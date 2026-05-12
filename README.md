@@ -80,10 +80,21 @@ conda activate spatial-pca
 Using pip:
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+python3 -m venv .venv
+.venv/bin/python -m pip install --upgrade pip
+.venv/bin/python -m pip install -r requirements.txt
 ```
+
+For notebooks, also register the environment as a Jupyter kernel:
+
+```bash
+.venv/bin/python -m pip install ipykernel
+.venv/bin/python -m ipykernel install --user --name spatial-pca-venv --display-name "Python (spatial-pca .venv)"
+```
+
+Then choose `Python (spatial-pca .venv)` as the notebook kernel. If you prefer
+activating the environment first, run `source .venv/bin/activate`; after that,
+`python` and `pip` refer to the `.venv` environment.
 
 ## Input Files
 
