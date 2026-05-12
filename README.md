@@ -171,7 +171,7 @@ or point the config to supporting best-k CSV files.
 Each case writes a run folder under `outputs/`, including:
 
 - `top_windows.gpkg`: ranked sliding-window geometries.
-- `top_windows.png`: map of top-ranked windows.
+- `<variables>_Top_<N>_Predicted_Windows.png`: map of top-ranked windows.
 - `top_similar_windows.png`: image chips for top-ranked windows.
 - `pc_score_map.png`: PCA score diagnostic map.
 - `component_weights.png`: deposit-specific PC weights.

@@ -7,6 +7,4 @@ shapely
 scikit-image
 scikit-learn
 PyYAML
-openpyxl
 pyogrio
-scipy

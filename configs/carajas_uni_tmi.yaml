@@ -7,7 +7,6 @@ project:
 
 data_root: "/path/to/shared/project/data"
 carajas:
-  raster_dir: "/path/to/Carajas/geophysical_grids"
   tmi_path: "/path/to/Carajas/TMI.ers"
   radiometric_u_path: "/path/to/Carajas/Radiometric_U.ers"
   study_area_polygon: "/path/to/Carajas/Demo_area_polygon.shp"
@@ -70,13 +69,10 @@ visualization:
     "12": [-200, 400]
 
 paths:
-  tif_directory: "/path/to/Carajas/geophysical_grids"
   tmi_file_path: "/path/to/Carajas/TMI.ers"
   rad_file_path: "/path/to/Carajas/Radiometric_U.ers"
-  mask_files: []
   polygon_path: "/path/to/Carajas/Demo_area_polygon.shp"
   nodata_to_nan: -99999.0
-  grayscale_weights: [0.6, 0.35, 0.05]
 
 targets:
   deposits_shp_paths:

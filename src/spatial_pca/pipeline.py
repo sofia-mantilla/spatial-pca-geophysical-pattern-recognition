@@ -334,6 +334,10 @@ def run_single_case(
         deposit_1based=deposit_1based,
         min_cover=float(config["analysis_defaults"]["min_cover"]),
     )
+    top_windows_plot_filename = _build_top_windows_plot_filename(summary_variables, n_top_windows)
+    top_windows_title = (
+        f"{' + '.join(summary_variables)}: Top {n_top_windows} Prediction Windows"
+    )
     top_windows_plot_path = plot_top_windows_overlay(
         top_windows_gdf=top_windows_gdf,
         deposits_gdf=deposits_gdf,
@@ -344,8 +348,8 @@ def run_single_case(
             deposit_1based=deposit_1based,
         ),
         transform=reference_raster.transform,
-        output_path=output_dir / "top_windows.png",
-        title=f"Deposit {deposit_1based} ranked SPCA windows",
+        output_path=output_dir / top_windows_plot_filename,
+        title=top_windows_title,
         image_cmap=_get_image_colormap(config),
     )
     pc_score_map_path = plot_pc_score_map(
@@ -542,6 +546,18 @@ def write_resolved_config(config: dict[str, Any], output_path: str | Path) -> Pa
         json.dump(config, outfile, indent=2, sort_keys=True)
         outfile.write("\n")
     return output_path
+
+
+def _build_top_windows_plot_filename(summary_variables: list[str], n_top_windows: int) -> str:
+    variable_token = "_".join(_filename_token(variable) for variable in summary_variables)
+    return f"{variable_token}_Top_{int(n_top_windows)}_Predicted_Windows.png"
+
+
+def _filename_token(value: Any) -> str:
+    token = "".join(char if char.isalnum() else "_" for char in str(value)).strip("_")
+    while "__" in token:
+        token = token.replace("__", "_")
+    return token or "variable"
 
 
 def _get_multivariate_variable_names(config: dict[str, Any]) -> list[str]:

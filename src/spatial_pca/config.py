@@ -71,10 +71,8 @@ REQUIRED_KEYS: dict[str, tuple[str, ...]] = {
     ),
     "visualization": ("deposit_limits_tmi",),
     "paths": (
-        "mask_files",
         "polygon_path",
         "nodata_to_nan",
-        "grayscale_weights",
     ),
     "targets": ("deposits_shp_paths",),
     "best_kpcs_files": (

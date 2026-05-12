@@ -1,66 +1,73 @@
+# Simple labels for this run.
 project:
-  name: "New spatial PCA project"
-  case: "Training deposit / target variable"
-  selected_variables: ["variable_1"]
-  training_deposit_id: 1
-  analysis_type: "Uni"
+  name: "New spatial PCA project"          # Project name for notes.
+  case: "Training deposit / target variable" # Short case description.
+  selected_variables: ["variable_1"]       # Variables used in this run.
+  training_deposit_id: 1                   # Deposit used as the example pattern.
+  analysis_type: "Uni"                     # Use "Uni" for one raster, "Multi" for two.
 
+# How the workflow should run.
 run:
-  base_output_dir: "outputs"
-  run_mode: "sweep_kpcs"
-  analysis_type: "Uni"
-  method_name: "Spatial_PCA"
-  outputs_subdir: "Output_New_Project"
-  uni_selected_variable: "variable_1"
-  multi_ranking_mode: "two_stage_pca_fusion"
+  base_output_dir: "outputs"               # Main folder for results.
+  run_mode: "sweep_kpcs"                   # Run the listed PC counts.
+  analysis_type: "Uni"                     # Must match project.analysis_type.
+  method_name: "Spatial_PCA"               # Main method name.
+  outputs_subdir: "Output_New_Project"     # Subfolder inside outputs.
+  uni_selected_variable: "variable_1"      # Variable used when analysis_type is Uni.
+  multi_ranking_mode: "two_stage_pca_fusion" # Ranking used when analysis_type is Multi.
 
+# Deposits and retained PCs to test.
 sweep:
-  deposits_1based: [1]
-  kpcs: [10]
-  score_w_auc: 0.45
-  score_w_red_points: 0.35
-  score_w_hit_early: 0.2
-  targets_shp_mode: "new_project"
-  best_kpcs_source_tag: "new_project"
-  fusion_weight_var1: 0.5
-  fusion_weight_var2: 0.5
-  top_windows_color_scale_mode: "config_range"
+  deposits_1based: [1]                     # Deposit IDs start at 1.
+  kpcs: [10]                               # Number of PCs to keep.
+  score_w_auc: 0.45                        # Weight for validation AUC summaries.
+  score_w_red_points: 0.35                 # Weight for recovered deposits.
+  score_w_hit_early: 0.2                   # Weight for early hits.
+  targets_shp_mode: "new_project"          # Which deposits path to use below.
+  best_kpcs_source_tag: "new_project"      # Label for best-k summary files.
+  fusion_weight_var1: 0.5                  # Multi-variable summary weight.
+  fusion_weight_var2: 0.5                  # Multi-variable summary weight.
+  top_windows_color_scale_mode: "config_range" # Use configured color limits.
 
+# Extra diagnostic plots.
 reconstruction:
-  extra_pcs: 3
-  enable: true
+  extra_pcs: 3                             # PCs to show after the chosen k.
+  enable: true                             # Keep reconstruction plots on.
 
+# Main method settings.
 analysis_defaults:
-  variable_1: "variable_1"
-  variable_2: "variable_2"
-  vmin_var2: 0
-  vmax_var2: 15
-  rotation_angle: 0
-  stride_x: 8
-  stride_y: 8
-  n_top_windows: 250
-  top_windows_plot_n_rows: 2
-  top_windows_plot_n_cols: 4
-  force_crs: "EPSG:32722"
-  show_plots: false
-  min_cover: 0.5
+  variable_1: "variable_1"                 # Name of the first raster variable.
+  variable_2: "variable_2"                 # Name of the second raster variable.
+  vmin_var2: 0                             # Minimum color value for variable_2.
+  vmax_var2: 15                            # Maximum color value for variable_2.
+  rotation_angle: 0                        # Rotation in degrees.
+  stride_x: 8                              # Window step in columns.
+  stride_y: 8                              # Window step in rows.
+  n_top_windows: 250                       # Number of predictions to export.
+  top_windows_plot_n_rows: 2               # Rows in the chip plot.
+  top_windows_plot_n_cols: 4               # Columns in the chip plot.
+  force_crs: "EPSG:32722"                  # CRS to use if raster metadata is missing.
+  show_plots: false                        # Save plots without opening windows.
+  min_cover: 0.5                           # Deposit overlap needed for a hit.
 
+# Plot colors.
 visualization:
-  image_colormap: "spatial_pca_paper"
-  deposit_limits_tmi: {}
+  image_colormap: "spatial_pca_paper"      # Raster color map.
+  deposit_limits_tmi: {}                   # Optional color limits by deposit.
 
+# Files outside the repo. Edit these for your project.
 paths:
-  variable_1_file_path: "/path/to/new_project/variable_1_grid.ers"
-  variable_2_file_path: "/path/to/new_project/variable_2_grid.ers"
-  mask_files: []
-  polygon_path: "/path/to/new_project/study_area.shp"
-  nodata_to_nan: -99999.0
-  grayscale_weights: [0.6, 0.35, 0.05]
+  variable_1_file_path: "/path/to/new_project/variable_1_grid.ers" # First raster.
+  variable_2_file_path: "/path/to/new_project/variable_2_grid.ers" # Second raster.
+  polygon_path: "/path/to/new_project/study_area.shp" # Area to analyze.
+  nodata_to_nan: -99999.0                  # Raster value treated as no data.
 
+# Known deposits used for training and validation.
 targets:
   deposits_shp_paths:
-    new_project: "/path/to/new_project/deposits.shp"
+    new_project: "/path/to/new_project/deposits.shp" # Deposit polygons.
 
+# Optional support files for choosing PC counts.
 best_kpcs_files:
   multicriteria_filename_template: "kpcs_best_multicriteria_by_deposit_{csv_file_tag}.csv"
   multicriteria_legacy_filename_template: "kpcs_best_multicriteria_by_deposit_{best_kpcs_source_tag}.csv"
@@ -68,5 +75,5 @@ best_kpcs_files:
   var1_legacy_filename: "kpcs_best_multicriteria_by_deposit_uni_variable_1.csv"
   var2_filename: "kpcs_best_multicriteria_by_deposit_spca_uni_variable_2.csv"
   var2_legacy_filename: "kpcs_best_multicriteria_by_deposit_uni_variable_2.csv"
-  var1_kpcs: 10
-  var2_kpcs: 10
+  var1_kpcs: 10                            # PCs for variable_1 in Multi runs.
+  var2_kpcs: 10                            # PCs for variable_2 in Multi runs.

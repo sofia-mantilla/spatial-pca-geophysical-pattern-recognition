@@ -389,7 +389,7 @@ def plot_top_windows_overlay(
                 color="white",
                 linewidth=1.0,
                 alpha=1.0,
-                label="Top 10 windows",
+                label="Top 10 Predicted Windows",
                 zorder=6,
             )
         if not other_deposits.empty:
@@ -415,32 +415,37 @@ def plot_top_windows_overlay(
         ax.set_ylabel("Northing")
         ax.grid(False)
         _add_scale_bar(ax, extent)
+        plot_vmin, plot_vmax = _resolve_plot_limits(background, vmin, vmax)
+        scalar_mappable = plt.cm.ScalarMappable(
+            norm=Normalize(vmin=plot_vmin, vmax=plot_vmax, clip=True),
+            cmap=cmap,
+        )
+        scalar_mappable.set_array([])
+        colorbar = fig.colorbar(scalar_mappable, ax=ax, fraction=0.035, pad=0.02)
+        colorbar.set_label(variable_name)
         if len(ordered_vars) > 1:
             ax.set_title(variable_name)
 
     legend_handles = [
         Line2D([0], [0], color="black", linewidth=2.5, label="Testing Known Deposits"),
         Line2D([0], [0], color="red", linewidth=3.0, label="Training Known Deposit"),
-        Line2D([0], [0], color="white", linewidth=1.0, label="Top 10 windows"),
+        Line2D([0], [0], color="white", linewidth=1.0, label="Top 10 Predicted Windows"),
         Line2D([0], [0], color="black", marker=r"$\uparrow$", linestyle="None", markersize=12, label="N"),
     ]
-    legend = axes.flat[0].legend(
+    axes.flat[0].legend(
         handles=legend_handles,
         loc="best",
         facecolor="#d4d4d8",
         framealpha=0.95,
         edgecolor="#52525b",
     )
-    if title is not None:
-        if len(ordered_vars) == 1:
-            axes.flat[0].set_title(title)
-        else:
-            fig.suptitle(title)
-            fig.tight_layout(rect=(0, 0, 1, 0.95))
-            fig.savefig(path, dpi=300)
-            plt.close(fig)
-            return path
-    fig.tight_layout()
+    title = title or f"Top {len(ranked_windows)} Prediction Windows"
+    if len(ordered_vars) == 1:
+        axes.flat[0].set_title(title)
+        fig.tight_layout()
+    else:
+        fig.suptitle(title)
+        fig.tight_layout(rect=(0, 0, 1, 0.95))
     fig.savefig(path, dpi=300)
     plt.close(fig)
     return path
@@ -492,15 +497,7 @@ def _array_to_rgba(
         rgba = np.zeros(arr.shape + (4,), dtype=float)
         return rgba
 
-    if vmin is None:
-        vmin = float(np.nanmin(arr))
-    if vmax is None:
-        vmax = float(np.nanmax(arr))
-    if not np.isfinite(vmin) or not np.isfinite(vmax):
-        raise ValueError("Raster plotting limits must be finite when derived from the data.")
-    if np.isclose(vmin, vmax):
-        vmax = vmin + 1.0
-
+    vmin, vmax = _resolve_plot_limits(arr, vmin, vmax)
     norm = Normalize(vmin=vmin, vmax=vmax, clip=True)
     rgba = np.asarray(cmap(norm(arr)), dtype=float)
     rgba[..., :3] *= float(brightness_scale)
@@ -508,6 +505,24 @@ def _array_to_rgba(
     return rgba
 
 
+def _resolve_plot_limits(
+    array: np.ndarray,
+    vmin: float | None,
+    vmax: float | None,
+) -> tuple[float, float]:
+    arr = np.asarray(array, dtype=float)
+    finite = np.isfinite(arr)
+    if not finite.any():
+        return 0.0, 1.0
+    if vmin is None:
+        vmin = float(np.nanmin(arr))
+    if vmax is None:
+        vmax = float(np.nanmax(arr))
+    if not np.isfinite(vmin) or not np.isfinite(vmax):
+        raise ValueError("Raster plotting limits must be finite when derived from the data.")
+    if np.isclose(vmin, vmax):
+        vmax = float(vmin) + 1.0
+    return float(vmin), float(vmax)
 
 
 def _add_scale_bar(ax: Any, extent: tuple[float, float, float, float]) -> None:
