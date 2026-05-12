@@ -10,7 +10,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from spatial_pca.config import load_run_config
+from spatial_pca.config import load_run_config, resolve_variable_raster_path
 from spatial_pca.geodata.deposits import (
     TemplateData,
     get_circle_patch_template,
@@ -499,15 +499,7 @@ def _get_deposits_path(config: dict[str, Any]) -> Path:
 
 
 def _get_raster_path(config: dict[str, Any], variable_name: str) -> Path:
-    variable_name_upper = variable_name.upper()
-    paths = config["paths"]
-    if variable_name_upper == str(config["analysis_defaults"]["variable_1"]).upper():
-        return Path(str(paths["tmi_file_path"])).expanduser()
-    if variable_name_upper == str(config["analysis_defaults"]["variable_2"]).upper():
-        return Path(str(paths["rad_file_path"])).expanduser()
-    raise ValueError(
-        f"Could not resolve raster path for variable '{variable_name}'."
-    )
+    return resolve_variable_raster_path(config, variable_name)
 
 
 def load_variable_raster(config: dict[str, Any], variable_name: str) -> RasterData:

@@ -71,9 +71,6 @@ REQUIRED_KEYS: dict[str, tuple[str, ...]] = {
     ),
     "visualization": ("deposit_limits_tmi",),
     "paths": (
-        "tif_directory",
-        "tmi_file_path",
-        "rad_file_path",
         "mask_files",
         "polygon_path",
         "nodata_to_nan",
@@ -184,6 +181,8 @@ def validate_run_config(config: dict[str, Any]) -> None:
             "sweep.targets_shp_mode must match one key in targets.deposits_shp_paths."
         )
 
+    _validate_raster_path_config(config)
+
     image_colormap = visualization.get("image_colormap")
     if image_colormap is not None:
         try:
@@ -284,6 +283,80 @@ def find_absolute_paths(value: Any, prefix: str = "") -> list[str]:
     elif isinstance(value, str) and Path(value).expanduser().is_absolute():
         found.append(prefix)
     return found
+
+
+def resolve_variable_raster_path(config: dict[str, Any], variable_name: str) -> Path:
+    """Resolve the raster path for a configured variable name.
+
+    Preferred portable config forms are:
+
+    - ``paths.variable_1_file_path`` / ``paths.variable_2_file_path``
+    - ``paths.variable_paths.<variable_name>``
+
+    The older Carajas configs may still use ``tmi_file_path`` and
+    ``rad_file_path`` as legacy aliases for variable 1 and variable 2.
+    """
+
+    path_value = _get_variable_raster_path_value(config, variable_name)
+    if path_value is None:
+        raise ConfigError(
+            f"Could not resolve a raster path for variable '{variable_name}'. "
+            "Use paths.variable_paths, paths.variable_1_file_path, or "
+            "paths.variable_2_file_path."
+        )
+    return Path(str(path_value)).expanduser()
+
+
+def _validate_raster_path_config(config: dict[str, Any]) -> None:
+    paths = config["paths"]
+    variable_paths = paths.get("variable_paths")
+    if variable_paths is not None and not isinstance(variable_paths, dict):
+        raise ConfigError("paths.variable_paths must be an object when provided.")
+
+    for variable_name in _required_raster_variables(config):
+        if _get_variable_raster_path_value(config, variable_name) is None:
+            raise ConfigError(
+                f"Missing raster path for variable '{variable_name}'. "
+                "Use paths.variable_paths, paths.variable_1_file_path, or "
+                "paths.variable_2_file_path."
+            )
+
+
+def _required_raster_variables(config: dict[str, Any]) -> list[str]:
+    run = config["run"]
+    analysis = config["analysis_defaults"]
+    if run["analysis_type"] == "Uni":
+        return [str(run["uni_selected_variable"])]
+    return [str(analysis["variable_1"]), str(analysis["variable_2"])]
+
+
+def _get_variable_raster_path_value(config: dict[str, Any], variable_name: str) -> Any | None:
+    paths = config["paths"]
+    analysis = config["analysis_defaults"]
+    variable_name_text = str(variable_name)
+    variable_name_upper = variable_name_text.upper()
+
+    variable_paths = paths.get("variable_paths")
+    if isinstance(variable_paths, dict):
+        if variable_name_text in variable_paths:
+            return variable_paths[variable_name_text]
+        for key, value in variable_paths.items():
+            if str(key).upper() == variable_name_upper:
+                return value
+
+    if variable_name_upper == str(analysis["variable_1"]).upper():
+        if "variable_1_file_path" in paths:
+            return paths["variable_1_file_path"]
+        if "tmi_file_path" in paths:
+            return paths["tmi_file_path"]
+
+    if variable_name_upper == str(analysis["variable_2"]).upper():
+        if "variable_2_file_path" in paths:
+            return paths["variable_2_file_path"]
+        if "rad_file_path" in paths:
+            return paths["rad_file_path"]
+
+    return None
 
 
 def _slugify_method(method_name: str) -> str:

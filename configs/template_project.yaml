@@ -1,17 +1,9 @@
 project:
   name: "New spatial PCA project"
   case: "Training deposit / target variable"
-  selected_variables: ["TMI"]
+  selected_variables: ["variable_1"]
   training_deposit_id: 1
   analysis_type: "Uni"
-
-data_root: "/path/to/shared/project/data"
-new_project:
-  raster_dir: "/path/to/new_project/geophysical_grids"
-  tmi_path: "/path/to/new_project/TMI.ers"
-  radiometric_u_path: "/path/to/new_project/Radiometric_U.ers"
-  study_area_polygon: "/path/to/new_project/study_area.shp"
-  deposits_shapefile: "/path/to/new_project/deposits.shp"
 
 run:
   base_output_dir: "outputs"
@@ -19,7 +11,7 @@ run:
   analysis_type: "Uni"
   method_name: "Spatial_PCA"
   outputs_subdir: "Output_New_Project"
-  uni_selected_variable: "TMI"
+  uni_selected_variable: "variable_1"
   multi_ranking_mode: "two_stage_pca_fusion"
 
 sweep:
@@ -39,8 +31,8 @@ reconstruction:
   enable: true
 
 analysis_defaults:
-  variable_1: "TMI"
-  variable_2: "Radiometric_U"
+  variable_1: "variable_1"
+  variable_2: "variable_2"
   vmin_var2: 0
   vmax_var2: 15
   rotation_angle: 0
@@ -58,9 +50,8 @@ visualization:
   deposit_limits_tmi: {}
 
 paths:
-  tif_directory: "/path/to/new_project/geophysical_grids"
-  tmi_file_path: "/path/to/new_project/TMI.ers"
-  rad_file_path: "/path/to/new_project/Radiometric_U.ers"
+  variable_1_file_path: "/path/to/new_project/variable_1_grid.ers"
+  variable_2_file_path: "/path/to/new_project/variable_2_grid.ers"
   mask_files: []
   polygon_path: "/path/to/new_project/study_area.shp"
   nodata_to_nan: -99999.0
@@ -73,9 +64,9 @@ targets:
 best_kpcs_files:
   multicriteria_filename_template: "kpcs_best_multicriteria_by_deposit_{csv_file_tag}.csv"
   multicriteria_legacy_filename_template: "kpcs_best_multicriteria_by_deposit_{best_kpcs_source_tag}.csv"
-  var1_filename: "kpcs_best_multicriteria_by_deposit_spca_uni_tmi.csv"
-  var1_legacy_filename: "kpcs_best_multicriteria_by_deposit_uni_tmi.csv"
-  var2_filename: "kpcs_best_multicriteria_by_deposit_spca_uni_radiometric_u.csv"
-  var2_legacy_filename: "kpcs_best_multicriteria_by_deposit_uni_radiometric_u.csv"
+  var1_filename: "kpcs_best_multicriteria_by_deposit_spca_uni_variable_1.csv"
+  var1_legacy_filename: "kpcs_best_multicriteria_by_deposit_uni_variable_1.csv"
+  var2_filename: "kpcs_best_multicriteria_by_deposit_spca_uni_variable_2.csv"
+  var2_legacy_filename: "kpcs_best_multicriteria_by_deposit_uni_variable_2.csv"
   var1_kpcs: 10
   var2_kpcs: 10

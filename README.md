@@ -92,10 +92,17 @@ Each run config should provide:
 - Analysis settings such as stride, retained PCs, rotation angle, minimum
   footprint overlap, and output directory.
 
-The public configs use placeholder external paths such as
-`/path/to/Carajas/TMI.ers`. For local work, copy a config to
-`configs/local_*.yaml` and edit the paths there. Local configs are ignored by
-Git.
+The reusable template uses variable-based raster paths:
+
+```yaml
+paths:
+  variable_1_file_path: "/path/to/new_project/variable_1_grid.ers"
+  variable_2_file_path: "/path/to/new_project/variable_2_grid.ers"
+```
+
+For local work, copy a config to `configs/local_*.yaml` and edit the paths
+there. Local configs are ignored by Git. The Carajas application configs keep
+the paper variable names (`TMI`, `Radiometric_U`) for readability.
 
 ## Case 1: Paulo Afonso / Deposit 6, Univariate TMI
 
@@ -145,8 +152,10 @@ Start from the template:
 cp configs/template_project.yaml configs/local_my_project.yaml
 ```
 
-Edit raster paths, deposit paths, CRS, variables, training deposit ID, retained
-PCs, stride, rotation angle, and output directory. Then run:
+Edit `analysis_defaults.variable_1`, `analysis_defaults.variable_2`,
+`paths.variable_1_file_path`, `paths.variable_2_file_path`, deposit paths, CRS,
+training deposit ID, retained PCs, stride, rotation angle, and output directory.
+Then run:
 
 ```bash
 python scripts/run_project_from_config.py --config configs/local_my_project.yaml
