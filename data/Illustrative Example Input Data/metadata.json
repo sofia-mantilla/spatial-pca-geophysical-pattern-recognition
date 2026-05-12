@@ -1,0 +1,19 @@
+{
+  "description": "Synthetic Gaussian-process raster for the Spatial PCA illustrative example.",
+  "grid_size": 10,
+  "seed": 42,
+  "sigma2": 1.0,
+  "ell": 0.25,
+  "noise": 0.5,
+  "window_height": 2,
+  "window_width": 2,
+  "stride_y": 1,
+  "stride_x": 1,
+  "training_window_index": 40,
+  "known_deposit_window_indices": [
+    12,
+    48,
+    51
+  ],
+  "variable_name": "Synthetic_GP"
+}

@@ -55,7 +55,12 @@ Spatial_PCA_Multivariate_Repo/
 │   ├── run_carajas_univariate.py
 │   ├── run_carajas_multivariate.py
 │   └── run_project_from_config.py
+├── data/
+│   └── Illustrative Example Input Data/
 ├── notebooks/
+│   ├── 00_illustrative_synthetic_demo.ipynb
+│   ├── 01_carajas_univariate_demo.ipynb
+│   └── 02_carajas_multivariate_demo.ipynb
 ├── outputs/
 └── docs/figures/
 ```
@@ -143,6 +148,18 @@ Key settings:
 - Fused retained PCs: `17`
 - Per-variable retained PCs: `TMI = 2`, `Radiometric_U = 34`
 - Validation: footprint recovery against known Carajas deposits
+
+## Synthetic Illustrative Example
+
+For a lightweight demo that does not need external geophysical files, open:
+
+```text
+notebooks/00_illustrative_synthetic_demo.ipynb
+```
+
+The notebook uses tracked input files in
+`data/Illustrative Example Input Data/` and calls the repository Spatial PCA
+functions directly. Outputs are written to `outputs/Illustrative_Example/`.
 
 ## Run Any Project From Config
 
