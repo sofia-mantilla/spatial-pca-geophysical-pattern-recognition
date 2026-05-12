@@ -53,6 +53,7 @@ analysis_defaults:
 # Plot colors.
 visualization:
   image_colormap: "spatial_pca_paper"      # Raster color map.
+  score_pairs_top_n_to_plot: 3             # Highlight this many top-ranked windows in score-pair plots; use 0 to disable.
   deposit_limits_tmi: {}                   # Optional color limits by deposit.
 
 # Files outside the repo. Edit these for your project.

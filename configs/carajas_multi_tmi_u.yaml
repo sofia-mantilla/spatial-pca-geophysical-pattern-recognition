@@ -54,6 +54,7 @@ analysis_defaults:
 
 visualization:
   image_colormap: "spatial_pca_paper"
+  score_pairs_top_n_to_plot: 3
   deposit_limits_tmi:
     "1": [-250, 300]
     "2": [-200, 400]

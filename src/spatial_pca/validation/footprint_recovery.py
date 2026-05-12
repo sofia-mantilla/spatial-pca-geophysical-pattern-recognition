@@ -12,11 +12,9 @@ from typing import Any
 os.environ.setdefault("MPLCONFIGDIR", str(Path(tempfile.gettempdir()) / "spatial_pca_matplotlib_cache"))
 
 import geopandas as gpd
-import matplotlib
-
-matplotlib.use("Agg", force=True)
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib import patheffects as pe
 from matplotlib.colors import Normalize
 from matplotlib.lines import Line2D
 from rasterio.features import rasterize
@@ -234,6 +232,7 @@ def plot_cumulative_recovery(
     deposit_1based: int | None = None,
     min_cover: float = 0.5,
     title: str | None = None,
+    hit_label_by_deposit: dict[int, str | int] | None = None,
 ) -> Path:
     """Plot cumulative footprint recovery using the legacy paper style."""
 
@@ -241,6 +240,7 @@ def plot_cumulative_recovery(
     path.parent.mkdir(parents=True, exist_ok=True)
     y = np.asarray(recovery.cum_recovered_frac_total, dtype=float).ravel()
     ranks = np.arange(1, y.size + 1)
+    hit_labels = hit_label_by_deposit or {}
 
     if title is None:
         title = (
@@ -248,7 +248,7 @@ def plot_cumulative_recovery(
             f"Orange = any overlap event, Red = first threshold event (>={int(100 * min_cover)}% coverage)"
         )
 
-    fig, ax = plt.subplots(figsize=(6.8, 4.6), dpi=150)
+    fig, ax = plt.subplots(figsize=(7.8, 4.6), dpi=150)
     ax.plot(
         ranks,
         y,
@@ -291,8 +291,9 @@ def plot_cumulative_recovery(
         for rank in hit_ranks:
             dep_rows = recovery.hit_by_rank.get(int(rank), [])
             for offset_idx, dep_row in enumerate(dep_rows):
+                dep_label = hit_labels.get(int(dep_row), int(dep_row) + 1)
                 ax.annotate(
-                    text=str(int(dep_row) + 1),
+                    text=str(dep_label),
                     xy=(int(rank), float(y[int(rank) - 1])),
                     xytext=(0, 6 + offset_idx * 10),
                     textcoords="offset points",
@@ -319,6 +320,15 @@ def plot_top_windows_overlay(
     output_path: str | Path,
     title: str | None = None,
     image_cmap: str | Any | None = None,
+    image_origin: str = "upper",
+    annotate_indices: bool = False,
+    annotate_training_index: bool | None = None,
+    annotate_testing_indices: bool | None = None,
+    annotate_predicted_indices: bool | None = None,
+    annotation_fontsize: float = 9.0,
+    testing_linewidth: float = 2.5,
+    training_linewidth: float = 3.0,
+    predicted_linewidth: float = 1.0,
 ) -> Path:
     """Plot top-ranked SPCA windows with known deposit footprints."""
 
@@ -330,6 +340,10 @@ def plot_top_windows_overlay(
         raise ValueError("deposits_gdf must have a CRS.")
     if not (0 <= int(reference_deposit_index) < len(deposits_gdf)):
         raise IndexError("reference_deposit_index is out of bounds for deposits_gdf.")
+    if image_origin not in {"upper", "lower"}:
+        raise ValueError("image_origin must be either 'upper' or 'lower'.")
+    if testing_linewidth < 0 or training_linewidth < 0 or predicted_linewidth < 0:
+        raise ValueError("Line widths must be nonnegative.")
 
     path = Path(output_path)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -344,6 +358,10 @@ def plot_top_windows_overlay(
     other_deposits = deposits_plot.drop(index=reference_label)
     ranked_windows = top_windows_gdf.sort_values("rank").reset_index(drop=True)
     top_subset = ranked_windows.head(min(10, len(ranked_windows)))
+    top_windows_label = f"Top {len(top_subset)} Predicted Windows"
+    annotate_training_index = annotate_indices if annotate_training_index is None else annotate_training_index
+    annotate_testing_indices = annotate_indices if annotate_testing_indices is None else annotate_testing_indices
+    annotate_predicted_indices = annotate_indices if annotate_predicted_indices is None else annotate_predicted_indices
 
     ordered_vars = list(background_layers)
     if not ordered_vars:
@@ -380,39 +398,72 @@ def plot_top_windows_overlay(
         bright_rgba = _array_to_rgba(background, cmap=cmap, vmin=vmin, vmax=vmax, brightness_scale=1.0)
         bright_rgba[..., 3] *= window_mask.astype(float)
 
-        ax.imshow(dark_rgba, extent=extent, origin="upper")
-        ax.imshow(bright_rgba, extent=extent, origin="upper")
+        ax.imshow(dark_rgba, extent=extent, origin=image_origin)
+        ax.imshow(bright_rgba, extent=extent, origin=image_origin)
 
         if not top_subset.empty:
             top_subset.boundary.plot(
                 ax=ax,
                 color="white",
-                linewidth=1.0,
+                linewidth=predicted_linewidth,
                 alpha=1.0,
-                label="Top 10 Predicted Windows",
+                label=top_windows_label,
                 zorder=6,
             )
         if not other_deposits.empty:
             other_deposits.boundary.plot(
                 ax=ax,
                 color="black",
-                linewidth=2.5,
+                linewidth=testing_linewidth,
                 label="Testing Known Deposits",
                 zorder=7,
             )
         reference.boundary.plot(
             ax=ax,
             color="red",
-            linewidth=3.0,
+            linewidth=training_linewidth,
             label="Training Known Deposit",
             zorder=8,
         )
 
+        if annotate_predicted_indices:
+            _annotate_gdf_indices(
+                ax,
+                top_subset,
+                id_column="window_id" if "window_id" in top_subset.columns else "rank",
+                color="white",
+                stroke_color="black",
+                fontsize=annotation_fontsize,
+                zorder=9,
+            )
+        if annotate_testing_indices:
+            _annotate_gdf_indices(
+                ax,
+                other_deposits,
+                id_column="window_id" if "window_id" in other_deposits.columns else "name",
+                color="black",
+                stroke_color="white",
+                fontsize=annotation_fontsize,
+                zorder=20,
+            )
+        if annotate_training_index:
+            _annotate_gdf_indices(
+                ax,
+                reference,
+                id_column="window_id" if "window_id" in reference.columns else "name",
+                color="red",
+                stroke_color="white",
+                fontsize=annotation_fontsize,
+                zorder=11,
+            )
+
         ax.set_xlim(extent[0], extent[1])
         ax.set_ylim(extent[2], extent[3])
         ax.set_aspect("equal", adjustable="box")
-        ax.set_xlabel("Easting")
-        ax.set_ylabel("Northing")
+        ax.set_xlabel("Easting", fontsize=annotation_fontsize)
+        ax.set_ylabel("Northing", fontsize=annotation_fontsize)
+        # bigger tick labels for better readability in small subplots
+        ax.tick_params(axis="both", which="major", labelsize=annotation_fontsize - 1)
         ax.grid(False)
         _add_scale_bar(ax, extent)
         plot_vmin, plot_vmax = _resolve_plot_limits(background, vmin, vmax)
@@ -422,33 +473,73 @@ def plot_top_windows_overlay(
         )
         scalar_mappable.set_array([])
         colorbar = fig.colorbar(scalar_mappable, ax=ax, fraction=0.035, pad=0.02)
-        colorbar.set_label(variable_name)
+        colorbar.set_label(variable_name, fontsize=annotation_fontsize)
         if len(ordered_vars) > 1:
-            ax.set_title(variable_name)
+            ax.set_title(variable_name, fontsize=annotation_fontsize, fontweight="bold")
 
     legend_handles = [
-        Line2D([0], [0], color="black", linewidth=2.5, label="Testing Known Deposits"),
-        Line2D([0], [0], color="red", linewidth=3.0, label="Training Known Deposit"),
-        Line2D([0], [0], color="white", linewidth=1.0, label="Top 10 Predicted Windows"),
+        Line2D([0], [0], color="black", linewidth=testing_linewidth, label="Testing Known Deposits"),
+        Line2D([0], [0], color="red", linewidth=training_linewidth, label="Training Known Deposit"),
+        Line2D([0], [0], color="white", linewidth=predicted_linewidth, label=top_windows_label),
         Line2D([0], [0], color="black", marker=r"$\uparrow$", linestyle="None", markersize=12, label="N"),
     ]
     axes.flat[0].legend(
         handles=legend_handles,
         loc="best",
         facecolor="#d4d4d8",
-        framealpha=0.95,
+        framealpha=0.65,
         edgecolor="#52525b",
+        fontsize=annotation_fontsize,
     )
     title = title or f"Top {len(ranked_windows)} Prediction Windows"
     if len(ordered_vars) == 1:
-        axes.flat[0].set_title(title)
+        axes.flat[0].set_title(title, fontsize=annotation_fontsize)
         fig.tight_layout()
     else:
-        fig.suptitle(title)
+        fig.suptitle(title, fontsize=annotation_fontsize)
         fig.tight_layout(rect=(0, 0, 1, 0.95))
     fig.savefig(path, dpi=300)
     plt.close(fig)
     return path
+
+
+def _annotate_gdf_indices(
+    ax: Any,
+    gdf: gpd.GeoDataFrame,
+    *,
+    id_column: str,
+    color: str,
+    stroke_color: str,
+    fontsize: float,
+    zorder: int,
+) -> None:
+    """Annotate GeoDataFrame geometries at representative points."""
+
+    if gdf.empty:
+        return
+
+    for idx, row in gdf.iterrows():
+        geom = row.geometry
+        if geom is None or geom.is_empty:
+            continue
+        label_value = row[id_column] if id_column in gdf.columns else idx
+        if label_value is None:
+            label_value = idx
+        if isinstance(label_value, float) and np.isnan(label_value):
+            label_value = idx
+        point = geom.representative_point()
+        text = ax.text(
+            point.x,
+            point.y,
+            str(label_value),
+            color=color,
+            fontsize=fontsize,
+            fontweight="bold",
+            ha="center",
+            va="center",
+            zorder=zorder,
+        )
+        text.set_path_effects([pe.withStroke(linewidth=2.0, foreground=stroke_color)])
 
 
 def _combined_total_bounds(*gdfs: gpd.GeoDataFrame) -> tuple[float, float, float, float]:

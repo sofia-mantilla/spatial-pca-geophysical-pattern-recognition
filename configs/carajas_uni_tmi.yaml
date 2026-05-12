@@ -5,13 +5,6 @@ project:
   training_deposit_id: 6
   analysis_type: "Uni"
 
-data_root: "/path/to/shared/project/data"
-carajas:
-  tmi_path: "/path/to/Carajas/TMI.ers"
-  radiometric_u_path: "/path/to/Carajas/Radiometric_U.ers"
-  study_area_polygon: "/path/to/Carajas/Demo_area_polygon.shp"
-  deposits_shapefile: "/path/to/Carajas/deposits.shp"
-
 run:
   base_output_dir: "outputs"
   run_mode: "sweep_kpcs"
@@ -54,6 +47,7 @@ analysis_defaults:
 
 visualization:
   image_colormap: "spatial_pca_paper"
+  score_pairs_top_n_to_plot: 3
   deposit_limits_tmi:
     "1": [-250, 300]
     "2": [-200, 400]
@@ -69,8 +63,8 @@ visualization:
     "12": [-200, 400]
 
 paths:
-  tmi_file_path: "/path/to/Carajas/TMI.ers"
-  rad_file_path: "/path/to/Carajas/Radiometric_U.ers"
+  variable_1_file_path: "/path/to/Carajas/TMI.ers"
+  variable_2_file_path: "/path/to/Carajas/Radiometric_U.ers"
   polygon_path: "/path/to/Carajas/Demo_area_polygon.shp"
   nodata_to_nan: -99999.0
 

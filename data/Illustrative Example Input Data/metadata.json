@@ -1,10 +1,12 @@
 {
-  "description": "Synthetic Gaussian-process raster for the Spatial PCA illustrative example.",
+  "description": "Synthetic Gaussian-process raster pinned to the saved paper_figure.ipynb illustrative example.",
   "grid_size": 10,
   "seed": 42,
   "sigma2": 1.0,
   "ell": 0.25,
   "noise": 0.5,
+  "paper_saved_min": -2.791,
+  "paper_saved_max": 1.985,
   "window_height": 2,
   "window_width": 2,
   "stride_y": 1,

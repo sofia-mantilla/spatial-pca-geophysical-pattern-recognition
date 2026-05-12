@@ -385,6 +385,8 @@ def run_single_case(
         weights=ranking_result.weights,
         deposit_index=window_matrix.deposit_index,
         output_path=output_dir / "score_pairs.png",
+        ranked_idx=valid_ranked_idx,
+        top_n_to_plot=int(config.get("visualization", {}).get("score_pairs_top_n_to_plot", 3)),
     )
     if score_pairs_path is not None:
         diagnostic_paths["score_pairs"] = score_pairs_path

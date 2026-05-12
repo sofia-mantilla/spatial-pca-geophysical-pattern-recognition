@@ -171,6 +171,34 @@ notebooks/00_illustrative_synthetic_demo.ipynb
 The notebook uses tracked input files in
 `data/Illustrative Example Input Data/` and calls the repository Spatial PCA
 functions directly. Outputs are written to `outputs/Illustrative_Example/`.
+Known-deposit labels in this example are the sliding-window IDs throughout the
+notebook, figures, and CSV outputs.
+
+The illustrative outputs include:
+
+- `toy_example_grid_x.png`: annotated grid-to-window-matrix schematic.
+- `toy_example_known_deposit_windows.png`: training and testing deposit windows
+  on the synthetic grid, plus exact testing-deposit window chips.
+- `deposit_scores_and_weights.png`: deposit-specific SPCA scores and weights.
+- `loading_maps.png`: illustrative SPCA loading maps generated with the same
+  `plot_loading_maps` helper used by the real-case pipeline.
+- `score_pairs.png`: SPCA score-pair diagnostic colored by distance to the
+  training deposit. By default, `plot_score_pairs` walks through adjacent PCs
+  in descending weight order, highlights the configured top-ranked windows,
+  and also accepts manual `pc_pairs`.
+- `Synthetic_GP_Top_5_Predicted_Windows.png`: top-ranked windows over the
+  synthetic grid. The overlay function can annotate training, testing, and
+  predicted window IDs and accepts separate line widths for each boundary type.
+- `cum_curve_unique_dep_hits.png`: cumulative footprint recovery. The companion
+  `illustrative_known_deposit_recovery.csv` includes the overlapped testing
+  known-deposit IDs by rank.
+- `top_windows_and_recovery.png`: final two-panel summary with the top-window
+  overlay on the left and cumulative recovery on the right.
+
+The notebook-specific glue lives in
+`src/spatial_pca/examples/illustrative.py` so the notebook can stay focused on
+hardcoded example inputs and calls to the shared SPCA, ranking, plotting, and
+validation functions.
 
 ## Run Any Project From Config
 
@@ -189,6 +217,15 @@ Then run:
 python scripts/run_project_from_config.py --config configs/local_my_project.yaml
 ```
 
+To run the Carajas univariate TMI config from the repo root:
+
+```bash
+.venv/bin/python scripts/run_project_from_config.py --config configs/carajas_uni_tmi.yaml
+```
+
+Set `visualization.score_pairs_top_n_to_plot` to control how many top-ranked
+windows are highlighted in `score_pairs.png`; use `0` to disable the overlay.
+
 For a multivariate project, set `run.analysis_type` to `Multi`, set
 `analysis_defaults.variable_1` and `analysis_defaults.variable_2`, and either
 provide direct `best_kpcs_files.var1_kpcs` / `best_kpcs_files.var2_kpcs` values
@@ -202,6 +239,8 @@ Each case writes a run folder under `outputs/`, including:
 - `<variables>_Top_<N>_Predicted_Windows.png`: map of top-ranked windows.
 - `top_similar_windows.png`: image chips for top-ranked windows.
 - `pc_score_map.png`: PCA score diagnostic map.
+- `score_pairs.png`: PCA score-pair diagnostic; highlighted open circles mark
+  the top-ranked windows selected by `visualization.score_pairs_top_n_to_plot`.
 - `component_weights.png`: deposit-specific PC weights.
 - `cumulative_footprint_recovery_fraction.png`: validation curve.
 - `validation_topk_results.pkl`: validation payload.

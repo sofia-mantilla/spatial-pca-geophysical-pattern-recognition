@@ -9,11 +9,9 @@ from typing import Any
 
 os.environ.setdefault("MPLCONFIGDIR", str(Path(tempfile.gettempdir()) / "spatial_pca_matplotlib_cache"))
 
-import matplotlib
-
-matplotlib.use("Agg", force=True)
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib import patheffects as pe
 from rasterio.transform import Affine
 from shapely.geometry.base import BaseGeometry
 
@@ -313,7 +311,7 @@ def plot_deposit_scores_and_weights(
 
     Z = np.asarray(scores, dtype=float)
     explained = np.asarray(explained_variance_ratio, dtype=float)
-    w = np.asarray(weights, dtype=float)
+    w = np.asarray(weights, dtype=float).ravel()
     k = min(int(k_used), Z.shape[1], w.size)
     pcs = np.arange(1, k + 1)
     z_dep = Z[int(deposit_index), :k]
@@ -348,7 +346,7 @@ def plot_deposit_scores_and_weights(
             label,
             ha="center",
             va=va,
-            fontsize=11,
+            fontsize=16,
             rotation=90,
             rotation_mode="anchor",
             clip_on=False,
@@ -382,51 +380,98 @@ def plot_loading_maps(
     max_pcs: int = 4,
     image_cmap: str | Any | None = None,
     feature_mask: np.ndarray | None = None,
+    origin: str = "upper",
 ) -> Path:
     """Plot weighted spatial PCA loading maps."""
 
     load = np.asarray(loadings, dtype=float)
     Z = np.asarray(scores, dtype=float)
-    w = np.asarray(weights, dtype=float)
+    w = np.asarray(weights, dtype=float).ravel()
+
     win_h, win_w = int(window_shape[0]), int(window_shape[1])
-    n_show = min(max_pcs, load.shape[0], w.size)
+
+    # If loadings are accidentally transposed, fix orientation.
+    # Expected: load shape = (n_pcs, n_features)
+    expected_features = win_h * win_w
+    if load.shape[0] == expected_features and load.shape[1] != expected_features:
+        load = load.T
+
+    n_show = min(max_pcs, load.shape[0], Z.shape[1], w.size)
+
     if n_show < 1:
         raise ValueError("No loading maps are available to plot.")
 
     cmap = resolve_colormap(image_cmap or DEFAULT_IMAGE_CMAP)
+
     path = Path(output_path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    fig, axes = plt.subplots(1, n_show, figsize=(5 * n_show, 5), squeeze=False)
-    fig.suptitle("Top-weighted Spatial PCA Loading Maps (from ranking)", fontsize=24)
-    vmax = float(np.nanmax(np.abs(load[:n_show, :])))
-    last_im = None
+
+    # Order PCs by weight, but only among available PCs
     order = np.argsort(w[:n_show])[::-1]
+
+    fig, axes = plt.subplots(
+        1,
+        n_show,
+        figsize=(4.6 * n_show + 0.8, 5.6),
+        squeeze=False,
+    )
+
+    fig.suptitle(
+        "Top-weighted Spatial PCA Loading Maps (from ranking)",
+        fontsize=22,
+        y=0.96,
+    )
+
+    selected_loadings = load[order, :]
+    vmax = float(np.nanmax(np.abs(selected_loadings)))
+    if not np.isfinite(vmax) or vmax == 0:
+        vmax = 1.0
+
+    last_im = None
+
     for ax, pc_idx in zip(axes.flat, order):
         loading_map = _vector_to_display_patch(
             load[pc_idx],
             (win_h, win_w),
             feature_mask=feature_mask,
         )
+
         last_im = ax.imshow(
             loading_map,
-            origin="upper",
+            origin=origin,
             cmap=cmap,
             vmin=-vmax,
             vmax=vmax,
         )
+
         ax.set_title(
             f"PC {pc_idx + 1}\n"
             rf"$z_{{dep}}$ = {Z[int(deposit_index), pc_idx]:.2f}" "\n"
             f"w = {100 * w[pc_idx]:.1f}%",
-            fontsize=18,
+            fontsize=17,
         )
+
         ax.set_xticks([])
         ax.set_yticks([])
+
+    # Reserve space on the right for the colorbar
+    fig.subplots_adjust(
+        left=0.04,
+        right=0.88,
+        top=0.78,
+        bottom=0.08,
+        wspace=0.22,
+    )
+
     if last_im is not None:
-        cbar = fig.colorbar(last_im, ax=axes.ravel().tolist(), fraction=0.035, pad=0.02)
+        cbar_ax = fig.add_axes([0.91, 0.18, 0.018, 0.58])
+        cbar = fig.colorbar(last_im, cax=cbar_ax)
         cbar.set_label("PCA loading", fontsize=18)
-    fig.savefig(path, dpi=200, bbox_inches="tight")
+        cbar.ax.tick_params(labelsize=14)
+
+    fig.savefig(path, dpi=200, bbox_inches="tight", facecolor="white")
     plt.close(fig)
+
     return path
 
 
@@ -472,16 +517,57 @@ def plot_score_pairs(
     weights: Any,
     deposit_index: int,
     output_path: str | Path,
-    max_pairs: int = 4,
+    n_pairs: int | None = None,
+    max_pairs: int | None = None,
+    pc_pairs: Any | None = None,
+    pc_index_base: int = 1,
+    ranked_idx: Any | None = None,
+    top_n_to_plot: int = 0,
+    exclude_deposit_from_highlights: bool = True,
+    highlight_color: str = "#1f77b4",
+    highlight_size: int = 95,
+    annotate_highlights: bool = True,
+    star_size: int = 240,
+    point_size: int = 18,
 ) -> Path | None:
-    """Plot weighted PCA score pairs colored by distance to the deposit."""
+    """Plot PCA score pairs ordered by descending deposit-weight percentage.
+
+    By default, panels use adjacent PCs in descending weight order, e.g.
+    PC1-vs-PC3, then PC3-vs-PC2, then PC2-vs-PC4. Pass ``pc_pairs`` to choose
+    exact pairs manually. Manual pairs use 1-based PC numbers by default;
+    set ``pc_index_base=0`` for zero-based indices.
+
+    ``n_pairs`` controls how many automatic pair subplots are drawn.
+    ``max_pairs`` is kept as a backwards-compatible alias for older callers.
+    Pass ``ranked_idx`` with ``top_n_to_plot`` to highlight top-ranked windows.
+    """
 
     Z = np.asarray(comparison_space, dtype=float)
-    w = np.asarray(weights, dtype=float)
+    w = np.asarray(weights, dtype=float).ravel()
     if Z.shape[1] < 2:
         return None
     k = min(Z.shape[1], w.size)
-    pairs = [(i, j) for i in range(k) for j in range(i + 1, k)][:max_pairs]
+    n_pairs_to_plot = max_pairs if max_pairs is not None else n_pairs
+
+    if pc_pairs is None:
+        n_pairs_to_plot = 4 if n_pairs_to_plot is None else int(n_pairs_to_plot)
+        if n_pairs_to_plot < 1:
+            return None
+        pc_order = np.argsort(w[:k])[::-1]
+        pairs = [
+            (int(pc_order[i]), int(pc_order[i + 1]))
+            for i in range(min(n_pairs_to_plot, k - 1))
+        ]
+    else:
+        pairs = [
+            _normalize_pc_pair(pair, k=k, pc_index_base=pc_index_base)
+            for pair in pc_pairs
+        ]
+        if n_pairs_to_plot is not None:
+            n_pairs_to_plot = int(n_pairs_to_plot)
+            if n_pairs_to_plot < 1:
+                return None
+            pairs = pairs[:n_pairs_to_plot]
     if not pairs:
         return None
 
@@ -489,11 +575,19 @@ def plot_score_pairs(
     dists = np.sqrt(np.sum((Z[:, :k] - dep) ** 2, axis=1))
     mask = np.ones(Z.shape[0], dtype=bool)
     mask[int(deposit_index)] = False
+    highlight_indices = _select_score_pair_highlights(
+        ranked_idx=ranked_idx,
+        top_n_to_plot=top_n_to_plot,
+        n_samples=Z.shape[0],
+        deposit_index=int(deposit_index),
+        exclude_deposit=exclude_deposit_from_highlights,
+    )
 
     path = Path(output_path)
     path.parent.mkdir(parents=True, exist_ok=True)
     fig, axes = plt.subplots(1, len(pairs), figsize=(7 * len(pairs), 7), squeeze=False)
-    fig.suptitle("Top-weighted PCA score plots colored by distance", fontsize=24)
+    title_prefix = "Selected" if pc_pairs is not None else "Top-weighted"
+    fig.suptitle(f"{title_prefix} PCA score plots colored by distance", fontsize=24)
     last_sc = None
     for ax, (pc_x, pc_y) in zip(axes.flat, pairs):
         last_sc = ax.scatter(
@@ -501,7 +595,7 @@ def plot_score_pairs(
             Z[mask, pc_y],
             c=dists[mask],
             cmap="magma_r",
-            s=18,
+            s=point_size,
             alpha=0.85,
             linewidths=0,
         )
@@ -509,12 +603,38 @@ def plot_score_pairs(
             [Z[int(deposit_index), pc_x]],
             [Z[int(deposit_index), pc_y]],
             marker="*",
-            s=240,
+            s=star_size,
             c="none",
             edgecolors="black",
             linewidths=1.5,
+            label="Training deposit",
             zorder=5,
         )
+        if highlight_indices.size:
+            ax.scatter(
+                Z[highlight_indices, pc_x],
+                Z[highlight_indices, pc_y],
+                marker="o",
+                s=highlight_size,
+                facecolors="none",
+                edgecolors=highlight_color,
+                linewidths=2.0,
+                label=f"Top {highlight_indices.size} ranked windows",
+                zorder=6,
+            )
+            if annotate_highlights:
+                for rank, window_idx in enumerate(highlight_indices, start=1):
+                    text = ax.annotate(
+                        str(rank),
+                        xy=(Z[int(window_idx), pc_x], Z[int(window_idx), pc_y]),
+                        xytext=(4, 4),
+                        textcoords="offset points",
+                        color=highlight_color,
+                        fontsize=10,
+                        fontweight="bold",
+                        zorder=7,
+                    )
+                    text.set_path_effects([pe.withStroke(linewidth=2.0, foreground="white")])
         ax.set_title(
             f"PC {pc_x + 1} (w={100 * w[pc_x]:.1f}%) vs "
             f"PC {pc_y + 1} (w={100 * w[pc_y]:.1f}%)",
@@ -525,9 +645,68 @@ def plot_score_pairs(
     if last_sc is not None:
         cbar = fig.colorbar(last_sc, ax=axes.ravel().tolist(), fraction=0.035, pad=0.04)
         cbar.set_label("Distance to deposit", fontsize=16)
+    if highlight_indices.size:
+        axes.flat[0].legend(loc="best", fontsize=11, frameon=True)
     fig.savefig(path, dpi=200, bbox_inches="tight")
     plt.close(fig)
     return path
+
+
+def _select_score_pair_highlights(
+    *,
+    ranked_idx: Any | None,
+    top_n_to_plot: int,
+    n_samples: int,
+    deposit_index: int,
+    exclude_deposit: bool,
+) -> np.ndarray:
+    if ranked_idx is None or int(top_n_to_plot) <= 0:
+        return np.asarray([], dtype=int)
+
+    selected: list[int] = []
+    for idx in np.asarray(ranked_idx, dtype=int).ravel():
+        idx_int = int(idx)
+        if idx_int < 0 or idx_int >= int(n_samples):
+            continue
+        if exclude_deposit and idx_int == int(deposit_index):
+            continue
+        selected.append(idx_int)
+        if len(selected) >= int(top_n_to_plot):
+            break
+
+    return np.asarray(selected, dtype=int)
+
+
+def _normalize_pc_pair(pair: Any, *, k: int, pc_index_base: int) -> tuple[int, int]:
+    if pc_index_base not in {0, 1}:
+        raise ValueError("pc_index_base must be 0 or 1.")
+    try:
+        pc_x_raw, pc_y_raw = pair
+    except (TypeError, ValueError) as exc:
+        raise ValueError("Each pc_pairs entry must contain exactly two PC indices.") from exc
+
+    pc_x = _normalize_pc_index(pc_x_raw, k=k, pc_index_base=pc_index_base)
+    pc_y = _normalize_pc_index(pc_y_raw, k=k, pc_index_base=pc_index_base)
+    if pc_x == pc_y:
+        raise ValueError("Each PC pair must contain two different PCs.")
+    return pc_x, pc_y
+
+
+def _normalize_pc_index(value: Any, *, k: int, pc_index_base: int) -> int:
+    if isinstance(value, str):
+        value_clean = value.strip().upper()
+        if value_clean.startswith("PC"):
+            value_clean = value_clean[2:].strip()
+        raw_index = int(value_clean)
+    else:
+        raw_index = int(value)
+
+    pc_index = raw_index - pc_index_base
+    if not 0 <= pc_index < k:
+        pc_min = pc_index_base
+        pc_max = k - 1 + pc_index_base
+        raise ValueError(f"PC index {raw_index} is out of range [{pc_min}, {pc_max}].")
+    return pc_index
 
 
 def plot_reconstruction_progression(
