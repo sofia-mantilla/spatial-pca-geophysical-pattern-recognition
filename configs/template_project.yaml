@@ -1,0 +1,81 @@
+project:
+  name: "New spatial PCA project"
+  case: "Training deposit / target variable"
+  selected_variables: ["TMI"]
+  training_deposit_id: 1
+  analysis_type: "Uni"
+
+data_root: "/path/to/shared/project/data"
+new_project:
+  raster_dir: "/path/to/new_project/geophysical_grids"
+  tmi_path: "/path/to/new_project/TMI.ers"
+  radiometric_u_path: "/path/to/new_project/Radiometric_U.ers"
+  study_area_polygon: "/path/to/new_project/study_area.shp"
+  deposits_shapefile: "/path/to/new_project/deposits.shp"
+
+run:
+  base_output_dir: "outputs"
+  run_mode: "sweep_kpcs"
+  analysis_type: "Uni"
+  method_name: "Spatial_PCA"
+  outputs_subdir: "Output_New_Project"
+  uni_selected_variable: "TMI"
+  multi_ranking_mode: "two_stage_pca_fusion"
+
+sweep:
+  deposits_1based: [1]
+  kpcs: [10]
+  score_w_auc: 0.45
+  score_w_red_points: 0.35
+  score_w_hit_early: 0.2
+  targets_shp_mode: "new_project"
+  best_kpcs_source_tag: "new_project"
+  fusion_weight_var1: 0.5
+  fusion_weight_var2: 0.5
+  top_windows_color_scale_mode: "config_range"
+
+reconstruction:
+  extra_pcs: 3
+  enable: true
+
+analysis_defaults:
+  variable_1: "TMI"
+  variable_2: "Radiometric_U"
+  vmin_var2: 0
+  vmax_var2: 15
+  rotation_angle: 0
+  stride_x: 8
+  stride_y: 8
+  n_top_windows: 250
+  top_windows_plot_n_rows: 2
+  top_windows_plot_n_cols: 4
+  force_crs: "EPSG:32722"
+  show_plots: false
+  min_cover: 0.5
+
+visualization:
+  image_colormap: "spatial_pca_paper"
+  deposit_limits_tmi: {}
+
+paths:
+  tif_directory: "/path/to/new_project/geophysical_grids"
+  tmi_file_path: "/path/to/new_project/TMI.ers"
+  rad_file_path: "/path/to/new_project/Radiometric_U.ers"
+  mask_files: []
+  polygon_path: "/path/to/new_project/study_area.shp"
+  nodata_to_nan: -99999.0
+  grayscale_weights: [0.6, 0.35, 0.05]
+
+targets:
+  deposits_shp_paths:
+    new_project: "/path/to/new_project/deposits.shp"
+
+best_kpcs_files:
+  multicriteria_filename_template: "kpcs_best_multicriteria_by_deposit_{csv_file_tag}.csv"
+  multicriteria_legacy_filename_template: "kpcs_best_multicriteria_by_deposit_{best_kpcs_source_tag}.csv"
+  var1_filename: "kpcs_best_multicriteria_by_deposit_spca_uni_tmi.csv"
+  var1_legacy_filename: "kpcs_best_multicriteria_by_deposit_uni_tmi.csv"
+  var2_filename: "kpcs_best_multicriteria_by_deposit_spca_uni_radiometric_u.csv"
+  var2_legacy_filename: "kpcs_best_multicriteria_by_deposit_uni_radiometric_u.csv"
+  var1_kpcs: 10
+  var2_kpcs: 10

@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# Environments
+.env
+*.env
+.venv/
+venv/
+my_env/
+
+# Local/private configs
+configs/local_*.yaml
+configs/local_*.yml
+
+# Large geospatial data
+data/raw/
+data/processed/
+*.tif
+*.tiff
+*.ers
+*.grd
+*.img
+*.vrt
+*.shp
+*.shx
+*.dbf
+*.prj
+*.cpg
+*.gpkg
+
+# Outputs
+outputs/*
+!outputs/.gitkeep
+/Output_*/
+*_outputs/
+*.pkl
+
+# OS/editor
+.DS_Store

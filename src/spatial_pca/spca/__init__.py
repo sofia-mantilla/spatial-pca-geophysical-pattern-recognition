@@ -1,0 +1,1 @@
+"""Spatial PCA method components."""

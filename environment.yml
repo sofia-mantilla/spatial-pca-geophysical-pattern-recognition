@@ -1,0 +1,17 @@
+name: spatial-pca
+channels:
+  - conda-forge
+dependencies:
+  - python>=3.10
+  - numpy
+  - pandas
+  - matplotlib
+  - geopandas
+  - rasterio
+  - shapely
+  - scikit-image
+  - scikit-learn
+  - pyyaml
+  - openpyxl
+  - pyogrio
+  - scipy
