@@ -147,11 +147,10 @@ ignored by Git.
 
 ### Public Data Download
 
-The Carajas geophysical grids and deposit polygons are distributed outside
-GitHub through public Google Drive folders:
+The Carajas geophysical TMI grid and deposit polygons are distributed outside
+GitHub through public Google Drive folder:
 
 - [Carajas data folder 1](https://drive.google.com/drive/folders/18hYA0qJFTlSgdd5eHp6skI83oSaN17GG?usp=drive_link)
-- [Carajas data folder 2](https://drive.google.com/drive/folders/1xp8QLp_IauLJ9tXiLb7bz6j3dvtK6Xr0?usp=drive_link)
 
 After downloading, arrange the files so the config paths resolve like this:
 
@@ -162,15 +161,10 @@ data/
 |   |-- 1097_1125_1129_TMI_merged
 |   |-- Demo_area_polygon.shp
 |   `-- Prospect_in Carajas_v2.shp
-`-- Carajas_Brazil_Multivariate_TMI_U/
-    |-- 1097_1125_1129_RAD_eU_merged.ers
-    |-- 1097_1125_1129_RAD_eU_merged
-    `-- Prospect_in Carajas_multi.shp
-```
+
 
 Include the companion Shapefile sidecar files (`.dbf`, `.shx`, `.prj`, `.cpg`)
-when present. The same folders can hold the files needed by the univariate TMI,
-univariate Radiometric U, and in-progress multivariate configs.
+when present.
 
 ### Run a Demo
 
