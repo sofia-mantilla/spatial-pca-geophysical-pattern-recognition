@@ -32,9 +32,9 @@ data/processed/
 *.cpg
 *.gpkg
 
-# Data
-data/Carajas_Brazil_Univariate_TMI/
-data/Carajas_Brazil_Multivariate_TMI_U/
+# Large geospatial input data
+data/Carajas_Brazil_Univariate_TMI/*
+data/Carajas_Brazil_Multivariate_TMI_U/*
 
 # Outputs
 outputs/*
