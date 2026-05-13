@@ -57,7 +57,7 @@ def build_provenance(config: dict[str, Any], command: list[str] | None = None) -
         },
         "analysis_defaults": {
             "variable_1": analysis["variable_1"],
-            "variable_2": analysis["variable_2"],
+            "variable_2": analysis.get("variable_2"),
             "rotation_angle": analysis["rotation_angle"],
             "stride_x": analysis["stride_x"],
             "stride_y": analysis["stride_y"],

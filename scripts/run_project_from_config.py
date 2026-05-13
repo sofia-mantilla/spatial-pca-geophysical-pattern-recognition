@@ -3,12 +3,15 @@
 from __future__ import annotations
 
 import argparse
+import os
 from pathlib import Path
 
 from _bootstrap import add_src_to_path
 
 
 REPO_ROOT = add_src_to_path()
+os.environ.setdefault("MPLBACKEND", "Agg")
+os.environ.setdefault("MPLCONFIGDIR", str(REPO_ROOT / ".matplotlib-cache"))
 
 
 def build_parser() -> argparse.ArgumentParser:

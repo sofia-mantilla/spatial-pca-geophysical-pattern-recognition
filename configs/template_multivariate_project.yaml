@@ -1,0 +1,78 @@
+# Template: two-raster Spatial PCA project using two-stage PCA fusion.
+# Copy this file, rename it for your case, and edit the paths/IDs below.
+
+project:
+  name: "New multivariate Spatial PCA project" # Human-readable project name.
+  case: "Training deposit / variable_1 + variable_2"
+  selected_variables: ["variable_1", "variable_2"] # Two rasters combined in this run.
+  training_deposit_id: 1                           # Main deposit ID to document; sweep controls actual runs.
+  analysis_type: "Multi"                           # Must be "Multi" here.
+
+run:
+  base_output_dir: "outputs"                     # Root folder for all generated results.
+  run_mode: "sweep_kpcs"                         # Runs each deposit/kpcs pair listed below.
+  analysis_type: "Multi"                         # Must match project.analysis_type.
+  method_name: "Spatial_PCA"                     # Use "Spatial_PCA" for SPCA ranking.
+  outputs_subdir: "Output_New_Project_Multi"     # Subfolder inside base_output_dir.
+  uni_selected_variable: "variable_1"            # Ignored for Multi, kept for schema consistency.
+  multi_ranking_mode: "two_stage_pca_fusion"     # Current paper-style multivariate ranking path.
+
+paths:
+  variable_1_file_path: "data/new_project/variable_1_grid.ers" # First raster, often TMI/MAG.
+  variable_2_file_path: "data/new_project/variable_2_grid.ers" # Second raster, often radiometric/geochemical.
+  polygon_path: "data/new_project/study_area_polygon.shp"      # Study-area crop polygon.
+  nodata_to_nan: -99999.0                                      # Raster value converted to NaN.
+
+targets:
+  deposit_crs_policy: "reproject_to_raster" # Use "assume_raster" only when coordinates already match the raster grid.
+  validation_deposit_crs_policy: "reproject_to_raster" # Usually match deposit_crs_policy; override for legacy comparisons.
+  deposits_shp_paths:
+    new_project: "data/new_project/deposits.shp" # Known deposit polygons for training/validation.
+
+sweep:
+  deposits_1based: [1]                     # Deposit IDs are 1-based, matching the shapefile row order.
+  kpcs: [10]                               # Fused PCs retained for final ranking.
+  score_w_auc: 0.45                        # Summary-table weight for recovery AUC.
+  score_w_red_points: 0.35                 # Summary-table weight for recovered deposits.
+  score_w_hit_early: 0.2                   # Summary-table weight for early hits.
+  targets_shp_mode: "new_project"          # Must match a key in targets.deposits_shp_paths.
+  best_kpcs_source_tag: "new_project"      # Label used for optional best-k summary filenames.
+  fusion_weight_var1: 0.5                  # Reserved summary weight for variable_1.
+  fusion_weight_var2: 0.5                  # Reserved summary weight for variable_2.
+  top_windows_color_scale_mode: "config_range" # Use configured color limits when available.
+
+reconstruction:
+  enable: true                             # Save reconstruction diagnostic plots.
+  extra_pcs: 3                             # Show this many PCs after the selected kpcs.
+
+analysis_defaults:
+  variable_1: "variable_1"                 # Display/name key for the first raster.
+  variable_2: "variable_2"                 # Display/name key for the second raster.
+  vmin_var2: 0                             # Colorbar minimum for variable_2 plots.
+  vmax_var2: 15                            # Colorbar maximum for variable_2 plots.
+  rotation_angle: 0                        # Deposit-template rotation in degrees.
+  stride_x: 8                              # Sliding-window step in columns.
+  stride_y: 8                              # Sliding-window step in rows.
+  n_top_windows: 250                       # Number of ranked windows to export and validate.
+  top_windows_plot_n_rows: 2               # Rows in the top-window chip diagnostic.
+  top_windows_plot_n_cols: 4               # Columns in the top-window chip diagnostic.
+  force_crs: "EPSG:32722"                  # CRS used if raster/deposit metadata is missing.
+  show_plots: false                        # Save figures without opening GUI windows.
+  min_cover: 0.5                           # Fraction of a deposit that counts as recovered.
+
+visualization:
+  image_colormap: "spatial_pca_paper"      # Use "paper", "spatial_pca_paper", or a Matplotlib cmap.
+  score_pairs_top_n_to_plot: 3             # Highlight this many top-ranked windows in score-pair plots.
+  deposit_limits_tmi: {}                   # Optional per-deposit color limits for MAG/TMI variables.
+
+best_kpcs_files:
+  multicriteria_filename_template: "kpcs_best_multicriteria_by_deposit_{csv_file_tag}.csv"
+  multicriteria_legacy_filename_template: "kpcs_best_multicriteria_by_deposit_{best_kpcs_source_tag}.csv"
+  var1_filename: "kpcs_best_multicriteria_by_deposit_spca_uni_variable_1.csv"
+  var1_legacy_filename: "kpcs_best_multicriteria_by_deposit_uni_variable_1.csv"
+  var2_filename: "kpcs_best_multicriteria_by_deposit_spca_uni_variable_2.csv"
+  var2_legacy_filename: "kpcs_best_multicriteria_by_deposit_uni_variable_2.csv"
+  var1_kpcs: 10                            # PCs used in the first-stage PCA for variable_1.
+  var2_kpcs: 10                            # PCs used in the first-stage PCA for variable_2.
+  # To use CSV-selected first-stage k values instead, remove var1_kpcs/var2_kpcs
+  # and place the CSV files named above in the resolved output directory.

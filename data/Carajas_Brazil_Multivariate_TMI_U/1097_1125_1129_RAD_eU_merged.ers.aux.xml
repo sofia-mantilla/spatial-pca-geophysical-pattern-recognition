@@ -1,0 +1,13 @@
+<PAMDataset>
+  <PAMRasterBand band="1">
+    <Description>eU_ini</Description>
+    <Metadata>
+      <MDI key="STATISTICS_APPROXIMATE">YES</MDI>
+      <MDI key="STATISTICS_MAXIMUM">76.994003295898</MDI>
+      <MDI key="STATISTICS_MEAN">1.9211887783003</MDI>
+      <MDI key="STATISTICS_MINIMUM">-3.6870000362396</MDI>
+      <MDI key="STATISTICS_STDDEV">1.6490226071927</MDI>
+      <MDI key="STATISTICS_VALID_PERCENT">56.04</MDI>
+    </Metadata>
+  </PAMRasterBand>
+</PAMDataset>

@@ -396,7 +396,8 @@ def plot_loading_maps(
     if load.shape[0] == expected_features and load.shape[1] != expected_features:
         load = load.T
 
-    n_show = min(max_pcs, load.shape[0], Z.shape[1], w.size)
+    n_available = min(load.shape[0], Z.shape[1], w.size)
+    n_show = min(int(max_pcs), n_available)
 
     if n_show < 1:
         raise ValueError("No loading maps are available to plot.")
@@ -406,8 +407,7 @@ def plot_loading_maps(
     path = Path(output_path)
     path.parent.mkdir(parents=True, exist_ok=True)
 
-    # Order PCs by weight, but only among available PCs
-    order = np.argsort(w[:n_show])[::-1]
+    order = np.argsort(w[:n_available])[::-1][:n_show]
 
     fig, axes = plt.subplots(
         1,

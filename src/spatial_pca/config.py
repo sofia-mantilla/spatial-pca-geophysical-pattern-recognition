@@ -58,9 +58,6 @@ REQUIRED_KEYS: dict[str, tuple[str, ...]] = {
     "reconstruction": ("extra_pcs", "enable"),
     "analysis_defaults": (
         "variable_1",
-        "variable_2",
-        "vmin_var2",
-        "vmax_var2",
         "rotation_angle",
         "stride_x",
         "stride_y",
@@ -80,8 +77,6 @@ REQUIRED_KEYS: dict[str, tuple[str, ...]] = {
         "multicriteria_legacy_filename_template",
         "var1_filename",
         "var1_legacy_filename",
-        "var2_filename",
-        "var2_legacy_filename",
     ),
 }
 
@@ -160,6 +155,17 @@ def validate_run_config(config: dict[str, Any]) -> None:
         raise ConfigError("run.method_name must be 'Spatial_PCA' or 'Raw_comparison'.")
     if run["run_mode"] not in {"sweep_kpcs", "optimal_k_recon"}:
         raise ConfigError("run.run_mode must be 'sweep_kpcs' or 'optimal_k_recon'.")
+    if run["analysis_type"] == "Multi":
+        _require_keys(
+            "analysis_defaults",
+            analysis,
+            ("variable_2", "vmin_var2", "vmax_var2"),
+        )
+        _require_keys(
+            "best_kpcs_files",
+            config["best_kpcs_files"],
+            ("var2_filename", "var2_legacy_filename"),
+        )
 
     _require_positive_ints("sweep.deposits_1based", sweep["deposits_1based"])
     _require_positive_ints("sweep.kpcs", sweep["kpcs"])
@@ -177,6 +183,20 @@ def validate_run_config(config: dict[str, Any]) -> None:
     if sweep["targets_shp_mode"] not in deposits_shp_paths:
         raise ConfigError(
             "sweep.targets_shp_mode must match one key in targets.deposits_shp_paths."
+        )
+    deposit_crs_policy = targets.get("deposit_crs_policy", "reproject_to_raster")
+    if deposit_crs_policy not in {"reproject_to_raster", "assume_raster"}:
+        raise ConfigError(
+            "targets.deposit_crs_policy must be 'reproject_to_raster' or 'assume_raster'."
+        )
+    validation_deposit_crs_policy = targets.get(
+        "validation_deposit_crs_policy",
+        deposit_crs_policy,
+    )
+    if validation_deposit_crs_policy not in {"reproject_to_raster", "assume_raster"}:
+        raise ConfigError(
+            "targets.validation_deposit_crs_policy must be 'reproject_to_raster' "
+            "or 'assume_raster'."
         )
 
     _validate_raster_path_config(config)

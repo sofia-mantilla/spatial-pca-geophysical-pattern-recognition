@@ -5,19 +5,12 @@ project:
   training_deposit_id: 3
   analysis_type: "Multi"
 
-data_root: "/path/to/shared/project/data"
-carajas:
-  tmi_path: "/path/to/Carajas/TMI.ers"
-  radiometric_u_path: "/path/to/Carajas/Radiometric_U.ers"
-  study_area_polygon: "/path/to/Carajas/Demo_area_polygon.shp"
-  deposits_shapefile: "/path/to/Carajas/deposits.shp"
-
 run:
   base_output_dir: "outputs"
   run_mode: "sweep_kpcs"
   analysis_type: "Multi"
   method_name: "Spatial_PCA"
-  outputs_subdir: "Output_Carajas_Multi"
+  outputs_subdir: "Output_Carajas_Brazil_Multivariate_TMI_U"
   uni_selected_variable: "TMI"
   multi_ranking_mode: "two_stage_pca_fusion"
 
@@ -70,14 +63,16 @@ visualization:
     "12": [-200, 400]
 
 paths:
-  tmi_file_path: "/path/to/Carajas/TMI.ers"
-  rad_file_path: "/path/to/Carajas/Radiometric_U.ers"
-  polygon_path: "/path/to/Carajas/Demo_area_polygon.shp"
+  variable_1_file_path: "data/Carajas_Brazil_Univariate_TMI/1097_1125_1129_TMI_merged.ers"
+  variable_2_file_path: "data/Carajas_Brazil_Multivariate_TMI_U/1097_1125_1129_RAD_eU_merged.ers"
+  polygon_path: "data/Carajas_Brazil_Univariate_TMI/Demo_area_polygon.shp"
   nodata_to_nan: -99999.0
 
 targets:
+  deposit_crs_policy: "assume_raster" # Match the legacy Carajas run: keep target coordinates on the raster grid.
+  validation_deposit_crs_policy: "reproject_to_raster" # Match legacy v5 validation against true projected deposits.
   deposits_shp_paths:
-    carajas: "/path/to/Carajas/deposits.shp"
+    carajas: "data/Carajas_Brazil_Multivariate_TMI_U/Prospect_in Carajas_multi.shp"
 
 best_kpcs_files:
   multicriteria_filename_template: "kpcs_best_multicriteria_by_deposit_{csv_file_tag}.csv"

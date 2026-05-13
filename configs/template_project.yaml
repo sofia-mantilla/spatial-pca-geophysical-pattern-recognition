@@ -65,6 +65,8 @@ paths:
 
 # Known deposits used for training and validation.
 targets:
+  deposit_crs_policy: "reproject_to_raster" # Use "assume_raster" only when coordinates already match the raster grid.
+  validation_deposit_crs_policy: "reproject_to_raster" # Usually match deposit_crs_policy; override for legacy comparisons.
   deposits_shp_paths:
     new_project: "/path/to/new_project/deposits.shp" # Deposit polygons.
 

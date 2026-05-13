@@ -137,7 +137,7 @@ def run_single_case(
         variable_name = _get_variable_name(config)
         raster_data = load_variable_raster(config, variable_name)
         reference_raster = raster_data
-        deposits_gdf = load_deposits(deposits_path, target_crs=reference_raster.crs)
+        deposits_gdf = _load_case_deposits(config, deposits_path, reference_raster.crs)
         patch_config = config.get("patch")
         if patch_config is None:
             template = get_deposit_template(deposits_gdf, deposit_1based - 1, raster_data)
@@ -186,7 +186,7 @@ def run_single_case(
         raster_data = load_multivariate_rasters(config, summary_variables)
         reference_raster = raster_data[summary_variables[0]]
         _validate_multivariate_rasters(raster_data, reference_variable=summary_variables[0])
-        deposits_gdf = load_deposits(deposits_path, target_crs=reference_raster.crs)
+        deposits_gdf = _load_case_deposits(config, deposits_path, reference_raster.crs)
         patch_config = config.get("patch")
         if patch_config is None:
             template = {
@@ -237,7 +237,8 @@ def run_single_case(
             k_pcs_var1=k_pcs_var1,
             k_pcs_var2=k_pcs_var2,
             k_pcs_fused=k_pcs,
-            top_k=n_top_windows,
+            # Match the legacy workflow: truncate only after removing the training deposit row.
+            top_k=None,
             return_squared=False,
             use_whitening=False,
             use_weights=True,
@@ -296,9 +297,15 @@ def run_single_case(
     resolved_config_path = write_resolved_config(config, output_dir / "run_config_resolved.json")
     provenance = build_provenance(config)
     provenance_path = write_provenance(provenance, output_dir / "run_provenance.json")
+    validation_deposits_gdf = _load_case_deposits(
+        config,
+        deposits_path,
+        reference_raster.crs,
+        policy_key="validation_deposit_crs_policy",
+    )
     recovery_result = validate_footprint_recovery(
         top_windows_gdf=top_windows_gdf,
-        deposits_gdf=deposits_gdf,
+        deposits_gdf=validation_deposits_gdf,
         reference_deposit_index=deposit_1based - 1,
         min_cover=float(config["analysis_defaults"]["min_cover"]),
     )
@@ -340,7 +347,7 @@ def run_single_case(
     )
     top_windows_plot_path = plot_top_windows_overlay(
         top_windows_gdf=top_windows_gdf,
-        deposits_gdf=deposits_gdf,
+        deposits_gdf=validation_deposits_gdf,
         reference_deposit_index=deposit_1based - 1,
         background_layers=_build_top_windows_background_layers(
             config=config,
@@ -469,7 +476,8 @@ def _get_variable_limits(
         value = limits.get(str(deposit_1based))
         if isinstance(value, list) and len(value) == 2:
             return float(value[0]), float(value[1])
-    if variable_name_upper == str(config["analysis_defaults"]["variable_2"]).upper():
+    variable_2 = config["analysis_defaults"].get("variable_2")
+    if variable_2 is not None and variable_name_upper == str(variable_2).upper():
         return (
             float(config["analysis_defaults"]["vmin_var2"]),
             float(config["analysis_defaults"]["vmax_var2"]),
@@ -502,6 +510,32 @@ def _get_deposits_path(config: dict[str, Any]) -> Path:
             f"targets_shp_mode '{target_mode}' is not defined in targets.deposits_shp_paths."
         )
     return Path(str(target_paths[target_mode])).expanduser()
+
+
+def _load_case_deposits(
+    config: dict[str, Any],
+    deposits_path: Path,
+    reference_crs: Any,
+    *,
+    policy_key: str = "deposit_crs_policy",
+):
+    """Load deposit targets using the configured CRS policy."""
+
+    targets = config.get("targets", {})
+    policy = str(targets.get(policy_key, targets.get("deposit_crs_policy", "reproject_to_raster")))
+    deposits = load_deposits(deposits_path, target_crs=None)
+
+    if reference_crs is None:
+        return deposits
+
+    if policy == "reproject_to_raster":
+        return deposits.to_crs(reference_crs)
+    if policy == "assume_raster":
+        return deposits.set_crs(reference_crs, allow_override=True)
+
+    raise ValueError(
+        "targets.deposit_crs_policy must be 'reproject_to_raster' or 'assume_raster'."
+    )
 
 
 def _get_raster_path(config: dict[str, Any], variable_name: str) -> Path:
