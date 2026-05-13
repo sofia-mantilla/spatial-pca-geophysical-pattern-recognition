@@ -145,6 +145,19 @@ After that, you can run:
 The multivariate TMI + Radiometric U workflow is included for transparency, but
 it is still in progress and is not the validated first-release workflow.
 
+### Run a Demo
+
+The synthetic example is the safest public demo because it uses small test data
+included with the repository:
+
+```bash
+python -m pip install --upgrade "notebook>=7"
+python -m notebook notebooks/00_illustrative_synthetic_demo.ipynb
+```
+
+Using `python -m notebook` ensures Jupyter runs from the active environment,
+instead of an older system-wide Jupyter installation.
+
 ### Input Data
 
 Inputs are controlled by YAML files in `configs/`.
@@ -182,19 +195,6 @@ data/
 
 Include the companion Shapefile sidecar files (`.dbf`, `.shx`, `.prj`, `.cpg`)
 when present.
-
-### Run a Demo
-
-The synthetic example is the safest public demo because it uses small test data
-included with the repository:
-
-```bash
-python -m pip install --upgrade "notebook>=7"
-python -m notebook notebooks/00_illustrative_synthetic_demo.ipynb
-```
-
-Using `python -m notebook` ensures Jupyter runs from the active environment,
-instead of an older system-wide Jupyter installation.
 
 ### Run Univariate SPCA with public domain TMI data from Carajas, Brazil
 
