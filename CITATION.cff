@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+title: "Spatial PCA for Geophysical Pattern Recognition in Mineral Exploration"
+message: "If you use this repository, please cite the archived Zenodo release."
+type: software
+
+authors:
+  - family-names: "Mantilla Salas"
+    given-names: "Sofia"
+    affiliation: "Stanford University"
+
+repository-code: "https://github.com/sofia-mantilla/spatial-pca-geophysical-pattern-recognition"
+url: "https://zenodo.org/records/20168910"
+doi: "10.5281/zenodo.20168910"
+
+version: "v1.0.1"
+date-released: "2026-05-13"
+
+abstract: "A reproducible spatial PCA workflow for learning deposit-scale geophysical geometry and ranking mineral exploration targets by similarity to known mineralization."
+
+keywords:
+  - spatial PCA
+  - geophysical pattern recognition
+  - mineral exploration
+  - mineral prospectivity
+  - similarity ranking
+  - sliding windows
+  - IOCG deposits
+  - Carajas
+
+license: "MIT"
