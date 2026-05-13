@@ -5,45 +5,43 @@
   <img alt="Status: research prototype" src="https://img.shields.io/badge/status-research%20prototype-yellow">
   <img alt="Release scope: univariate validated" src="https://img.shields.io/badge/release-univariate%20validated-green">
   <img alt="Multivariate status: in progress" src="https://img.shields.io/badge/multivariate-in%20progress-orange">
-  <img alt="License: pending" src="https://img.shields.io/badge/license-pending-lightgrey">
+  <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-green">
 </p>
 
+## Why
+
+Mineral exploration targeting is high impact and high uncertainty: early
+decisions can lead to expensive drilling or data acquisition, yet only a small
+fraction of prospects become economic mines. In many districts, only a few
+deposits are known, so this workflow uses each known deposit as a spatial
+geophysical signature rather than only as a labeled point.
+
+**Real-world problem:** rank areas whose geophysical geometry resembles a known
+deposit, so exploration teams can prioritize follow-up targets more
+systematically.
+
+**Keywords:** mineral exploration, Spatial PCA, geophysics, TMI, radiometrics,
+sliding windows, IOCG deposits, Carajas, footprint recovery.
+
 <p align="center">
-  <img src="docs/figures/top_windows.png" alt="Top-ranked Spatial PCA prediction windows over the Carajas study area" width="760">
+  <img src="docs/figures/top_windows.png" alt="Top-ranked Spatial PCA prediction windows over the Carajas study area" width="900">
 </p>
 
 <p align="center">
   <strong>Spatial PCA ranks geophysical windows by how closely their spatial pattern matches a known deposit footprint.</strong>
 </p>
 
-<p align="center">
-  <img src="docs/figures/spatial_pca_simple_workflow.png" alt="Simple Spatial PCA workflow from input rasters and deposit polygons to ranked windows and validation" width="760">
-</p>
-
-## Why
-
-Mineral exploration teams often need to search large geophysical surveys for
-spatial patterns that resemble known deposits, not just for isolated high or low
-pixel values. This repository implements a reproducible Spatial PCA workflow for
-turning raster windows into comparable pattern vectors, ranking candidate
-windows, and validating whether the highest-ranked windows recover known
-mineralized footprints.
-
-**Real-world problem:** identify geophysical patterns that look like known
-mineral deposits so exploration teams can prioritize follow-up targets across
-large survey areas.
-
-**Keywords:** mineral exploration, Spatial PCA, geophysics, TMI, radiometrics,
-sliding windows, IOCG deposits, Carajas, footprint recovery.
-
 ## What
 
-Spatial PCA treats each moving geophysical window as an image-like pattern. A
-selected training deposit defines the template size and reference geometry. The
-workflow extracts raster windows, projects them into PCA space, computes
-deposit-driven component weights, ranks windows by weighted distance to the
-training deposit, and validates the ranked windows against independent deposit
-polygons.
+This repository provides a config-driven Spatial PCA workflow for building a
+similarity map and target ranking from geophysical rasters. It moves
+deposit-sized windows across the study area, represents each window with PCA
+scores, weights the components most characteristic of the training deposit, and
+validates the top-ranked windows against independent deposit footprints.
+
+<p align="center">
+  <img src="docs/figures/spatial_pca_simple_workflow.png" alt="Simple Spatial PCA workflow from input rasters and deposit polygons to ranked windows and validation" width="900">
+</p>
 
 **Module core functionality**
 
@@ -212,14 +210,12 @@ version.
 Before final publication, the remaining Mineral-X release checklist items are:
 
 - Add approved external links for any non-GitHub data distribution.
-- Add or confirm the project license file.
 - Complete the assigned Mineral-X code review.
 - Publish the code with the associated paper or preprint when ready.
 
 ## License / Licence
 
-License pending. Add the approved `LICENSE` file before the final public
-release.
+This project is released under the MIT License. See [LICENSE](LICENSE).
 
 ## Citation
 

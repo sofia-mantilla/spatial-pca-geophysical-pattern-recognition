@@ -26,7 +26,7 @@ from spatial_pca.geodata.exports import (
 from spatial_pca.geodata.rasters import RasterData, load_raster
 from spatial_pca.provenance import build_provenance, write_provenance
 from spatial_pca.spca.pca import PCAResult, fit_spca
-from spatial_pca.spca.ranking import RankingResult, rank_multi_two_stage_pca_fusion, rank_spca_windows
+from spatial_pca.spca.ranking import RankingResult, rank_spca_windows, run_spca_ranking_pipeline
 from spatial_pca.spca.windows import (
     WindowMatrix,
     build_multivariate_circle_window_matrix,
@@ -225,25 +225,20 @@ def run_single_case(
             patch_size=window_matrix.window_shape,
         )
         k_pcs_var1, k_pcs_var2 = _resolve_multivariate_best_kpcs(config, deposit_1based)
-        ranking_result = rank_multi_two_stage_pca_fusion(
+        ranking_out = run_spca_ranking_pipeline(
             X_multi=window_matrix.data_for_pca,
+            Z=pca_result.scores,
+            eigvals=pca_result.eigvals,
             deposit_index=window_matrix.deposit_index,
             window_shape=window_matrix.window_shape,
-            n_features_var1=(
-                int(np.asarray(window_matrix.feature_mask, dtype=bool).sum())
-                if window_matrix.feature_mask is not None
-                else None
-            ),
-            k_pcs_var1=k_pcs_var1,
-            k_pcs_var2=k_pcs_var2,
-            k_pcs_fused=k_pcs,
-            # Match the legacy workflow: truncate only after removing the training deposit row.
-            top_k=None,
-            return_squared=False,
-            use_whitening=False,
-            use_weights=True,
-            standardize_fused_input=True,
+            analysis_type=analysis_type,
+            multi_ranking_mode=str(config["run"].get("multi_ranking_mode", "two_stage_pca_fusion")),
+            k_pcs_rank=k_pcs,
+            k_pcs_rank_var1=k_pcs_var1,
+            k_pcs_rank_var2=k_pcs_var2,
+            n_top_windows=n_top_windows,
         )
+        ranking_result = ranking_out["ranking_result"]
         variable_name = "Combined"
         validation_extras = {
             "ranking_mode": ranking_result.ranking_mode,
@@ -309,6 +304,21 @@ def run_single_case(
         reference_deposit_index=deposit_1based - 1,
         min_cover=float(config["analysis_defaults"]["min_cover"]),
     )
+    spca_diagnostics = {
+        "k_used": int(ranking_result.k_used),
+        "use_whitening": bool(ranking_result.use_whitening),
+        "use_weights": bool(ranking_result.use_weights),
+    }
+    if ranking_result.ranking_mode == "two_stage_pca_fusion":
+        fusion_details = ranking_result.fusion_details or {}
+        spca_diagnostics.update(
+            {
+                "K_var1": int(fusion_details["K_var1"]),
+                "K_var2": int(fusion_details["K_var2"]),
+                "K_fused": int(fusion_details["K_fused"]),
+                "standardize_fused_input": bool(fusion_details["standardize_fused_input"]),
+            }
+        )
     validation_payload = build_validation_payload(
         recovery=recovery_result,
         method_name=config["run"]["method_name"],
@@ -320,11 +330,7 @@ def run_single_case(
         top_windows_path=top_windows_path,
         run_config_path=resolved_config_path,
         provenance_path=provenance_path,
-        spca_diagnostics={
-            "k_used": int(ranking_result.k_used),
-            "use_whitening": bool(ranking_result.use_whitening),
-            "use_weights": bool(ranking_result.use_weights),
-        },
+        spca_diagnostics=spca_diagnostics,
         deposit_metrics={},
         ranking_mode=validation_extras["ranking_mode"],
         k_pcs_var1=validation_extras["k_pcs_var1"],
@@ -626,11 +632,6 @@ def _validate_multivariate_rasters(
 def _resolve_multivariate_best_kpcs(config: dict[str, Any], deposit_1based: int) -> tuple[int, int]:
     output_dir = Path(str(config["resolved"]["output_dir"]))
     files = config["best_kpcs_files"]
-    direct_var1 = files.get("var1_kpcs")
-    direct_var2 = files.get("var2_kpcs")
-    if direct_var1 is not None and direct_var2 is not None:
-        return int(direct_var1), int(direct_var2)
-
     project_root = Path(str(config["resolved"]["project_root"]))
     var1_path = _resolve_support_csv_path(
         files=files,
@@ -794,7 +795,7 @@ def _build_diagnostic_paths(
         config["analysis_defaults"]["top_windows_plot_n_cols"]
     )
     fusion_details = ranking_result.fusion_details or {}
-    return {
+    diagnostic_paths = {
         "rotated_deposit": plot_multivariate_rotated_deposit(
             deposit_arrays={var: template[var].array for var in variable_names},
             deposit_1based=deposit_1based,
@@ -821,15 +822,21 @@ def _build_diagnostic_paths(
                 None if window_matrix.per_variable_display_windows is not None else window_matrix.feature_mask
             ),
         ),
-        "component_weights": plot_deposit_scores_and_weights(
-            scores=fusion_details["Zf_full"],
+    }
+
+    if ranking_result.ranking_mode == "two_stage_pca_fusion":
+        diagnostic_paths["component_weights"] = plot_deposit_scores_and_weights(
+            scores=fusion_details["Zf_space"],
             explained_variance_ratio=fusion_details["explained_variance_ratio_fused"],
             weights=ranking_result.weights,
             deposit_index=window_matrix.deposit_index,
             k_used=ranking_result.k_used,
             output_path=output_dir / "component_weights.png",
-        ),
-        "reconstruction_progression": plot_two_stage_multivariate_reconstruction_progression(
+            k_display=min(int(ranking_result.k_used), 12),
+            recompute_weights_from_scores=True,
+            weight_ylim=(0.0, 1.0),
+        )
+        diagnostic_paths["reconstruction_progression"] = plot_two_stage_multivariate_reconstruction_progression(
             fusion_details=fusion_details,
             window_shape=window_matrix.window_shape,
             variable_names=(variable_names[0], variable_names[1]),
@@ -843,8 +850,19 @@ def _build_diagnostic_paths(
                 f"Deposit {deposit_1based} two-stage fused reconstruction progression "
                 f"(optimal fused k={k_pcs})"
             ),
-        ),
-    }
+        )
+        return diagnostic_paths
+
+    diagnostic_paths["component_weights"] = plot_deposit_scores_and_weights(
+        scores=pca_result.scores,
+        explained_variance_ratio=pca_result.explained_variance_ratio,
+        weights=ranking_result.weights,
+        deposit_index=window_matrix.deposit_index,
+        k_used=ranking_result.k_used,
+        output_path=output_dir / "component_weights.png",
+        k_display=min(int(ranking_result.k_used), 12),
+    )
+    return diagnostic_paths
 
 
 def _build_top_windows_background_layers(

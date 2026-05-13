@@ -40,6 +40,7 @@ class RankingResult:
             "fusion_details": self.fusion_details or {},
             "use_separate_multi_fusion": False,
             "use_two_stage_multi_fusion": self.ranking_mode == "two_stage_pca_fusion",
+            "ranking_result": self,
         }
 
 
@@ -63,6 +64,67 @@ def rank_spca_windows(
         use_whitening=False,
         use_weights=True,
     )
+
+
+def run_spca_ranking_pipeline(
+    *,
+    X_multi: Any,
+    Z: Any,
+    eigvals: Any,
+    deposit_index: int,
+    window_shape: tuple[int, int],
+    analysis_type: str,
+    multi_ranking_mode: str,
+    k_pcs_rank: int,
+    k_pcs_rank_var1: int | None,
+    k_pcs_rank_var2: int | None,
+    n_top_windows: int | None = None,
+    fusion_weight_var1: float = 0.5,
+    fusion_weight_var2: float = 0.5,
+) -> dict[str, Any]:
+    """Run the paper SPCA ranking dispatcher with the maintained return contract."""
+
+    # Kept in the signature for compatibility with the paper driver. Two-stage
+    # fused PCA does not use late variable-distance weights, and top-window
+    # slicing happens after the appended training deposit row is removed.
+    del n_top_windows, fusion_weight_var1, fusion_weight_var2
+    analysis = str(analysis_type)
+    mode = str(multi_ranking_mode)
+
+    if analysis == "Multi":
+        if mode != "two_stage_pca_fusion":
+            raise ValueError(
+                "Multi Spatial_PCA ranking is defined as two_stage_pca_fusion; "
+                f"got '{mode}'."
+            )
+        if k_pcs_rank_var1 is None or k_pcs_rank_var2 is None:
+            raise ValueError("two_stage_pca_fusion requires k_pcs_rank_var1 and k_pcs_rank_var2.")
+        result = rank_multi_two_stage_pca_fusion(
+            X_multi=X_multi,
+            deposit_index=deposit_index,
+            window_shape=window_shape,
+            k_pcs_var1=int(k_pcs_rank_var1),
+            k_pcs_var2=int(k_pcs_rank_var2),
+            k_pcs_fused=int(k_pcs_rank),
+            top_k=None,
+            return_squared=False,
+            use_whitening=False,
+            use_weights=True,
+            standardize_fused_input=True,
+        )
+        return result.to_pipeline_dict()
+
+    result = rank_by_weighted_l2(
+        scores=Z,
+        eigvals=eigvals,
+        deposit_index=deposit_index,
+        k_pcs=k_pcs_rank,
+        top_k=None,
+        return_squared=False,
+        use_whitening=False,
+        use_weights=True,
+    )
+    return result.to_pipeline_dict()
 
 
 def rank_by_weighted_l2(
@@ -147,7 +209,6 @@ def rank_multi_two_stage_pca_fusion(
     X_multi: Any,
     deposit_index: int,
     window_shape: tuple[int, int],
-    n_features_var1: int | None = None,
     k_pcs_var1: int,
     k_pcs_var2: int,
     k_pcs_fused: int | None = None,
@@ -170,7 +231,7 @@ def rank_multi_two_stage_pca_fusion(
 
     win_h = int(window_shape[0])
     win_w = int(window_shape[1])
-    n_pix = int(n_features_var1) if n_features_var1 is not None else (win_h * win_w)
+    n_pix = int(win_h * win_w)
     if X.shape[1] < 2 * n_pix:
         raise ValueError(
             f"Expected at least {2 * n_pix} multivariate features for two-stage fusion, got {X.shape[1]}."
@@ -227,20 +288,16 @@ def rank_multi_two_stage_pca_fusion(
     order = np.argsort(dists)
     ranked_idx = order
     ranked_dists = dists[order]
-    if top_k is not None:
-        top_k = max(1, min(int(top_k), ranked_idx.shape[0]))
-        ranked_idx = ranked_idx[:top_k]
-        ranked_dists = ranked_dists[:top_k]
+    # Match the paper script: keep the full ranking here. The caller removes
+    # the appended deposit row and then selects the top validation windows.
+    del top_k
 
     fusion_details = {
         "mode": "two_stage_pca_fusion",
         "K_var1": int(K1_eff),
         "K_var2": int(K2_eff),
-        "n_features_var1": int(n_pix),
-        "n_features_var2": int(n_pix),
         "K_fused": int(Kf_eff),
         "M_fused": int(M_fused),
-        "Zf_full": Zf,
         "Zf_space": comparison_space,
         "weights_fused": weights,
         "eigvals_fused": eig_fused,

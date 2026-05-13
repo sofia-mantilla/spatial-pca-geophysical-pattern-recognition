@@ -37,8 +37,8 @@ sweep:
   score_w_hit_early: 0.2                   # Summary-table weight for early hits.
   targets_shp_mode: "new_project"          # Must match a key in targets.deposits_shp_paths.
   best_kpcs_source_tag: "new_project"      # Label used for optional best-k summary filenames.
-  fusion_weight_var1: 0.5                  # Reserved summary weight for variable_1.
-  fusion_weight_var2: 0.5                  # Reserved summary weight for variable_2.
+  fusion_weight_var1: 0.5                  # Ignored by two_stage_pca_fusion; kept for schema compatibility.
+  fusion_weight_var2: 0.5                  # Ignored by two_stage_pca_fusion; kept for schema compatibility.
   top_windows_color_scale_mode: "config_range" # Use configured color limits when available.
 
 reconstruction:
@@ -70,9 +70,8 @@ best_kpcs_files:
   multicriteria_legacy_filename_template: "kpcs_best_multicriteria_by_deposit_{best_kpcs_source_tag}.csv"
   var1_filename: "kpcs_best_multicriteria_by_deposit_spca_uni_variable_1.csv"
   var1_legacy_filename: "kpcs_best_multicriteria_by_deposit_uni_variable_1.csv"
+  # Optional: set var1_path to the univariate variable_1 best-k CSV if it lives outside this output folder.
   var2_filename: "kpcs_best_multicriteria_by_deposit_spca_uni_variable_2.csv"
   var2_legacy_filename: "kpcs_best_multicriteria_by_deposit_uni_variable_2.csv"
-  var1_kpcs: 10                            # PCs used in the first-stage PCA for variable_1.
-  var2_kpcs: 10                            # PCs used in the first-stage PCA for variable_2.
-  # To use CSV-selected first-stage k values instead, remove var1_kpcs/var2_kpcs
+  # Optional: set var2_path to the univariate variable_2 best-k CSV if it lives outside this output folder.
   # and place the CSV files named above in the resolved output directory.

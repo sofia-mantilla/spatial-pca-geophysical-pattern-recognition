@@ -306,13 +306,34 @@ def plot_deposit_scores_and_weights(
     deposit_index: int,
     k_used: int,
     output_path: str | Path,
+    k_display: int | None = None,
+    recompute_weights_from_scores: bool = False,
+    weight_ylim: tuple[float, float] | None = None,
 ) -> Path:
     """Plot deposit PCA scores and ranking weights for the PCs used."""
 
     Z = np.asarray(scores, dtype=float)
     explained = np.asarray(explained_variance_ratio, dtype=float)
-    w = np.asarray(weights, dtype=float).ravel()
-    k = min(int(k_used), Z.shape[1], w.size)
+    k_weight = min(int(k_used), Z.shape[1])
+    if k_weight < 1:
+        raise ValueError("k_used must select at least one PCA component.")
+
+    if recompute_weights_from_scores:
+        z_dep_full = Z[int(deposit_index), :k_weight]
+        raw_weights = z_dep_full**2
+        weight_sum = float(raw_weights.sum())
+        if weight_sum > 0:
+            w_full = raw_weights / weight_sum
+        else:
+            w_full = np.ones(k_weight, dtype=float) / float(k_weight)
+    else:
+        w = np.asarray(weights, dtype=float).ravel()
+        k_weight = min(k_weight, w.size)
+        w_full = w[:k_weight]
+
+    if k_display is None:
+        k_display = k_weight
+    k = max(1, min(int(k_display), k_weight))
     pcs = np.arange(1, k + 1)
     z_dep = Z[int(deposit_index), :k]
 
@@ -336,7 +357,12 @@ def plot_deposit_scores_and_weights(
     axis_margin = 0.28 * score_span
     ax_top.set_ylim(score_min - axis_margin, score_max + axis_margin)
 
-    for pc, score, var_frac in zip(pcs, z_dep, explained[:k]):
+    explained_display = explained[:k].copy()
+    explained_sum = float(np.nansum(explained))
+    if explained_sum > 1.0 + 1e-6:
+        explained_display = explained_display / explained_sum
+
+    for pc, score, var_frac in zip(pcs, z_dep, explained_display):
         label = rf"Var$_{{{pc}}}$ = {100 * float(var_frac):.1f}%"
         va = "bottom" if score >= 0 else "top"
         offset = label_offset if score >= 0 else -label_offset
@@ -354,14 +380,17 @@ def plot_deposit_scores_and_weights(
     ax_top.axhline(0, color="black", linewidth=0.8)
 
     ax_bot = axes[1]
-    weights_used = w[:k]
+    weights_used = w_full[:k]
     ax_bot.bar(pcs, weights_used, color="#2ca02c")
     ax_bot.set_title(r"Deposit-based weights $w_m$", fontsize=16)
     ax_bot.set_xlabel("Principal component (m)", fontsize=14)
     ax_bot.set_ylabel("Weight", fontsize=14)
     finite_weights = weights_used[np.isfinite(weights_used)]
     max_weight = float(np.nanmax(finite_weights)) if finite_weights.size else 0.0
-    ax_bot.set_ylim(0, max_weight * 1.15 if max_weight > 0 else 1.0)
+    if weight_ylim is not None:
+        ax_bot.set_ylim(*weight_ylim)
+    else:
+        ax_bot.set_ylim(0, max_weight * 1.15 if max_weight > 0 else 1.0)
     ax_bot.set_xticks(pcs)
     fig.tight_layout(rect=(0, 0, 1, 0.96))
     fig.savefig(path, dpi=200, bbox_inches="tight")

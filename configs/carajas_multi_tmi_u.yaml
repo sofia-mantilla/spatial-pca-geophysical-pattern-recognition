@@ -20,10 +20,10 @@ sweep:
   score_w_auc: 0.45
   score_w_red_points: 0.35
   score_w_hit_early: 0.2
-  targets_shp_mode: "carajas"
-  best_kpcs_source_tag: "carajas"
-  fusion_weight_var1: 0.5
-  fusion_weight_var2: 0.5
+  targets_shp_mode: "multi"
+  best_kpcs_source_tag: "multi"
+  fusion_weight_var1: 0.5 # Ignored by two_stage_pca_fusion; kept for schema compatibility.
+  fusion_weight_var2: 0.5 # Ignored by two_stage_pca_fusion; kept for schema compatibility.
   top_windows_color_scale_mode: "config_range"
 
 reconstruction:
@@ -63,16 +63,18 @@ visualization:
     "12": [-200, 400]
 
 paths:
-  variable_1_file_path: "data/Carajas_Brazil_Univariate_TMI/1097_1125_1129_TMI_merged.ers"
-  variable_2_file_path: "data/Carajas_Brazil_Multivariate_TMI_U/1097_1125_1129_RAD_eU_merged.ers"
-  polygon_path: "data/Carajas_Brazil_Univariate_TMI/Demo_area_polygon.shp"
+  variable_1_file_path: "/Users/sofiamantillasalas/Library/CloudStorage/OneDrive-Stanford/Research_Stanford/Research_files/MineralX_research/EroCopper_project/Paper_files/TMI_Univariate_case/Data_inputs/Whole_area_geophysical_grids/1097_1125_1129_TMI_merged.ers"
+  variable_2_file_path: "/Users/sofiamantillasalas/Library/CloudStorage/OneDrive-Stanford/Research_Stanford/Research_files/MineralX_research/EroCopper_project/Paper_files/TMI_Univariate_case/Data_inputs/Whole_area_geophysical_grids/1097_1125_1129_RAD_eU_merged.ers"
+  polygon_path: "/Users/sofiamantillasalas/Library/CloudStorage/OneDrive-Stanford/Research_Stanford/Research_files/MineralX_research/EroCopper_project/Carajas_maps_and_data/Multiscale_demo/Demo_area_polygon.shp"
   nodata_to_nan: -99999.0
 
 targets:
   deposit_crs_policy: "assume_raster" # Match the legacy Carajas run: keep target coordinates on the raster grid.
   validation_deposit_crs_policy: "reproject_to_raster" # Match legacy v5 validation against true projected deposits.
-  deposits_shp_paths:
-    carajas: "data/Carajas_Brazil_Multivariate_TMI_U/Prospect_in Carajas_multi.shp"
+  "deposits_shp_paths": {
+      "multi": "/Users/sofiamantillasalas/Library/CloudStorage/OneDrive-Stanford/Research_Stanford/Research_files/MineralX_research/EroCopper_project/Paper_files/TMI_Univariate_case/Data_inputs/Targets/Prospect_in Carajas_multi.shp",
+      "v2": "/Users/sofiamantillasalas/Library/CloudStorage/OneDrive-Stanford/Research_Stanford/Research_files/MineralX_research/EroCopper_project/Paper_files/TMI_Univariate_case/Data_inputs/Targets/Prospect_in Carajas_v2.shp"
+    }
 
 best_kpcs_files:
   multicriteria_filename_template: "kpcs_best_multicriteria_by_deposit_{csv_file_tag}.csv"
@@ -81,5 +83,3 @@ best_kpcs_files:
   var1_legacy_filename: "kpcs_best_multicriteria_by_deposit_uni_tmi.csv"
   var2_filename: "kpcs_best_multicriteria_by_deposit_spca_uni_radiometric_u.csv"
   var2_legacy_filename: "kpcs_best_multicriteria_by_deposit_uni_radiometric_u.csv"
-  var1_kpcs: 2
-  var2_kpcs: 34

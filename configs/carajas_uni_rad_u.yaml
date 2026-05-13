@@ -10,7 +10,7 @@ run:
   run_mode: "sweep_kpcs"
   analysis_type: "Uni"
   method_name: "Spatial_PCA"
-  outputs_subdir: "Output_Carajas_Brazil_Univariate_RAD_U"
+  outputs_subdir: "Output_Carajas_Brazil_Multivariate_TMI_U"
   uni_selected_variable: "Radiometric_U"
   multi_ranking_mode: "two_stage_pca_fusion"
 
