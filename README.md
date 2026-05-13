@@ -8,6 +8,8 @@
   <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-green">
 </p>
 
+[![DOI](https://zenodo.org/badge/1236162161.svg)](https://doi.org/10.5281/zenodo.20164768)
+
 ## Why
 
 Mineral exploration targeting requires high-stakes decisions under uncertainty: companies must decide where to acquire more data or drill long before they know whether a prospect can become an economic mine. Because only a small fraction of prospects ultimately become viable mines, poor early targeting can lead to costly investment in areas with limited economic potential. This makes it important to extract as much useful information as possible from the limited evidence available. In many districts, only a few deposits are known, so this workflow uses each known deposit not only as a labeled location, but as a spatial geophysical signature. It learns the deposit’s geophysical geometry and ranks other areas by how closely they reproduce that geometry.
