@@ -24,7 +24,7 @@ systematically.
 sliding windows, IOCG deposits, Carajas, footprint recovery.
 
 <p align="center">
-  <img src="docs/figures/top_windows.png" alt="Top-ranked Spatial PCA prediction windows over the Carajas study area" width="900">
+  <img src="docs/figures/TMI_Top_250_Predicted_Windows.png" alt="Top-ranked Spatial PCA prediction windows over the Carajas study area" width="900">
 </p>
 
 <p align="center">
@@ -66,7 +66,7 @@ validates the top-ranked windows against independent deposit footprints.
 
 **Author:** Sofia Mantilla Salas<br>
 **Affiliation:** Stanford Mineral-X<br>
-**Repository:** <https://github.com/sofia-mantilla/Spatial_PCA_Multivariate_Repo>
+**Repository:** <https://github.com/sofia-mantilla/spatial-pca-geophysical-pattern-recognition>
 
 For questions, open a GitHub issue or contact the maintainer through the GitHub
 profile linked above.
@@ -80,7 +80,7 @@ profile linked above.
 Clone the repository and create the Conda environment:
 
 ```bash
-git clone https://github.com/sofia-mantilla/Spatial_PCA_Multivariate_Repo.git
+git clone https://github.com/sofia-mantilla/spatial-pca-geophysical-pattern-recognition.git
 cd Spatial_PCA_Multivariate_Repo
 conda env create -f environment.yml
 conda activate spatial-pca
