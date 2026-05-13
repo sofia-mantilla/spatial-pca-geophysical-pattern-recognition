@@ -275,6 +275,6 @@ This project is released under the MIT License. See [LICENSE](LICENSE).
 
 ## Citation
 
-Citation information is pending. When citing this repository before a formal
-paper release, please cite the GitHub repository and include the commit hash used
-for reproducibility.
+If you use this repository, please cite the archived Zenodo release:
+
+Mantilla Salas, S. (2026). Spatial PCA for Geophysical Pattern Recognition in Mineral Exploration (v1.0.0). Zenodo. https://doi.org/10.5281/zenodo.20164769
