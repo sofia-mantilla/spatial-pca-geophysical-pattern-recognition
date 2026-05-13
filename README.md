@@ -212,6 +212,7 @@ data under `data/`, use:
 ```bash
 python scripts/run_project_from_config.py --config configs/carajas_uni_tmi.yaml
 ```
+(this should take about 25 seconds.)
 
 or the convenience script:
 
