@@ -161,7 +161,7 @@ data/
 |   |-- 1097_1125_1129_TMI_merged
 |   |-- Demo_area_polygon.shp
 |   `-- Prospect_in Carajas_v2.shp
-
+```
 
 Include the companion Shapefile sidecar files (`.dbf`, `.shx`, `.prj`, `.cpg`)
 when present.
