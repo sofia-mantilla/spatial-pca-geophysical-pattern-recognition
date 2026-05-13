@@ -24,7 +24,7 @@ sliding windows, IOCG deposits, Carajas, footprint recovery.
 </p>
 
 <p align="center">
-  <strong>Real case result using public TMI data in Carajas, Brazil. Spatial PCA ranks geophysical windows learning the training deposit’s geophysical geometry and ranks other areas by how closely they reproduce that geometry..</strong>
+  <strong>Real case result using public TMI data in Carajas, Brazil. Spatial PCA learns the training deposit’s geophysical geometry and ranks other areas by how closely they reproduce that geometry..</strong>
 </p>
 
 ## What
