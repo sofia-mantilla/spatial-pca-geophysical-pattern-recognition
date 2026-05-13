@@ -196,19 +196,6 @@ python -m notebook notebooks/00_illustrative_synthetic_demo.ipynb
 Using `python -m notebook` ensures Jupyter runs from the active environment,
 instead of an older system-wide Jupyter installation.
 
-### Troubleshooting
-
-- `zsh: command not found: conda`: Conda is not installed or not on your shell
-  path. Use the Python virtual environment installation option above, or install
-  Miniforge/Miniconda and reopen the terminal.
-- `ImportError: cannot import name 'soft_unicode' from 'markupsafe'`: this comes
-  from an older system-wide Jupyter stack. Activate a clean Python 3.10+
-  environment, then run `python -m pip install --upgrade "notebook>=7"` and
-  launch the notebook with `python -m notebook ...`.
-
-To run the Carajas univariate TMI workflow after placing the required geospatial
-data under `data/`, use:
-
 ```bash
 python scripts/run_project_from_config.py --config configs/carajas_uni_tmi.yaml
 ```
