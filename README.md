@@ -64,6 +64,12 @@ validates the top-ranked windows against independent deposit footprints.
 
 **Author:** Sofia Mantilla Salas<br>
 **Affiliation:** Stanford Mineral-X<br>
+**Author:** Pablo Mejia-Herrera<br>
+**Affiliation:** NorthIsle Copper and Gold Inc.<br>
+**Author:** Jonas Kloeckner<br>
+**Affiliation:** Stanford Mineral-X<br>
+**Author:** Jef Caers<br>
+**Affiliation:** Stanford Mineral-X<br>
 **Repository:** <https://github.com/sofia-mantilla/spatial-pca-geophysical-pattern-recognition>
 
 For questions, open a GitHub issue or contact the maintainer through the GitHub
