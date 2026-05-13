@@ -105,9 +105,6 @@ python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-If your machine only has `python3` and it is version 3.10 or newer, replace
-`python3.10` with `python3` in the command above.
-
 The scripts add `src/` to the Python path automatically, so an editable package
 install is not required for the current workflow.
 
