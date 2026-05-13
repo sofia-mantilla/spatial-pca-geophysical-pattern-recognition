@@ -77,7 +77,7 @@ Clone the repository and create the Conda environment:
 
 ```bash
 git clone https://github.com/sofia-mantilla/spatial-pca-geophysical-pattern-recognition.git
-cd Spatial_PCA_Multivariate_Repo
+cd spatial-pca-geophysical-pattern-recognition
 conda env create -f environment.yml
 conda activate spatial-pca
 ```
@@ -90,6 +90,43 @@ python -m pip install -r requirements.txt
 
 The scripts add `src/` to the Python path automatically, so an editable package
 install is not required for the current workflow.
+
+### Smoke Test
+
+Run the bundled synthetic example from the command line to verify that the
+environment, imports, input data, PCA, and ranking steps work:
+
+```bash
+python scripts/run_synthetic_smoke_test.py
+```
+
+Expected output begins with:
+
+```text
+smoke_test=PASS
+field_shape=(10, 10)
+window_matrix_shape=(82, 4)
+top_5_window_indices=[40, 12, 52, 31, 48]
+```
+
+### What Can I Run?
+
+If you are a new user, start with the smoke test above. It is the fastest way to
+confirm the repository works because it uses the small synthetic dataset tracked
+in Git.
+
+After that, you can run:
+
+- `notebooks/00_illustrative_synthetic_demo.ipynb`: full synthetic walkthrough
+  with figures and validation outputs; no external data required.
+- `python scripts/run_project_from_config.py --config configs/carajas_uni_tmi.yaml`:
+  Carajas univariate TMI workflow; requires the Carajas raster and polygon data
+  from the public Drive folders below.
+- `python scripts/run_carajas_univariate.py`: convenience wrapper for the same
+  Carajas univariate TMI workflow.
+
+The multivariate TMI + Radiometric U workflow is included for transparency, but
+it is still in progress and is not the validated first-release workflow.
 
 ### Run a Demo
 
@@ -142,6 +179,33 @@ approved external drive or cloud location, not committed to GitHub. This repo is
 structured so those files can be copied locally into `data/` while remaining
 ignored by Git.
 
+### Public Data Download
+
+The Carajas geophysical grids and deposit polygons are distributed outside
+GitHub through public Google Drive folders:
+
+- [Carajas data folder 1](https://drive.google.com/drive/folders/18hYA0qJFTlSgdd5eHp6skI83oSaN17GG?usp=drive_link)
+- [Carajas data folder 2](https://drive.google.com/drive/folders/1xp8QLp_IauLJ9tXiLb7bz6j3dvtK6Xr0?usp=drive_link)
+
+After downloading, arrange the files so the config paths resolve like this:
+
+```text
+data/
+|-- Carajas_Brazil_Univariate_TMI/
+|   |-- 1097_1125_1129_TMI_merged.ers
+|   |-- 1097_1125_1129_TMI_merged
+|   |-- Demo_area_polygon.shp
+|   `-- Prospect_in Carajas_v2.shp
+`-- Carajas_Brazil_Multivariate_TMI_U/
+    |-- 1097_1125_1129_RAD_eU_merged.ers
+    |-- 1097_1125_1129_RAD_eU_merged
+    `-- Prospect_in Carajas_multi.shp
+```
+
+Include the companion Shapefile sidecar files (`.dbf`, `.shx`, `.prj`, `.cpg`)
+when present. The same folders can hold the files needed by the univariate TMI,
+univariate Radiometric U, and in-progress multivariate configs.
+
 ### Output Data
 
 Each run writes a self-contained output folder under `outputs/`.
@@ -169,6 +233,7 @@ Generated outputs are ignored by Git except for `outputs/.gitkeep`.
 |-- notebooks/               # Demo notebooks and case-study notebooks
 |-- outputs/                 # Generated run outputs; ignored except .gitkeep
 |-- scripts/                 # Command-line entry points
+|   |-- run_synthetic_smoke_test.py
 |-- src/spatial_pca/         # Spatial PCA source code
 |   |-- geodata/             # Raster, vector, and export utilities
 |   |-- spca/                # Window extraction, PCA, and ranking logic
@@ -205,7 +270,6 @@ version.
 
 Before final publication, the remaining Mineral-X release checklist items are:
 
-- Add approved external links for any non-GitHub data distribution.
 - Complete the assigned Mineral-X code review.
 - Publish the code with the associated paper or preprint when ready.
 
