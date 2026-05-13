@@ -13,3 +13,4 @@ dependencies:
   - scikit-learn
   - pyyaml
   - pyogrio
+  - notebook>=7

@@ -75,20 +75,38 @@ profile linked above.
 
 #### Installation Guide
 
-Clone the repository and create the Conda environment:
+This repository is intended for Python 3.10 or newer. Check your Python version
+before installing:
+
+```bash
+python3 --version
+```
+
+Clone the repository:
 
 ```bash
 git clone https://github.com/sofia-mantilla/spatial-pca-geophysical-pattern-recognition.git
 cd spatial-pca-geophysical-pattern-recognition
+```
+
+Option A, using Conda:
+
+```bash
 conda env create -f environment.yml
 conda activate spatial-pca
 ```
 
-If you prefer `pip`, install the Python dependencies directly:
+If `conda` is not available, use Option B with a Python virtual environment:
 
 ```bash
+python3.10 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
+
+If your machine only has `python3` and it is version 3.10 or newer, replace
+`python3.10` with `python3` in the command above.
 
 The scripts add `src/` to the Python path automatically, so an editable package
 install is not required for the current workflow.
@@ -174,9 +192,22 @@ The synthetic example is the safest public demo because it uses small test data
 included with the repository:
 
 ```bash
-python -m pip install notebook
-jupyter notebook notebooks/00_illustrative_synthetic_demo.ipynb
+python -m pip install --upgrade "notebook>=7"
+python -m notebook notebooks/00_illustrative_synthetic_demo.ipynb
 ```
+
+Using `python -m notebook` ensures Jupyter runs from the active environment,
+instead of an older system-wide Jupyter installation.
+
+### Troubleshooting
+
+- `zsh: command not found: conda`: Conda is not installed or not on your shell
+  path. Use the Python virtual environment installation option above, or install
+  Miniforge/Miniconda and reopen the terminal.
+- `ImportError: cannot import name 'soft_unicode' from 'markupsafe'`: this comes
+  from an older system-wide Jupyter stack. Activate a clean Python 3.10+
+  environment, then run `python -m pip install --upgrade "notebook>=7"` and
+  launch the notebook with `python -m notebook ...`.
 
 To run the Carajas univariate TMI workflow after placing the required geospatial
 data under `data/`, use:
