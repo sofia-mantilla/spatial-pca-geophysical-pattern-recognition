@@ -52,7 +52,7 @@ validates the top-ranked windows against independent deposit footprints.
 **Current release scope**
 
 - Ready in this first public version: synthetic demo notebooks and the
-  univariate Carajas Spatial PCA workflows for TMI and Radiometric U.
+  univariate Carajas Spatial PCA workflow for TMI.
 - In progress for the next version: multivariate TMI + Radiometric U fusion.
   The repository still names the multivariate configs, notebooks, and code path
   for transparency, but multivariate fusion is not considered validated in this
@@ -128,40 +128,6 @@ After that, you can run:
 The multivariate TMI + Radiometric U workflow is included for transparency, but
 it is still in progress and is not the validated first-release workflow.
 
-### Run a Demo
-
-The synthetic example is the safest public demo because it uses small test data
-included with the repository:
-
-```bash
-python -m pip install notebook
-jupyter notebook notebooks/00_illustrative_synthetic_demo.ipynb
-```
-
-To run the Carajas univariate TMI workflow after placing the required geospatial
-data under `data/`, use:
-
-```bash
-python scripts/run_project_from_config.py --config configs/carajas_uni_tmi.yaml
-```
-
-or the convenience script:
-
-```bash
-python scripts/run_carajas_univariate.py
-```
-
-You can override the training deposit, retained PC count, output directory, or
-top-window count from the command line:
-
-```bash
-python scripts/run_project_from_config.py \
-  --config configs/carajas_uni_tmi.yaml \
-  --deposit 3 \
-  --kpcs 17 \
-  --top-k 250
-```
-
 ### Input Data
 
 Inputs are controlled by YAML files in `configs/`.
@@ -205,6 +171,40 @@ data/
 Include the companion Shapefile sidecar files (`.dbf`, `.shx`, `.prj`, `.cpg`)
 when present. The same folders can hold the files needed by the univariate TMI,
 univariate Radiometric U, and in-progress multivariate configs.
+
+### Run a Demo
+
+The synthetic example is the safest public demo because it uses small test data
+included with the repository:
+
+```bash
+python -m pip install notebook
+jupyter notebook notebooks/00_illustrative_synthetic_demo.ipynb
+```
+
+To run the Carajas univariate TMI workflow after placing the required geospatial
+data under `data/`, use:
+
+```bash
+python scripts/run_project_from_config.py --config configs/carajas_uni_tmi.yaml
+```
+
+or the convenience script:
+
+```bash
+python scripts/run_carajas_univariate.py
+```
+
+You can override the training deposit, retained PC count, output directory, or
+top-window count from the command line:
+
+```bash
+python scripts/run_project_from_config.py \
+  --config configs/carajas_uni_tmi.yaml \
+  --deposit 3 \
+  --kpcs 17 \
+  --top-k 250
+```
 
 ### Output Data
 
