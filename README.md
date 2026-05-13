@@ -8,7 +8,7 @@
   <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-green">
 </p>
 
-[![DOI](https://zenodo.org/badge/1236162161.svg)](https://doi.org/10.5281/zenodo.20164768)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20168910.svg)](https://doi.org/10.5281/zenodo.20168910)
 
 ## Why
 
@@ -306,4 +306,4 @@ This project is released under the MIT License. See [LICENSE](LICENSE).
 
 If you use this repository, please cite the archived Zenodo release:
 
-Mantilla Salas, S. (2026). Spatial PCA for Geophysical Pattern Recognition in Mineral Exploration (v1.0.0). Zenodo. https://doi.org/10.5281/zenodo.20164769
+Mantilla Salas, S. (2026). *Spatial PCA for Geophysical Pattern Recognition in Mineral Exploration* (v1.0.1). Zenodo. https://doi.org/10.5281/zenodo.20168910
