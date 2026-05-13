@@ -108,7 +108,7 @@ Each run config should provide:
 - Analysis settings such as stride, retained PCs, rotation angle, minimum
   footprint overlap, and output directory.
 
-The reusable template uses variable-based raster paths:
+The reusable templates use variable-based raster paths:
 
 ```yaml
 paths:
@@ -202,25 +202,41 @@ validation functions.
 
 ## Run Any Project From Config
 
-Start from the template:
+Start from the template that matches the analysis:
 
 ```bash
-cp configs/template_project.yaml configs/local_my_project.yaml
+cp configs/template_univariate_project.yaml configs/local_my_univariate_project.yaml
+cp configs/template_multivariate_project.yaml configs/local_my_multivariate_project.yaml
 ```
 
-Edit `analysis_defaults.variable_1`, `analysis_defaults.variable_2`,
-`paths.variable_1_file_path`, `paths.variable_2_file_path`, deposit paths, CRS,
-training deposit ID, retained PCs, stride, rotation angle, and output directory.
+Edit the copied file's variable names, `paths.variable_1_file_path`,
+`paths.variable_2_file_path` for multivariate runs, deposit paths, CRS, training
+deposit ID, retained PCs, stride, rotation angle, and output directory. The
+univariate template intentionally omits `analysis_defaults.variable_2`,
+`analysis_defaults.vmin_var2`, `analysis_defaults.vmax_var2`, and
+`paths.variable_2_file_path`.
+Use `targets.deposit_crs_policy: "reproject_to_raster"` for normal projects.
+Use `"assume_raster"` only for legacy datasets whose vector coordinates already
+match the raster grid even though the shapefile CRS metadata differs.
+`targets.validation_deposit_crs_policy` can be set separately when you need to
+extract the training template with one CRS policy but validate known-deposit
+footprints with another.
 Then run:
 
 ```bash
-python scripts/run_project_from_config.py --config configs/local_my_project.yaml
+python scripts/run_project_from_config.py --config configs/local_my_univariate_project.yaml
 ```
 
 To run the Carajas univariate TMI config from the repo root:
 
 ```bash
 .venv/bin/python scripts/run_project_from_config.py --config configs/carajas_uni_tmi.yaml
+```
+
+To run the Carajas multivariate TMI + Radiometric U config:
+
+```bash
+.venv/bin/python scripts/run_project_from_config.py --config configs/carajas_multi_tmi_u.yaml
 ```
 
 Set `visualization.score_pairs_top_n_to_plot` to control how many top-ranked
