@@ -196,6 +196,8 @@ python -m notebook notebooks/00_illustrative_synthetic_demo.ipynb
 Using `python -m notebook` ensures Jupyter runs from the active environment,
 instead of an older system-wide Jupyter installation.
 
+### Run Univariate SPCA with public domain TMI data from Carajas, Brazil
+
 ```bash
 python scripts/run_project_from_config.py --config configs/carajas_uni_tmi.yaml
 ```
