@@ -21,6 +21,8 @@ class RankingResult:
     use_whitening: bool
     use_weights: bool
     return_squared: bool
+    weight_mode: str = "square"
+    normalize_weights_over: str = "selected_pcs"
     ranking_mode: str = "shared_weighted_l2"
     fusion_details: dict[str, Any] | None = None
 
@@ -38,6 +40,8 @@ class RankingResult:
             "weights": self.weights,
             "Z_space": self.comparison_space,
             "fusion_details": self.fusion_details or {},
+            "weight_mode": self.weight_mode,
+            "normalize_weights_over": self.normalize_weights_over,
             "use_separate_multi_fusion": False,
             "use_two_stage_multi_fusion": self.ranking_mode == "two_stage_pca_fusion",
             "ranking_result": self,
@@ -51,6 +55,10 @@ def rank_spca_windows(
     deposit_index: int,
     k_pcs: int | None = None,
     top_k: int | None = None,
+    use_whitening: bool = False,
+    use_weights: bool = True,
+    weight_mode: str = "square",
+    normalize_weights_over: str = "selected_pcs",
 ) -> RankingResult:
     """Rank windows using the default shared SPCA behavior from the reference workflow."""
 
@@ -61,8 +69,10 @@ def rank_spca_windows(
         k_pcs=k_pcs,
         top_k=top_k,
         return_squared=False,
-        use_whitening=False,
-        use_weights=True,
+        use_whitening=use_whitening,
+        use_weights=use_weights,
+        weight_mode=weight_mode,
+        normalize_weights_over=normalize_weights_over,
     )
 
 
@@ -82,6 +92,12 @@ def run_spca_ranking_pipeline(
     fusion_weight_var1: float = 0.5,
     fusion_weight_var2: float = 0.5,
     features_per_variable: int | None = None,
+    use_whitening: bool = False,
+    use_weights: bool = True,
+    weight_mode: str = "square",
+    normalize_weights_over: str = "selected_pcs",
+    stage1_pca_svd_solver: str = "auto",
+    fused_pca_svd_solver: str = "auto",
 ) -> dict[str, Any]:
     """Run the paper SPCA ranking dispatcher with the maintained return contract."""
 
@@ -109,10 +125,14 @@ def run_spca_ranking_pipeline(
             k_pcs_fused=int(k_pcs_rank),
             top_k=None,
             return_squared=False,
-            use_whitening=False,
-            use_weights=True,
+            use_whitening=use_whitening,
+            use_weights=use_weights,
             standardize_fused_input=True,
             features_per_variable=features_per_variable,
+            weight_mode=weight_mode,
+            normalize_weights_over=normalize_weights_over,
+            stage1_pca_svd_solver=stage1_pca_svd_solver,
+            fused_pca_svd_solver=fused_pca_svd_solver,
         )
         return result.to_pipeline_dict()
 
@@ -123,8 +143,10 @@ def run_spca_ranking_pipeline(
         k_pcs=k_pcs_rank,
         top_k=None,
         return_squared=False,
-        use_whitening=False,
-        use_weights=True,
+        use_whitening=use_whitening,
+        use_weights=use_weights,
+        weight_mode=weight_mode,
+        normalize_weights_over=normalize_weights_over,
     )
     return result.to_pipeline_dict()
 
@@ -140,6 +162,8 @@ def rank_by_weighted_l2(
     return_squared: bool = False,
     use_whitening: bool = True,
     use_weights: bool = True,
+    weight_mode: str = "square",
+    normalize_weights_over: str = "selected_pcs",
 ) -> RankingResult:
     """Compute weighted L2 distances in raw or whitened PCA score space.
 
@@ -150,6 +174,8 @@ def rank_by_weighted_l2(
     Z = np.asarray(scores, dtype=float)
     lam_all = np.asarray(eigvals, dtype=float)
     _validate_scores_and_eigvals(Z, lam_all, deposit_index)
+    weight_mode = _normalize_weight_mode(weight_mode)
+    normalize_weights_over = _normalize_weight_normalization(normalize_weights_over)
 
     n_samples, n_components = Z.shape
     if k_pcs is None:
@@ -168,13 +194,13 @@ def rank_by_weighted_l2(
         comparison_space = Z[:, :k_used].copy()
         deposit_space = Z[deposit_index, :k_used].copy()
 
-    deposit_unwhitened = Z[deposit_index, :k_used]
-    raw_weights = deposit_unwhitened**2
-    weight_sum = raw_weights.sum()
-    if weight_sum > 0:
-        weights = raw_weights / weight_sum
-    else:
-        weights = np.ones(k_used, dtype=float) / float(k_used)
+    weights = _compute_deposit_weights(
+        scores=Z,
+        deposit_index=deposit_index,
+        k_used=k_used,
+        weight_mode=weight_mode,
+        normalize_weights_over=normalize_weights_over,
+    )
 
     diff = comparison_space - deposit_space
     if use_weights:
@@ -201,6 +227,8 @@ def rank_by_weighted_l2(
         use_whitening=use_whitening,
         use_weights=use_weights,
         return_squared=return_squared,
+        weight_mode=weight_mode,
+        normalize_weights_over=normalize_weights_over,
         ranking_mode="shared_weighted_l2",
         fusion_details={},
     )
@@ -221,6 +249,10 @@ def rank_multi_two_stage_pca_fusion(
     use_weights: bool = True,
     standardize_fused_input: bool = True,
     features_per_variable: int | None = None,
+    weight_mode: str = "square",
+    normalize_weights_over: str = "selected_pcs",
+    stage1_pca_svd_solver: str = "auto",
+    fused_pca_svd_solver: str = "auto",
 ) -> RankingResult:
     """Rank multivariate windows using the paper two-stage fused PCA method."""
 
@@ -231,6 +263,8 @@ def rank_multi_two_stage_pca_fusion(
         raise ValueError("X_multi contains non-finite values.")
     if not (0 <= int(deposit_index) < X.shape[0]):
         raise IndexError("deposit_index is out of bounds for X_multi.")
+    weight_mode = _normalize_weight_mode(weight_mode)
+    normalize_weights_over = _normalize_weight_normalization(normalize_weights_over)
 
     win_h = int(window_shape[0])
     win_w = int(window_shape[1])
@@ -244,8 +278,16 @@ def rank_multi_two_stage_pca_fusion(
 
     X1 = X[:, :n_pix]
     X2 = X[:, n_pix : 2 * n_pix]
-    Z1k, K1_eff, pca1, X1_mean, X1_std_safe = _fit_block_scores(X1, k_pcs_var1)
-    Z2k, K2_eff, pca2, X2_mean, X2_std_safe = _fit_block_scores(X2, k_pcs_var2)
+    Z1k, K1_eff, pca1, X1_mean, X1_std_safe = _fit_block_scores(
+        X1,
+        k_pcs_var1,
+        svd_solver=stage1_pca_svd_solver,
+    )
+    Z2k, K2_eff, pca2, X2_mean, X2_std_safe = _fit_block_scores(
+        X2,
+        k_pcs_var2,
+        svd_solver=stage1_pca_svd_solver,
+    )
 
     F = np.hstack([Z1k, Z2k])
     if standardize_fused_input:
@@ -259,7 +301,7 @@ def rank_multi_two_stage_pca_fusion(
         F_in = F
 
     M_fused = min(F_in.shape[0], F_in.shape[1])
-    pca_fused = PCA(n_components=M_fused)
+    pca_fused = PCA(n_components=M_fused, svd_solver=fused_pca_svd_solver)
     Zf = pca_fused.fit_transform(F_in)
     eig_fused = np.asarray(pca_fused.explained_variance_, dtype=float)
 
@@ -275,13 +317,13 @@ def rank_multi_two_stage_pca_fusion(
         comparison_space = Zf[:, :Kf_eff].copy()
         deposit_space = Zf[int(deposit_index), :Kf_eff].copy()
 
-    deposit_unwhitened = Zf[int(deposit_index), :Kf_eff]
-    raw_weights = deposit_unwhitened**2
-    weight_sum = raw_weights.sum()
-    if weight_sum > 0:
-        weights = raw_weights / weight_sum
-    else:
-        weights = np.ones(Kf_eff, dtype=float) / float(Kf_eff)
+    weights = _compute_deposit_weights(
+        scores=Zf,
+        deposit_index=deposit_index,
+        k_used=Kf_eff,
+        weight_mode=weight_mode,
+        normalize_weights_over=normalize_weights_over,
+    )
 
     diff = comparison_space - deposit_space
     if use_weights:
@@ -304,6 +346,7 @@ def rank_multi_two_stage_pca_fusion(
         "K_fused": int(Kf_eff),
         "M_fused": int(M_fused),
         "Zf_space": comparison_space,
+        "Zf_scores": np.asarray(Zf, dtype=float),
         "weights_fused": weights,
         "eigvals_fused": eig_fused,
         "explained_variance_ratio_fused": np.asarray(
@@ -311,6 +354,10 @@ def rank_multi_two_stage_pca_fusion(
             dtype=float,
         ),
         "standardize_fused_input": bool(standardize_fused_input),
+        "weight_mode": weight_mode,
+        "normalize_weights_over": normalize_weights_over,
+        "stage1_pca_svd_solver": stage1_pca_svd_solver,
+        "fused_pca_svd_solver": fused_pca_svd_solver,
         "zf_dep_full": np.asarray(Zf[int(deposit_index), :], dtype=float),
         "pca_var1": pca1,
         "pca_var2": pca2,
@@ -333,6 +380,8 @@ def rank_multi_two_stage_pca_fusion(
         use_whitening=use_whitening,
         use_weights=use_weights,
         return_squared=return_squared,
+        weight_mode=weight_mode,
+        normalize_weights_over=normalize_weights_over,
         ranking_mode="two_stage_pca_fusion",
         fusion_details=fusion_details,
     )
@@ -341,6 +390,8 @@ def rank_multi_two_stage_pca_fusion(
 def _fit_block_scores(
     X_block: np.ndarray,
     k_req: int,
+    *,
+    svd_solver: str = "auto",
 ) -> tuple[np.ndarray, int, PCA, np.ndarray, np.ndarray]:
     X_mean = X_block.mean(axis=0)
     X_std = X_block.std(axis=0, ddof=0)
@@ -349,7 +400,7 @@ def _fit_block_scores(
 
     n_samples, n_features = X_stdzd.shape
     n_components = min(n_samples, n_features)
-    pca = PCA(n_components=n_components)
+    pca = PCA(n_components=n_components, svd_solver=svd_solver)
     scores = pca.fit_transform(X_stdzd)
     k_eff = max(1, min(int(k_req), n_components))
     return scores[:, :k_eff], int(k_eff), pca, X_mean, X_std_safe
@@ -366,6 +417,8 @@ def rank_by_weighted_l2_legacy_tuple(
     return_squared: bool = False,
     use_whitening: bool = True,
     use_weights: bool = True,
+    weight_mode: str = "square",
+    normalize_weights_over: str = "selected_pcs",
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Legacy adapter using the old argument names and tuple return shape."""
 
@@ -379,7 +432,61 @@ def rank_by_weighted_l2_legacy_tuple(
         return_squared=return_squared,
         use_whitening=use_whitening,
         use_weights=use_weights,
+        weight_mode=weight_mode,
+        normalize_weights_over=normalize_weights_over,
     ).to_legacy_tuple()
+
+
+def _normalize_weight_mode(weight_mode: str) -> str:
+    mode = str(weight_mode).strip().lower()
+    if mode not in {"square", "abs"}:
+        raise ValueError("weight_mode must be 'square' or 'abs'.")
+    return mode
+
+
+def _normalize_weight_normalization(normalize_weights_over: str) -> str:
+    mode = str(normalize_weights_over).strip().lower()
+    aliases = {
+        "selected": "selected_pcs",
+        "selected_pcs": "selected_pcs",
+        "all": "all_pcs",
+        "all_pcs": "all_pcs",
+    }
+    if mode not in aliases:
+        raise ValueError("normalize_weights_over must be 'selected_pcs' or 'all_pcs'.")
+    return aliases[mode]
+
+
+def _compute_deposit_weights(
+    *,
+    scores: np.ndarray,
+    deposit_index: int,
+    k_used: int,
+    weight_mode: str,
+    normalize_weights_over: str,
+) -> np.ndarray:
+    z_dep_all = np.asarray(scores[int(deposit_index), :], dtype=float)
+    if weight_mode == "square":
+        raw_all = z_dep_all**2
+    elif weight_mode == "abs":
+        raw_all = np.abs(z_dep_all)
+    else:  # pragma: no cover - guarded by _normalize_weight_mode.
+        raise ValueError(f"Unsupported weight_mode '{weight_mode}'.")
+
+    if normalize_weights_over == "selected_pcs":
+        raw_used = raw_all[:k_used]
+        weight_sum = float(raw_used.sum())
+        if weight_sum > 0:
+            return raw_used / weight_sum
+        return np.ones(int(k_used), dtype=float) / float(k_used)
+
+    if normalize_weights_over == "all_pcs":
+        weight_sum = float(raw_all.sum())
+        if weight_sum > 0:
+            return raw_all[:k_used] / weight_sum
+        return np.ones(int(k_used), dtype=float) / float(raw_all.size)
+
+    raise ValueError(f"Unsupported normalize_weights_over '{normalize_weights_over}'.")
 
 
 def _validate_scores_and_eigvals(Z: np.ndarray, eigvals: np.ndarray, deposit_index: int) -> None:

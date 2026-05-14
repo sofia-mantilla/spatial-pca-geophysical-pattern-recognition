@@ -1,0 +1,182 @@
+{
+  "_options": {
+    "run": {
+      "run_mode": [
+        "sweep_kpcs",
+        "optimal_k_recon"
+      ],
+      "analysis_type": [
+        "Uni",
+        "Multi"
+      ],
+      "method_name": [
+        "Spatial_PCA",
+        "Raw_comparison"
+      ],
+      "uni_selected_variable": [
+        "TMI",
+        "Radiometric_U"
+      ],
+      "multi_ranking_mode": [
+        "combined_pca",
+        "separate_pca_fusion",
+        "two_stage_pca_fusion"
+      ]
+    },
+    "sweep": {
+      "targets_shp_mode": [
+        "multi",
+        "v2"
+      ],
+      "top_windows_color_scale_mode": [
+        "config_range",
+        "deposit_range",
+        "window_local"
+      ]
+    },
+    "reconstruction": {
+      "enable": [
+        true,
+        false
+      ]
+    },
+    "analysis_defaults": {
+      "show_plots": [
+        true,
+        false
+      ]
+    },
+    "notes": {
+      "deposits_1based": "Use 1-based deposit IDs, for example [1, 2, 3].",
+      "kpcs": "Use a list of integers, for example [1, 2, 3] or [1, 5, 10].",
+      "deposits_shp_paths": "The key must match sweep.targets_shp_mode."
+    }
+  },
+  "run": {
+    "base_output_dir": "/Users/sofiamantillasalas/Documents/GitHub_Sofia/EroCopper_Xcalibur_Project/Code/Spatial_PCA_Multivariate_Repo/docs/repro_debug_deposit3_multivariate/old_workflow_replay",
+    "run_mode": "sweep_kpcs",
+    "analysis_type": "Multi",
+    "method_name": "Spatial_PCA",
+    "outputs_subdir": "outputs_v5_replay_test",
+    "uni_selected_variable": "TMI",
+    "multi_ranking_mode": "two_stage_pca_fusion"
+  },
+  "sweep": {
+    "deposits_1based": [
+      3
+    ],
+    "kpcs": [
+      17
+    ],
+    "score_w_auc": 0.45,
+    "score_w_red_points": 0.35,
+    "score_w_hit_early": 0.2,
+    "targets_shp_mode": "multi",
+    "best_kpcs_source_tag": "multi",
+    "fusion_weight_var1": 0.5,
+    "fusion_weight_var2": 0.5,
+    "top_windows_color_scale_mode": "config_range"
+  },
+  "reconstruction": {
+    "extra_pcs": 3,
+    "enable": true
+  },
+  "analysis_defaults": {
+    "variable_1": "TMI",
+    "variable_2": "Radiometric_U",
+    "vmin_var2": 0,
+    "vmax_var2": 15,
+    "rotation_angle": 0,
+    "stride_x": 8,
+    "stride_y": 8,
+    "n_top_windows": 250,
+    "top_windows_plot_n_rows": 2,
+    "top_windows_plot_n_cols": 4,
+    "force_crs": "EPSG:32722",
+    "show_plots": false,
+    "min_cover": 0.5
+  },
+  "visualization": {
+    "deposit_limits_tmi": {
+      "1": [
+        -250,
+        300
+      ],
+      "2": [
+        -200,
+        400
+      ],
+      "3": [
+        -150,
+        150
+      ],
+      "4": [
+        -600,
+        400
+      ],
+      "5": [
+        -200,
+        400
+      ],
+      "6": [
+        -200,
+        400
+      ],
+      "7": [
+        -150,
+        300
+      ],
+      "8": [
+        -200,
+        300
+      ],
+      "9": [
+        -100,
+        100
+      ],
+      "10": [
+        -200,
+        300
+      ],
+      "11": [
+        -300,
+        500
+      ],
+      "12": [
+        -200,
+        400
+      ]
+    }
+  },
+  "paths": {
+    "tif_directory": "/Users/sofiamantillasalas/Library/CloudStorage/OneDrive-Stanford/Research_Stanford/Research_files/MineralX_research/EroCopper_project/Carajas_maps_and_data/Multiscale_demo",
+    "tmi_file_path": "/Users/sofiamantillasalas/Library/CloudStorage/OneDrive-Stanford/Research_Stanford/Research_files/MineralX_research/EroCopper_project/Paper_files/TMI_Univariate_case/Data_inputs/Whole_area_geophysical_grids/1097_1125_1129_TMI_merged.ers",
+    "rad_file_path": "/Users/sofiamantillasalas/Library/CloudStorage/OneDrive-Stanford/Research_Stanford/Research_files/MineralX_research/EroCopper_project/Paper_files/TMI_Univariate_case/Data_inputs/Whole_area_geophysical_grids/1097_1125_1129_RAD_eU_merged.ers",
+    "mask_files": [
+      "1097_mask.tif",
+      "1125_mask.tif",
+      "1129_mask.tif"
+    ],
+    "polygon_path": "/Users/sofiamantillasalas/Library/CloudStorage/OneDrive-Stanford/Research_Stanford/Research_files/MineralX_research/EroCopper_project/Carajas_maps_and_data/Multiscale_demo/Demo_area_polygon.shp",
+    "nodata_to_nan": -99999.0,
+    "grayscale_weights": [
+      0.6,
+      0.35,
+      0.05
+    ]
+  },
+  "targets": {
+    "deposits_shp_paths": {
+      "multi": "/Users/sofiamantillasalas/Library/CloudStorage/OneDrive-Stanford/Research_Stanford/Research_files/MineralX_research/EroCopper_project/Paper_files/TMI_Univariate_case/Data_inputs/Targets/Prospect_in Carajas_multi.shp",
+      "v2": "/Users/sofiamantillasalas/Library/CloudStorage/OneDrive-Stanford/Research_Stanford/Research_files/MineralX_research/EroCopper_project/Paper_files/TMI_Univariate_case/Data_inputs/Targets/Prospect_in Carajas_v2.shp"
+    }
+  },
+  "best_kpcs_files": {
+    "multicriteria_filename_template": "kpcs_best_multicriteria_by_deposit_{csv_file_tag}.csv",
+    "multicriteria_legacy_filename_template": "kpcs_best_multicriteria_by_deposit_{best_kpcs_source_tag}.csv",
+    "var1_filename": "kpcs_best_multicriteria_by_deposit_spca_uni_tmi.csv",
+    "var1_legacy_filename": "kpcs_best_multicriteria_by_deposit_uni_tmi.csv",
+    "var2_filename": "kpcs_best_multicriteria_by_deposit_spca_uni_radiometric_u.csv",
+    "var2_legacy_filename": "kpcs_best_multicriteria_by_deposit_uni_radiometric_u.csv"
+  }
+}

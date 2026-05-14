@@ -132,6 +132,7 @@ def run_single_case(
     analysis_type = str(config["run"]["analysis_type"])
     deposits_path = _get_deposits_path(config)
     n_top_windows = top_k or int(config["analysis_defaults"]["n_top_windows"])
+    ranking_options = _get_ranking_options(config)
 
     if analysis_type == "Uni":
         variable_name = _get_variable_name(config)
@@ -175,6 +176,10 @@ def run_single_case(
             eigvals=pca_result.eigvals,
             deposit_index=window_matrix.deposit_index,
             k_pcs=k_pcs,
+            use_whitening=ranking_options["use_whitening"],
+            use_weights=ranking_options["use_weights"],
+            weight_mode=ranking_options["weight_mode"],
+            normalize_weights_over=ranking_options["normalize_weights_over"],
         )
         summary_variables = [variable_name]
         validation_extras = {
@@ -246,6 +251,12 @@ def run_single_case(
                 if window_matrix.patch_geometry_type == "circle" and window_matrix.feature_mask is not None
                 else None
             ),
+            use_whitening=ranking_options["use_whitening"],
+            use_weights=ranking_options["use_weights"],
+            weight_mode=ranking_options["weight_mode"],
+            normalize_weights_over=ranking_options["normalize_weights_over"],
+            stage1_pca_svd_solver=ranking_options["stage1_pca_svd_solver"],
+            fused_pca_svd_solver=ranking_options["fused_pca_svd_solver"],
         )
         ranking_result = ranking_out["ranking_result"]
         variable_name = "Combined"
@@ -317,6 +328,8 @@ def run_single_case(
         "k_used": int(ranking_result.k_used),
         "use_whitening": bool(ranking_result.use_whitening),
         "use_weights": bool(ranking_result.use_weights),
+        "weight_mode": ranking_result.weight_mode,
+        "normalize_weights_over": ranking_result.normalize_weights_over,
     }
     if ranking_result.ranking_mode == "two_stage_pca_fusion":
         fusion_details = ranking_result.fusion_details or {}
@@ -326,6 +339,8 @@ def run_single_case(
                 "K_var2": int(fusion_details["K_var2"]),
                 "K_fused": int(fusion_details["K_fused"]),
                 "standardize_fused_input": bool(fusion_details["standardize_fused_input"]),
+                "stage1_pca_svd_solver": str(fusion_details["stage1_pca_svd_solver"]),
+                "fused_pca_svd_solver": str(fusion_details["fused_pca_svd_solver"]),
             }
         )
     validation_payload = build_validation_payload(
@@ -502,6 +517,22 @@ def _get_variable_limits(
 
 def _get_image_colormap(config: dict[str, Any]) -> str | None:
     return config.get("visualization", {}).get("image_colormap")
+
+
+def _get_ranking_options(config: dict[str, Any]) -> dict[str, Any]:
+    ranking = config.get("ranking", {})
+    if ranking is None:
+        ranking = {}
+    if not isinstance(ranking, dict):
+        raise ValueError("Config section 'ranking' must be an object when provided.")
+    return {
+        "use_whitening": bool(ranking.get("use_whitening", False)),
+        "use_weights": bool(ranking.get("use_weights", True)),
+        "weight_mode": str(ranking.get("weight_mode", "square")),
+        "normalize_weights_over": str(ranking.get("normalize_weights_over", "selected_pcs")),
+        "stage1_pca_svd_solver": str(ranking.get("stage1_pca_svd_solver", "auto")),
+        "fused_pca_svd_solver": str(ranking.get("fused_pca_svd_solver", "auto")),
+    }
 
 
 def _get_summary_variables(config: dict[str, Any]) -> list[str]:
@@ -843,14 +874,13 @@ def _build_diagnostic_paths(
 
     if ranking_result.ranking_mode == "two_stage_pca_fusion":
         diagnostic_paths["component_weights"] = plot_deposit_scores_and_weights(
-            scores=fusion_details["Zf_space"],
+            scores=fusion_details["Zf_scores"],
             explained_variance_ratio=fusion_details["explained_variance_ratio_fused"],
             weights=ranking_result.weights,
             deposit_index=window_matrix.deposit_index,
             k_used=ranking_result.k_used,
             output_path=output_dir / "component_weights.png",
             k_display=min(int(ranking_result.k_used), 12),
-            recompute_weights_from_scores=True,
             weight_ylim=(0.0, 1.0),
         )
         diagnostic_paths["reconstruction_progression"] = plot_two_stage_multivariate_reconstruction_progression(

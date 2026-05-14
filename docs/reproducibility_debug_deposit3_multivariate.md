@@ -477,6 +477,54 @@ docs/repro_debug_deposit3_multivariate/paper_era_ground_truth/
 
 The bundle contains the March 9 best-k CSV, restored validation pickle, restored fused weights figure, original config text, and a README with hashes and key validation values.
 
+## Paper-era artifact verifier
+
+To back the paper result from immutable local evidence, a strict verifier was
+added:
+
+```text
+scripts/verify_paper_era_deposit3_artifact.py
+```
+
+Run command:
+
+```bash
+.venv/bin/python scripts/verify_paper_era_deposit3_artifact.py
+```
+
+This script verifies the SHA-256 hashes of the frozen validation pickle, best-k
+CSV, fused weight figure, and config text; then it regenerates an audit package
+from the restored pickle:
+
+```text
+docs/repro_debug_deposit3_multivariate/paper_era_verification/
+```
+
+Generated files:
+
+```text
+paper_era_verification_summary.json
+paper_era_ranked_rows_top250.csv
+paper_era_cumulative_recovery.png
+README.md
+```
+
+Strict verification currently passes. The key verified paper-era values are:
+
+| Field | Verified value |
+|---|---:|
+| Ranking mode | `two_stage_pca_fusion` |
+| `k_pcs_var1` | 2 |
+| `k_pcs_var2` | 34 |
+| `k_pcs_fused` | 17 |
+| Recovery at rank 250 | 0.7770279819273643 |
+| AUC at rank 250 | 128.88557758754246 |
+| Current rerun top-20 overlap | 10/20 |
+
+This is the code-backed paper provenance record. It does not pretend to
+recompute an unsaved fitted fused PCA basis; instead it verifies the restored
+paper-era artifacts and makes the artifact-to-paper values reproducible.
+
 ## Tied-subspace rotation recovery test
 
 To test whether the paper-era ranking is reachable from the same fused PCA
