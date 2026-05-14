@@ -1,0 +1,81 @@
+project:
+  name: "NorthIsle Canada univariate EM circular patch demo"
+  case: "NorthIsle / Deposit 3"
+  selected_variables: ["EM"]
+  training_deposit_id: 3
+  analysis_type: "Uni"
+
+run:
+  base_output_dir: "outputs"
+  run_mode: "sweep_kpcs"
+  analysis_type: "Uni"
+  method_name: "Spatial_PCA"
+  outputs_subdir: "Output_NorthIsle_Canada_Univariate_EM_Circle"
+  uni_selected_variable: "EM"
+  multi_ranking_mode: "two_stage_pca_fusion"
+
+paths:
+  variable_1_file_path: "data/NorthIsle_Canada_Univariate_EM/EM/EM_REGIONAL_NORTHISLE_BELT.tiff"
+  polygon_path: "data/NorthIsle_Canada_Univariate_EM/AOI/NI_Project_Claim.shp"
+  nodata_to_nan: -99999.0
+
+targets:
+  deposit_crs_policy: "reproject_to_raster"
+  validation_deposit_crs_policy: "reproject_to_raster"
+  deposits_shp_paths:
+    northisle: "data/NorthIsle_Canada_Univariate_EM/targets/known_deposits.shp"
+
+patch:
+  geometry: circle
+  source: manual
+  manual:
+    center_x: 572230.6444702148
+    center_y: 5617993.191894531
+    radius_m: 650.0
+  export_geometry: both
+
+sweep:
+  deposits_1based: [3]
+  kpcs: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+  score_w_auc: 0.45
+  score_w_red_points: 0.35
+  score_w_hit_early: 0.2
+  targets_shp_mode: "northisle"
+  best_kpcs_source_tag: "northisle"
+  fusion_weight_var1: 0.5
+  fusion_weight_var2: 0.5
+  top_windows_color_scale_mode: "config_range"
+
+reconstruction:
+  extra_pcs: 5
+  enable: true
+
+analysis_defaults:
+  variable_1: "EM"
+  variable_2: "EM"
+  vmin_var2: -0.5
+  vmax_var2: 3.5
+  rotation_angle: 0
+  stride_x: 4
+  stride_y: 4
+  n_top_windows: 100
+  top_windows_plot_n_rows: 2
+  top_windows_plot_n_cols: 4
+  force_crs: "EPSG:26909"
+  show_plots: false
+  min_cover: 0.5
+
+visualization:
+  image_colormap: "paper"
+  score_pairs_top_n_to_plot: 3
+  deposit_limits_tmi:
+    "1": [-200, 400]
+    "2": [80, 280]
+    "3": [-100, 600]
+    "4": [-320, 10]
+
+best_kpcs_files:
+  multicriteria_filename_template: "kpcs_best_multicriteria_by_deposit_{csv_file_tag}.csv"
+  multicriteria_legacy_filename_template: "kpcs_best_multicriteria_by_deposit_{best_kpcs_source_tag}.csv"
+  var1_filename: "kpcs_best_multicriteria_by_deposit_spca_uni_em.csv"
+  var1_legacy_filename: "kpcs_best_multicriteria_by_deposit_uni_em.csv"

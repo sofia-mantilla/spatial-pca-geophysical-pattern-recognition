@@ -39,6 +39,12 @@ data/Carajas_Brazil_Univariate_TMI/*
 data/Carajas_Brazil_Multivariate_TMI_U/*
 !data/Carajas_Brazil_Multivariate_TMI_U/.gitkeep
 
+data/NorthIsle_Canada_Univariate_TMI/*
+!data/NorthIsle_Canada_Univariate_TMI/.gitkeep
+
+data/NorthIsle_Canada_Univariate_EM/*
+!data/NorthIsle_Canada_Univariate_EM/.gitkeep
+
 # Outputs
 outputs/*
 !outputs/.gitkeep

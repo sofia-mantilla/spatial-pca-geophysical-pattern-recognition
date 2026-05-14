@@ -81,6 +81,7 @@ def run_spca_ranking_pipeline(
     n_top_windows: int | None = None,
     fusion_weight_var1: float = 0.5,
     fusion_weight_var2: float = 0.5,
+    features_per_variable: int | None = None,
 ) -> dict[str, Any]:
     """Run the paper SPCA ranking dispatcher with the maintained return contract."""
 
@@ -111,6 +112,7 @@ def run_spca_ranking_pipeline(
             use_whitening=False,
             use_weights=True,
             standardize_fused_input=True,
+            features_per_variable=features_per_variable,
         )
         return result.to_pipeline_dict()
 
@@ -218,6 +220,7 @@ def rank_multi_two_stage_pca_fusion(
     use_whitening: bool = False,
     use_weights: bool = True,
     standardize_fused_input: bool = True,
+    features_per_variable: int | None = None,
 ) -> RankingResult:
     """Rank multivariate windows using the paper two-stage fused PCA method."""
 
@@ -231,7 +234,9 @@ def rank_multi_two_stage_pca_fusion(
 
     win_h = int(window_shape[0])
     win_w = int(window_shape[1])
-    n_pix = int(win_h * win_w)
+    n_pix = int(features_per_variable) if features_per_variable is not None else int(win_h * win_w)
+    if n_pix <= 0:
+        raise ValueError("features_per_variable must be positive when provided.")
     if X.shape[1] < 2 * n_pix:
         raise ValueError(
             f"Expected at least {2 * n_pix} multivariate features for two-stage fusion, got {X.shape[1]}."
@@ -316,6 +321,7 @@ def rank_multi_two_stage_pca_fusion(
         "X2_std_safe": np.asarray(X2_std_safe, dtype=float),
         "F_mu": np.asarray(F_mu, dtype=float) if F_mu is not None else None,
         "F_std_safe": np.asarray(F_sd_safe, dtype=float) if F_sd_safe is not None else None,
+        "features_per_variable": int(n_pix),
     }
 
     return RankingResult(

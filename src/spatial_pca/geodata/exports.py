@@ -163,7 +163,6 @@ def build_circle_top_windows_gdf(
         "center_y": center_y,
         "radius_m": np.full(rows.shape[0], float(radius_m)),
         "patch_shape": np.full(rows.shape[0], "circle"),
-        "geometry": polygons,
     }
     if window_ids is not None:
         data["window_id"] = np.asarray(window_ids, dtype=int)
@@ -176,6 +175,7 @@ def build_circle_top_windows_gdf(
     if extra_columns is not None:
         for name, values in extra_columns.items():
             data[name] = np.asarray(values)
+    data["geometry"] = polygons
 
     gdf = gpd.GeoDataFrame(data, geometry="geometry", crs=crs).reset_index(drop=True)
     if layer_name != "top_windows":
