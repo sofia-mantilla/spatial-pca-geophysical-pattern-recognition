@@ -29,7 +29,7 @@ REQUIRED_SECTIONS: tuple[str, ...] = (
     "best_kpcs_files",
 )
 
-PATCH_ALLOWED_SHAPES: frozenset[str] = frozenset({"circle"})
+PATCH_ALLOWED_GEOMETRIES: frozenset[str] = frozenset({"circle"})
 PATCH_ALLOWED_SOURCES: frozenset[str] = frozenset({"manual", "deposit_bounds"})
 PATCH_ALLOWED_EXPORT_GEOMETRIES: frozenset[str] = frozenset({"polygon", "point", "both"})
 PATCH_ALLOWED_RADIUS_RULES: frozenset[str] = frozenset({"half_max_extent"})
@@ -264,7 +264,7 @@ def build_output_subdir_from_config(config: dict[str, Any]) -> str:
     if patch is not None:
         tokens.extend(
             [
-                str(patch["shape"]).lower(),
+                _get_patch_geometry(patch),
                 _compact_patch_source_token(patch["source"]),
             ]
         )
@@ -454,25 +454,25 @@ def _validate_optional_patch_config(patch: Any) -> None:
     if not isinstance(patch, dict):
         raise ConfigError("Config section 'patch' must be an object when provided.")
 
-    _require_keys("patch", patch, ("shape", "source", "rotation_deg", "stride_units", "export_geometry"))
+    _require_keys("patch", patch, ("source", "export_geometry"))
+    if "geometry" not in patch and "shape" not in patch:
+        raise ConfigError("Missing keys in 'patch' config: ['geometry']")
 
-    shape = str(patch["shape"])
+    geometry = _get_patch_geometry(patch)
     source = str(patch["source"])
     export_geometry = str(patch["export_geometry"])
-    stride_units = str(patch["stride_units"])
-    rotation_deg = float(patch["rotation_deg"])
 
-    if shape not in PATCH_ALLOWED_SHAPES:
-        raise ConfigError(f"patch.shape must be one of {sorted(PATCH_ALLOWED_SHAPES)}.")
+    if geometry not in PATCH_ALLOWED_GEOMETRIES:
+        raise ConfigError(f"patch.geometry must be one of {sorted(PATCH_ALLOWED_GEOMETRIES)}.")
     if source not in PATCH_ALLOWED_SOURCES:
         raise ConfigError(f"patch.source must be one of {sorted(PATCH_ALLOWED_SOURCES)}.")
     if export_geometry not in PATCH_ALLOWED_EXPORT_GEOMETRIES:
         raise ConfigError(
             f"patch.export_geometry must be one of {sorted(PATCH_ALLOWED_EXPORT_GEOMETRIES)}."
         )
-    if stride_units != "pixels":
+    if "stride_units" in patch and str(patch["stride_units"]) != "pixels":
         raise ConfigError("patch.stride_units must be 'pixels' for the current implementation plan.")
-    if rotation_deg != 0.0:
+    if "rotation_deg" in patch and float(patch["rotation_deg"]) != 0.0:
         raise ConfigError("patch.rotation_deg must be 0.0 for the current circle-only phase.")
 
     if source == "manual":
@@ -495,6 +495,12 @@ def _validate_optional_patch_config(patch: Any) -> None:
             raise ConfigError(
                 f"patch.deposit_bounds.radius_rule must be one of {sorted(PATCH_ALLOWED_RADIUS_RULES)}."
             )
+
+
+def _get_patch_geometry(patch: dict[str, Any]) -> str:
+    """Return the patch geometry, accepting legacy ``shape`` as an alias."""
+
+    return str(patch.get("geometry", patch.get("shape"))).strip().lower()
 
 
 def _require_keys(section_name: str, section_data: dict[str, Any], keys: tuple[str, ...]) -> None:
@@ -550,7 +556,7 @@ def main(argv: list[str] | None = None) -> int:
     print(f"Deposits: {sweep['deposits_1based']} | k_pcs: {sweep['kpcs']}")
     if "patch" in config:
         patch = config["patch"]
-        print(f"Patch: {patch['shape']} | Source: {patch['source']} | Export: {patch['export_geometry']}")
+        print(f"Patch: {_get_patch_geometry(patch)} | Source: {patch['source']} | Export: {patch['export_geometry']}")
     print(f"Output dir: {resolved['output_dir']}")
     print(f"Absolute path fields: {len(resolved['absolute_paths'])}")
     return 0

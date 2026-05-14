@@ -151,6 +151,19 @@ After that, you can run:
 The multivariate TMI + Radiometric U workflow is included for transparency, but
 it is still in progress and is not the validated first-release workflow.
 
+### Experimental circular patch support
+
+Circular patches are available as an experimental method extension. They use a
+bounding-box-plus-mask strategy: the workflow extracts a rectangular bounding
+box around the circle, keeps a boolean mask for pixel centers inside the circle,
+and uses only those in-circle pixels as Spatial PCA features. Top-ranked
+windows can be exported as circle polygons and, when requested, center points.
+
+This is not part of the validated first public release yet. The default Carajas
+TMI config remains the validated rectangular-window workflow; use
+`configs/carajas_uni_tmi_circle.yaml` only when testing the experimental circle
+path.
+
 ### Run a Demo
 
 The synthetic example is the safest public demo because it uses small test data

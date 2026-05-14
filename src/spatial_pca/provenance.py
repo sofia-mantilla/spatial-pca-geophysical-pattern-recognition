@@ -23,8 +23,9 @@ def build_provenance(config: dict[str, Any], command: list[str] | None = None) -
     run = config["run"]
     sweep = config["sweep"]
     analysis = config["analysis_defaults"]
+    patch_record = _build_patch_provenance(config.get("patch"))
 
-    return {
+    provenance = {
         "timestamp_utc": datetime.now(timezone.utc).isoformat(),
         "command": command or sys.argv,
         "python": {
@@ -71,6 +72,9 @@ def build_provenance(config: dict[str, Any], command: list[str] | None = None) -
             "targets_shp_mode": sweep["targets_shp_mode"],
         },
     }
+    if patch_record is not None:
+        provenance["patch"] = patch_record
+    return provenance
 
 
 def write_provenance(provenance: dict[str, Any], output_path: str | Path) -> Path:
@@ -97,6 +101,31 @@ def get_git_info(project_root: str | Path) -> dict[str, Any]:
         "is_dirty": bool(status),
         "status_short": status.splitlines() if status else [],
     }
+
+
+def _build_patch_provenance(patch: Any) -> dict[str, Any] | None:
+    if not isinstance(patch, dict):
+        return None
+
+    source = str(patch.get("source"))
+    record: dict[str, Any] = {
+        "geometry": str(patch.get("geometry", patch.get("shape"))),
+        "source": source,
+        "export_geometry": patch.get("export_geometry"),
+    }
+
+    if source == "manual":
+        manual = patch.get("manual", {})
+        if isinstance(manual, dict):
+            record["center_x"] = manual.get("center_x")
+            record["center_y"] = manual.get("center_y")
+            record["radius_m"] = manual.get("radius_m")
+    elif source == "deposit_bounds":
+        deposit_bounds = patch.get("deposit_bounds", {})
+        if isinstance(deposit_bounds, dict):
+            record["radius_rule"] = deposit_bounds.get("radius_rule")
+
+    return record
 
 
 def _run_git(project_root: Path, *args: str) -> str | None:

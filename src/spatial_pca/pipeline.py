@@ -149,6 +149,7 @@ def run_single_case(
                 stride_x=int(config["analysis_defaults"]["stride_x"]),
             )
         else:
+            _require_circle_patch(patch_config)
             template = get_circle_patch_template(
                 patch_config=patch_config,
                 deposits_gdf=deposits_gdf,
@@ -162,6 +163,7 @@ def run_single_case(
                 stride_y=int(config["analysis_defaults"]["stride_y"]),
                 stride_x=int(config["analysis_defaults"]["stride_x"]),
                 radius_m=float(template.radius_m),
+                feature_mask=template.feature_mask,
             )
         pca_result = fit_spca(
             window_matrix.data_for_pca,
@@ -201,6 +203,7 @@ def run_single_case(
                 stride_x=int(config["analysis_defaults"]["stride_x"]),
             )
         else:
+            _require_circle_patch(patch_config)
             template = {
                 var: get_circle_patch_template(
                     patch_config=patch_config,
@@ -218,6 +221,7 @@ def run_single_case(
                 stride_y=int(config["analysis_defaults"]["stride_y"]),
                 stride_x=int(config["analysis_defaults"]["stride_x"]),
                 radius_m=shared_radius_m,
+                feature_mask=template[summary_variables[0]].feature_mask,
             )
         pca_result = fit_spca(
             window_matrix.data_for_pca,
@@ -237,6 +241,11 @@ def run_single_case(
             k_pcs_rank_var1=k_pcs_var1,
             k_pcs_rank_var2=k_pcs_var2,
             n_top_windows=n_top_windows,
+            features_per_variable=(
+                int(window_matrix.feature_mask.sum())
+                if window_matrix.patch_geometry_type == "circle" and window_matrix.feature_mask is not None
+                else None
+            ),
         )
         ranking_result = ranking_out["ranking_result"]
         variable_name = "Combined"
@@ -499,6 +508,14 @@ def _get_summary_variables(config: dict[str, Any]) -> list[str]:
     if config["run"]["analysis_type"] == "Uni":
         return [_get_variable_name(config)]
     return _get_multivariate_variable_names(config)
+
+
+def _require_circle_patch(patch_config: Any) -> None:
+    if not isinstance(patch_config, dict):
+        raise ValueError("Config section 'patch' must be an object when provided.")
+    geometry = str(patch_config.get("geometry", patch_config.get("shape", ""))).strip().lower()
+    if geometry != "circle":
+        raise ValueError("Only patch.geometry='circle' is currently supported.")
 
 
 def _get_reconstruction_max_k(config: dict[str, Any], k_pcs: int, num_pcs: int) -> int:

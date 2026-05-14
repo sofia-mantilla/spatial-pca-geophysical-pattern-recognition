@@ -289,14 +289,17 @@ def build_univariate_circle_window_matrix(
     stride_y: int,
     stride_x: int,
     radius_m: float,
+    feature_mask: Any | None = None,
 ) -> WindowMatrix:
     """Build circle-masked univariate windows using a bbox-plus-mask template."""
 
     raster_arr = _validate_2d_array(raster, name="raster")
     template_arr = _validate_2d_array(circle_template, name="circle_template")
-    mask = np.isfinite(template_arr)
+    mask = _resolve_feature_mask(feature_mask, template_arr, name="feature_mask")
     if not np.any(mask):
         raise ValueError("circle_template has no finite in-circle pixels.")
+    if not np.isfinite(template_arr[mask]).all():
+        raise ValueError("circle_template contains non-finite values inside the circle mask.")
 
     window_shape = _validate_window_shape(template_arr.shape)
     stride_y = _validate_positive_int(stride_y, "stride_y")
@@ -334,6 +337,7 @@ def build_univariate_circle_window_matrix(
     combined_deposit = template_arr[mask].astype(float)
     display_deposit = np.where(mask, template_arr, np.nan).flatten().astype(float)
     data_for_pca = np.vstack([combined_sliding_windows, combined_deposit])
+    _require_finite_matrix(data_for_pca, name="circle data_for_pca")
     deposit_index = combined_sliding_windows.shape[0]
 
     return WindowMatrix(
@@ -364,6 +368,7 @@ def build_multivariate_circle_window_matrix(
     stride_y: int,
     stride_x: int,
     radius_m: float,
+    feature_mask: Any | None = None,
 ) -> WindowMatrix:
     """Build a combined multivariate window matrix using a shared circle mask."""
 
@@ -373,9 +378,11 @@ def build_multivariate_circle_window_matrix(
 
     first_template = _validate_2d_array(circle_templates[ordered_vars[0]], name="circle_template")
     window_shape = _validate_window_shape(first_template.shape)
-    feature_mask = np.isfinite(first_template)
-    if not np.any(feature_mask):
+    mask = _resolve_feature_mask(feature_mask, first_template, name="feature_mask")
+    if not np.any(mask):
         raise ValueError("Circle template has no finite in-circle pixels.")
+    if not np.isfinite(first_template[mask]).all():
+        raise ValueError("Circle template contains non-finite values inside the circle mask.")
 
     for var in ordered_vars[1:]:
         template = _validate_2d_array(circle_templates[var], name=f"circle_templates['{var}']")
@@ -383,8 +390,10 @@ def build_multivariate_circle_window_matrix(
             raise ValueError(
                 f"Circle template for variable '{var}' has shape {template.shape}, expected {window_shape}."
             )
-        if not np.array_equal(np.isfinite(template), feature_mask):
+        if feature_mask is None and not np.array_equal(np.isfinite(template), mask):
             raise ValueError(f"Circle feature mask mismatch for variable '{var}'.")
+        if not np.isfinite(template[mask]).all():
+            raise ValueError(f"Circle template for variable '{var}' contains non-finite in-circle values.")
 
     stride_y = _validate_positive_int(stride_y, "stride_y")
     stride_x = _validate_positive_int(stride_x, "stride_x")
@@ -407,14 +416,14 @@ def build_multivariate_circle_window_matrix(
 
         for row_idx, row in enumerate(windows):
             for col_idx, window in enumerate(row):
-                selected = np.asarray(window, dtype=float)[feature_mask]
+                selected = np.asarray(window, dtype=float)[mask]
                 if np.isfinite(selected).all():
                     top_left_y = row_idx * stride_y
                     top_left_x = col_idx * stride_x
                     center_row = top_left_y + half_h
                     center_col = top_left_x + half_w
                     feature_windows.append(selected)
-                    display_windows.append(np.where(feature_mask, window, np.nan).flatten())
+                    display_windows.append(np.where(mask, window, np.nan).flatten())
                     window_indices.append(
                         [top_left_y, top_left_x, original_window_number, center_row, center_col]
                     )
@@ -453,12 +462,13 @@ def build_multivariate_circle_window_matrix(
     combined_sliding_windows = np.hstack(filtered_windows_list)
     display_sliding_windows = np.hstack([filtered_display_by_var[var] for var in ordered_vars])
     combined_deposit = np.concatenate(
-        [np.asarray(circle_templates[var], dtype=float)[feature_mask] for var in ordered_vars]
+        [np.asarray(circle_templates[var], dtype=float)[mask] for var in ordered_vars]
     )
     display_deposit = np.concatenate(
-        [np.where(feature_mask, np.asarray(circle_templates[var], dtype=float), np.nan).flatten() for var in ordered_vars]
+        [np.where(mask, np.asarray(circle_templates[var], dtype=float), np.nan).flatten() for var in ordered_vars]
     )
     data_for_pca = np.vstack([combined_sliding_windows, combined_deposit])
+    _require_finite_matrix(data_for_pca, name="multivariate circle data_for_pca")
     deposit_index = combined_sliding_windows.shape[0]
 
     return WindowMatrix(
@@ -472,7 +482,7 @@ def build_multivariate_circle_window_matrix(
         variable_names=ordered_vars,
         per_variable_windows=filtered_windows_by_var,
         window_indices_by_var={var: window_indices_by_var[var][np.isin(window_indices_by_var[var][:, 2], common_id_values)] for var in ordered_vars},
-        feature_mask=feature_mask,
+        feature_mask=mask,
         display_sliding_windows=display_sliding_windows,
         display_deposit=display_deposit,
         per_variable_display_windows=filtered_display_by_var,
@@ -507,6 +517,22 @@ def _validate_2d_array(value: Any, *, name: str) -> np.ndarray:
     if arr.shape[0] < 1 or arr.shape[1] < 1:
         raise ValueError(f"{name} must be non-empty, got shape {arr.shape}.")
     return arr
+
+
+def _resolve_feature_mask(mask: Any | None, template_arr: np.ndarray, *, name: str) -> np.ndarray:
+    if mask is None:
+        return np.isfinite(template_arr)
+    mask_arr = np.asarray(mask, dtype=bool)
+    if mask_arr.shape != template_arr.shape:
+        raise ValueError(f"{name} shape {mask_arr.shape} does not match template shape {template_arr.shape}.")
+    return mask_arr
+
+
+def _require_finite_matrix(matrix: np.ndarray, *, name: str) -> None:
+    if np.isfinite(matrix).all():
+        return
+    n_bad = int((~np.isfinite(matrix)).sum())
+    raise ValueError(f"{name} contains {n_bad} non-finite values.")
 
 
 def _validate_window_shape(window_shape: tuple[int, int]) -> tuple[int, int]:
