@@ -476,3 +476,79 @@ docs/repro_debug_deposit3_multivariate/paper_era_ground_truth/
 ```
 
 The bundle contains the March 9 best-k CSV, restored validation pickle, restored fused weights figure, original config text, and a README with hashes and key validation values.
+
+## Tied-subspace rotation recovery test
+
+To test whether the paper-era ranking is reachable from the same fused PCA
+subspace, a rotation-recovery script was added:
+
+```text
+scripts/recover_deposit3_fused_basis_rotation.py
+```
+
+The script rebuilds the current two-stage fused score matrix, keeps fused PC1
+and PC2 fixed, and searches orthonormal rotations of the tied PC3-PC36 subspace.
+Ranking is then recomputed with the same paper formula:
+
+```text
+weights_m = z_dep,m^2 / sum_selected(z_dep^2)
+distance_i = sqrt(sum_m weights_m * (z_i,m - z_dep,m)^2)
+```
+
+Run command:
+
+```bash
+.venv/bin/python scripts/recover_deposit3_fused_basis_rotation.py \
+  --random-trials 800 \
+  --local-trials 1600 \
+  --seed 11 \
+  --output-dir docs/repro_debug_deposit3_multivariate/rotation_recovery_ordered
+```
+
+Outputs:
+
+```text
+docs/repro_debug_deposit3_multivariate/rotation_recovery_ordered/
+```
+
+Key files:
+
+```text
+rotation_recovery_summary.json
+best_tied_subspace_basis.npz
+best_ranked_rows.csv
+best_recovered_weights.png
+```
+
+Results:
+
+| Metric | Current basis | Best rotated tied basis |
+|---|---:|---:|
+| Prefix match with paper ranking | 1 | 1 |
+| Paper top-20 rows recovered in top 20 | 10/20 | 20/20 |
+| Paper top-50 rows recovered in top 50 | 21/50 | 36/50 |
+| Paper top-100 rows recovered in top 100 | 46/100 | 59/100 |
+| Paper top-250 rows recovered in top 250 | 118/250 | 142/250 |
+| Mean rank of paper top-20 rows | 264.75 | 10.5 |
+| Max rank of paper top-20 rows | 2361 | 20 |
+| Paper top-20 order MAE | 256.85 | 3.4 |
+
+Paper top-20 rank positions under the best rotated basis:
+
+```text
+[1, 9, 4, 11, 5, 6, 7, 8, 16, 10, 15, 14, 2, 20, 3, 13, 17, 18, 19, 12]
+```
+
+Best rotated-basis first 20 rows:
+
+```text
+[2774, 7419, 1858, 539, 2615, 3466, 3038, 1380, 7912, 2667,
+ 1219, 54, 4264, 1696, 1539, 8885, 3093, 2878, 6806, 5636]
+```
+
+This does not exactly reproduce the paper-era order, but it is strong evidence
+for the core diagnosis: rotating only the tied PC3-PC36 fused subspace can move
+the current ranking from a partial match to a perfect recovery of the paper-era
+top-20 set. Therefore the mismatch is plausibly caused by non-unique PCA axes
+inside a degenerate/tied fused eigenspace, not by changed rasters, deposit
+geometry, window extraction, K settings, or plotting alone.
