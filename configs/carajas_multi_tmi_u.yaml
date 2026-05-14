@@ -10,7 +10,7 @@ run:
   run_mode: "sweep_kpcs"
   analysis_type: "Multi"
   method_name: "Spatial_PCA"
-  outputs_subdir: "Output_Carajas_Brazil_Multivariate_TMI_U"
+  outputs_subdir: "Output_Carajas_Brazil_Multivariate_TMI_U_clean_sweep_current_20260514"
   uni_selected_variable: "TMI"
   multi_ranking_mode: "two_stage_pca_fusion"
 
