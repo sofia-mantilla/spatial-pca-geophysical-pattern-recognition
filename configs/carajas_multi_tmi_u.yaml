@@ -15,8 +15,8 @@ run:
   multi_ranking_mode: "two_stage_pca_fusion"
 
 sweep:
-  deposits_1based: [3]
-  kpcs: [17]
+  deposits_1based: [1,2,3,4,5,6]
+  kpcs: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
   score_w_auc: 0.45
   score_w_red_points: 0.35
   score_w_hit_early: 0.2
