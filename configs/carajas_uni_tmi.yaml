@@ -10,7 +10,7 @@ run:
   run_mode: "sweep_kpcs"
   analysis_type: "Uni"
   method_name: "Spatial_PCA"
-  outputs_subdir: "Output_Carajas_Brazil_Multivariate_TMI_U_clean_sweep_current_20260514"
+  outputs_subdir: "Output_Carajas_Brazil_Univariate_TMI"
   uni_selected_variable: "TMI"
   multi_ranking_mode: "two_stage_pca_fusion"
 
@@ -26,8 +26,8 @@ targets:
     carajas: "data/Carajas_Brazil_Univariate_TMI/Prospect_in Carajas_v2.shp"
 
 sweep:
-  deposits_1based: [1,2,3,4,5,6]
-  kpcs: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40]
+  deposits_1based: [6] # Use the training deposit ID for the sweep to ensure it is included in the runs.
+  kpcs: [17] # Adjusted based on preliminary runs; can be tuned further.
   score_w_auc: 0.45
   score_w_red_points: 0.35
   score_w_hit_early: 0.2

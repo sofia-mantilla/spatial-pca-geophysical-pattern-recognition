@@ -15,6 +15,12 @@ my_env/
 # Local/private configs
 configs/local_*.yaml
 configs/local_*.yml
+configs/carajas_multi_tmi_u_square_dep5_tmi31_u2_k33.yaml
+configs/northisle_multi_tmi_em_circle.yaml
+configs/support/carajas_multi_tmi_fixed_uni_kpcs_31.csv
+configs/support/carajas_multi_u_fixed_uni_kpcs_2.csv
+configs/support/northisle_multi_em_fixed_uni_kpcs.csv
+configs/support/northisle_multi_tmi_fixed_uni_kpcs.csv
 
 # Large geospatial data
 data/raw/
@@ -45,12 +51,26 @@ data/NorthIsle_Canada_Univariate_TMI/*
 data/NorthIsle_Canada_Univariate_EM/*
 !data/NorthIsle_Canada_Univariate_EM/.gitkeep
 
+data/NorthIsle_Canada_Multivariate_TMI_EM/*
+!data/NorthIsle_Canada_Multivariate_TMI_EM/.gitkeep
+
 # Outputs
 outputs/*
 !outputs/.gitkeep
 /Output_*/
 *_outputs/
 *.pkl
+
+# Local debugging and chat-export artifacts
+docs/First_chat_with_codex.*
+docs/Second_chat_with_codex.*
+docs/full_chat_export_best_effort*
+docs/multi_spca_first_chat_reconstruction.md
+docs/~$*.docx
+docs/repro_debug_deposit3_multivariate/git_9e298ef_replay/
+docs/repro_debug_deposit3_multivariate/old_workflow_replay/
+docs/repro_debug_deposit3_multivariate/rotation_recovery/
+docs/repro_debug_deposit3_multivariate/rotation_recovery_smoke/
 
 # OS/editor
 .DS_Store

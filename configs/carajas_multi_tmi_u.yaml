@@ -15,7 +15,7 @@ run:
   multi_ranking_mode: "two_stage_pca_fusion"
 
 sweep:
-  deposits_1based: [1,2,3,4,5,6]
+  deposits_1based: [1,2,3,4,5]
   kpcs: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
   score_w_auc: 0.45
   score_w_red_points: 0.35
@@ -63,23 +63,24 @@ visualization:
     "12": [-200, 400]
 
 paths:
-  variable_1_file_path: "/Users/sofiamantillasalas/Library/CloudStorage/OneDrive-Stanford/Research_Stanford/Research_files/MineralX_research/EroCopper_project/Paper_files/TMI_Univariate_case/Data_inputs/Whole_area_geophysical_grids/1097_1125_1129_TMI_merged.ers"
-  variable_2_file_path: "/Users/sofiamantillasalas/Library/CloudStorage/OneDrive-Stanford/Research_Stanford/Research_files/MineralX_research/EroCopper_project/Paper_files/TMI_Univariate_case/Data_inputs/Whole_area_geophysical_grids/1097_1125_1129_RAD_eU_merged.ers"
-  polygon_path: "/Users/sofiamantillasalas/Library/CloudStorage/OneDrive-Stanford/Research_Stanford/Research_files/MineralX_research/EroCopper_project/Carajas_maps_and_data/Multiscale_demo/Demo_area_polygon.shp"
+  variable_1_file_path: "data/Carajas_Brazil_Univariate_TMI/1097_1125_1129_TMI_merged.ers"
+  variable_2_file_path: "data/Carajas_Brazil_Multivariate_TMI_U/1097_1125_1129_RAD_eU_merged.ers"
+  polygon_path: "data/Carajas_Brazil_Univariate_TMI/Demo_area_polygon.shp"
   nodata_to_nan: -99999.0
 
 targets:
   deposit_crs_policy: "assume_raster" # Match the legacy Carajas run: keep target coordinates on the raster grid.
   validation_deposit_crs_policy: "reproject_to_raster" # Match legacy v5 validation against true projected deposits.
-  "deposits_shp_paths": {
-      "multi": "/Users/sofiamantillasalas/Library/CloudStorage/OneDrive-Stanford/Research_Stanford/Research_files/MineralX_research/EroCopper_project/Paper_files/TMI_Univariate_case/Data_inputs/Targets/Prospect_in Carajas_multi.shp",
-      "v2": "/Users/sofiamantillasalas/Library/CloudStorage/OneDrive-Stanford/Research_Stanford/Research_files/MineralX_research/EroCopper_project/Paper_files/TMI_Univariate_case/Data_inputs/Targets/Prospect_in Carajas_v2.shp"
-    }
+  deposits_shp_paths:
+    multi: "data/Carajas_Brazil_Multivariate_TMI_U/Prospect_in Carajas_multi.shp"
+    v2: "data/Carajas_Brazil_Univariate_TMI/Prospect_in Carajas_v2.shp"
 
 best_kpcs_files:
   multicriteria_filename_template: "kpcs_best_multicriteria_by_deposit_{csv_file_tag}.csv"
   multicriteria_legacy_filename_template: "kpcs_best_multicriteria_by_deposit_{best_kpcs_source_tag}.csv"
   var1_filename: "kpcs_best_multicriteria_by_deposit_spca_uni_tmi.csv"
   var1_legacy_filename: "kpcs_best_multicriteria_by_deposit_uni_tmi.csv"
+  var1_path: "outputs/Output_Carajas_Brazil_Multivariate_TMI_U_clean_sweep_current_20260514/kpcs_best_multicriteria_by_deposit_spca_uni_tmi.csv"
   var2_filename: "kpcs_best_multicriteria_by_deposit_spca_uni_radiometric_u.csv"
   var2_legacy_filename: "kpcs_best_multicriteria_by_deposit_uni_radiometric_u.csv"
+  var2_path: "outputs/Output_Carajas_Brazil_Multivariate_TMI_U_clean_sweep_current_20260514/kpcs_best_multicriteria_by_deposit_spca_uni_radiometric_u.csv"

@@ -1,7 +1,7 @@
 project:
-  name: "Carajas IOCG univariate RAD_U demo"
-  case: "Paulo Afonso / Deposit 3"
-  selected_variables: ["Radiometric_U"]
+  name: "Carajas IOCG multivariate support univariate TMI sweep"
+  case: "TMI sweep for TMI + Radiometric U multivariate setup"
+  selected_variables: ["TMI"]
   training_deposit_id: 3
   analysis_type: "Uni"
 
@@ -10,12 +10,12 @@ run:
   run_mode: "sweep_kpcs"
   analysis_type: "Uni"
   method_name: "Spatial_PCA"
-  outputs_subdir: "Output_Carajas_Brazil_Multivariate_TMI_U"
-  uni_selected_variable: "Radiometric_U"
+  outputs_subdir: "Output_Carajas_Brazil_Multivariate_TMI_U_clean_sweep_current_20260514"
+  uni_selected_variable: "TMI"
   multi_ranking_mode: "two_stage_pca_fusion"
 
 paths:
-  variable_1_file_path: "data/Carajas_Brazil_Multivariate_TMI_U/1097_1125_1129_RAD_eU_merged.ers"
+  variable_1_file_path: "data/Carajas_Brazil_Univariate_TMI/1097_1125_1129_TMI_merged.ers"
   polygon_path: "data/Carajas_Brazil_Univariate_TMI/Demo_area_polygon.shp"
   nodata_to_nan: -99999.0
 
@@ -26,8 +26,8 @@ targets:
     carajas: "data/Carajas_Brazil_Multivariate_TMI_U/Prospect_in Carajas_multi.shp"
 
 sweep:
-  deposits_1based: [3]
-  kpcs: [34]
+  deposits_1based: [1,2,3,4,5]
+  kpcs: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17]
   score_w_auc: 0.45
   score_w_red_points: 0.35
   score_w_hit_early: 0.2
@@ -42,7 +42,7 @@ reconstruction:
   enable: true
 
 analysis_defaults:
-  variable_1: "Radiometric_U"
+  variable_1: "TMI"
   rotation_angle: 0
   stride_x: 8
   stride_y: 8
@@ -73,5 +73,5 @@ visualization:
 best_kpcs_files:
   multicriteria_filename_template: "kpcs_best_multicriteria_by_deposit_{csv_file_tag}.csv"
   multicriteria_legacy_filename_template: "kpcs_best_multicriteria_by_deposit_{best_kpcs_source_tag}.csv"
-  var1_filename: "kpcs_best_multicriteria_by_deposit_spca_uni_radiometric_u.csv"
-  var1_legacy_filename: "kpcs_best_multicriteria_by_deposit_uni_radiometric_u.csv"
+  var1_filename: "kpcs_best_multicriteria_by_deposit_spca_uni_tmi.csv"
+  var1_legacy_filename: "kpcs_best_multicriteria_by_deposit_uni_tmi.csv"
