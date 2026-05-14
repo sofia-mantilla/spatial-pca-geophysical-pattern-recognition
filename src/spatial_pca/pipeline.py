@@ -26,7 +26,12 @@ from spatial_pca.geodata.exports import (
 from spatial_pca.geodata.rasters import RasterData, load_raster
 from spatial_pca.provenance import build_provenance, write_provenance
 from spatial_pca.spca.pca import PCAResult, fit_spca
-from spatial_pca.spca.ranking import RankingResult, rank_spca_windows, run_spca_ranking_pipeline
+from spatial_pca.spca.ranking import (
+    RankingResult,
+    rank_raw_windows,
+    rank_spca_windows,
+    run_spca_ranking_pipeline,
+)
 from spatial_pca.spca.windows import (
     WindowMatrix,
     build_multivariate_circle_window_matrix,
@@ -67,14 +72,14 @@ class SPCAOutput:
     raster_data: RasterData | dict[str, RasterData]
     deposit_template: TemplateData | dict[str, TemplateData]
     window_matrix: WindowMatrix
-    pca_result: PCAResult
+    pca_result: PCAResult | None
     ranking_result: RankingResult
     recovery_result: FootprintRecoveryResult
     top_windows_path: Path
     validation_path: Path
     recovery_plot_path: Path
     top_windows_plot_path: Path
-    pc_score_map_path: Path
+    pc_score_map_path: Path | None
     diagnostic_paths: dict[str, Path]
     resolved_config_path: Path
     provenance_path: Path
@@ -130,9 +135,12 @@ def run_single_case(
     output_dir = build_case_output_dir(config, deposit_1based, k_pcs)
     output_dir.mkdir(parents=True, exist_ok=True)
     analysis_type = str(config["run"]["analysis_type"])
+    method_name = str(config["run"]["method_name"])
+    is_raw_comparison = method_name == "Raw_comparison"
     deposits_path = _get_deposits_path(config)
     n_top_windows = top_k or int(config["analysis_defaults"]["n_top_windows"])
     ranking_options = _get_ranking_options(config)
+    raw_options = _get_raw_comparison_options(config) if is_raw_comparison else {"standardize": True}
 
     if analysis_type == "Uni":
         variable_name = _get_variable_name(config)
@@ -166,21 +174,29 @@ def run_single_case(
                 radius_m=float(template.radius_m),
                 feature_mask=template.feature_mask,
             )
-        pca_result = fit_spca(
-            window_matrix.data_for_pca,
-            var_name=variable_name,
-            patch_size=window_matrix.window_shape,
-        )
-        ranking_result = rank_spca_windows(
-            scores=pca_result.scores,
-            eigvals=pca_result.eigvals,
-            deposit_index=window_matrix.deposit_index,
-            k_pcs=k_pcs,
-            use_whitening=ranking_options["use_whitening"],
-            use_weights=ranking_options["use_weights"],
-            weight_mode=ranking_options["weight_mode"],
-            normalize_weights_over=ranking_options["normalize_weights_over"],
-        )
+        if is_raw_comparison:
+            pca_result = None
+            ranking_result = rank_raw_windows(
+                features=window_matrix.data_for_pca,
+                deposit_index=window_matrix.deposit_index,
+                standardize=raw_options["standardize"],
+            )
+        else:
+            pca_result = fit_spca(
+                window_matrix.data_for_pca,
+                var_name=variable_name,
+                patch_size=window_matrix.window_shape,
+            )
+            ranking_result = rank_spca_windows(
+                scores=pca_result.scores,
+                eigvals=pca_result.eigvals,
+                deposit_index=window_matrix.deposit_index,
+                k_pcs=k_pcs,
+                use_whitening=ranking_options["use_whitening"],
+                use_weights=ranking_options["use_weights"],
+                weight_mode=ranking_options["weight_mode"],
+                normalize_weights_over=ranking_options["normalize_weights_over"],
+            )
         summary_variables = [variable_name]
         validation_extras = {
             "ranking_mode": ranking_result.ranking_mode,
@@ -228,44 +244,58 @@ def run_single_case(
                 radius_m=shared_radius_m,
                 feature_mask=template[summary_variables[0]].feature_mask,
             )
-        pca_result = fit_spca(
-            window_matrix.data_for_pca,
-            var_name="Combined",
-            patch_size=window_matrix.window_shape,
-        )
-        k_pcs_var1, k_pcs_var2 = _resolve_multivariate_best_kpcs(config, deposit_1based)
-        ranking_out = run_spca_ranking_pipeline(
-            X_multi=window_matrix.data_for_pca,
-            Z=pca_result.scores,
-            eigvals=pca_result.eigvals,
-            deposit_index=window_matrix.deposit_index,
-            window_shape=window_matrix.window_shape,
-            analysis_type=analysis_type,
-            multi_ranking_mode=str(config["run"].get("multi_ranking_mode", "two_stage_pca_fusion")),
-            k_pcs_rank=k_pcs,
-            k_pcs_rank_var1=k_pcs_var1,
-            k_pcs_rank_var2=k_pcs_var2,
-            n_top_windows=n_top_windows,
-            features_per_variable=(
-                int(window_matrix.feature_mask.sum())
-                if window_matrix.patch_geometry_type == "circle" and window_matrix.feature_mask is not None
-                else None
-            ),
-            use_whitening=ranking_options["use_whitening"],
-            use_weights=ranking_options["use_weights"],
-            weight_mode=ranking_options["weight_mode"],
-            normalize_weights_over=ranking_options["normalize_weights_over"],
-            stage1_pca_svd_solver=ranking_options["stage1_pca_svd_solver"],
-            fused_pca_svd_solver=ranking_options["fused_pca_svd_solver"],
-        )
-        ranking_result = ranking_out["ranking_result"]
         variable_name = "Combined"
-        validation_extras = {
-            "ranking_mode": ranking_result.ranking_mode,
-            "k_pcs_var1": int(k_pcs_var1),
-            "k_pcs_var2": int(k_pcs_var2),
-            "k_pcs_fused": int(k_pcs),
-        }
+        if is_raw_comparison:
+            pca_result = None
+            ranking_result = rank_raw_windows(
+                features=window_matrix.data_for_pca,
+                deposit_index=window_matrix.deposit_index,
+                standardize=raw_options["standardize"],
+            )
+            validation_extras = {
+                "ranking_mode": ranking_result.ranking_mode,
+                "k_pcs_var1": np.nan,
+                "k_pcs_var2": np.nan,
+                "k_pcs_fused": np.nan,
+            }
+        else:
+            pca_result = fit_spca(
+                window_matrix.data_for_pca,
+                var_name="Combined",
+                patch_size=window_matrix.window_shape,
+            )
+            k_pcs_var1, k_pcs_var2 = _resolve_multivariate_best_kpcs(config, deposit_1based)
+            ranking_out = run_spca_ranking_pipeline(
+                X_multi=window_matrix.data_for_pca,
+                Z=pca_result.scores,
+                eigvals=pca_result.eigvals,
+                deposit_index=window_matrix.deposit_index,
+                window_shape=window_matrix.window_shape,
+                analysis_type=analysis_type,
+                multi_ranking_mode=str(config["run"].get("multi_ranking_mode", "two_stage_pca_fusion")),
+                k_pcs_rank=k_pcs,
+                k_pcs_rank_var1=k_pcs_var1,
+                k_pcs_rank_var2=k_pcs_var2,
+                n_top_windows=n_top_windows,
+                features_per_variable=(
+                    int(window_matrix.feature_mask.sum())
+                    if window_matrix.patch_geometry_type == "circle" and window_matrix.feature_mask is not None
+                    else None
+                ),
+                use_whitening=ranking_options["use_whitening"],
+                use_weights=ranking_options["use_weights"],
+                weight_mode=ranking_options["weight_mode"],
+                normalize_weights_over=ranking_options["normalize_weights_over"],
+                stage1_pca_svd_solver=ranking_options["stage1_pca_svd_solver"],
+                fused_pca_svd_solver=ranking_options["fused_pca_svd_solver"],
+            )
+            ranking_result = ranking_out["ranking_result"]
+            validation_extras = {
+                "ranking_mode": ranking_result.ranking_mode,
+                "k_pcs_var1": int(k_pcs_var1),
+                "k_pcs_var2": int(k_pcs_var2),
+                "k_pcs_fused": int(k_pcs),
+            }
     else:
         raise NotImplementedError(f"Unsupported analysis_type '{analysis_type}'.")
 
@@ -343,6 +373,8 @@ def run_single_case(
                 "fused_pca_svd_solver": str(fusion_details["fused_pca_svd_solver"]),
             }
         )
+    elif is_raw_comparison:
+        spca_diagnostics.update(ranking_result.fusion_details or {})
     validation_payload = build_validation_payload(
         recovery=recovery_result,
         method_name=config["run"]["method_name"],
@@ -389,18 +421,21 @@ def run_single_case(
         title=top_windows_title,
         image_cmap=_get_image_colormap(config),
     )
-    pc_score_map_path = plot_pc_score_map(
-        scores=pca_result.scores,
-        window_indices=window_matrix.window_indices_for_mapping,
-        window_shape=window_matrix.window_shape,
-        transform=reference_raster.transform,
-        background=reference_raster.array,
-        background_extent=reference_raster.extent,
-        deposit_index=window_matrix.deposit_index,
-        deposit_polygon=_get_reference_deposit_polygon(template, summary_variables[0]),
-        variable_name=variable_name,
-        output_path=output_dir / "pc_score_map.png",
-    )
+    if pca_result is None:
+        pc_score_map_path = None
+    else:
+        pc_score_map_path = plot_pc_score_map(
+            scores=pca_result.scores,
+            window_indices=window_matrix.window_indices_for_mapping,
+            window_shape=window_matrix.window_shape,
+            transform=reference_raster.transform,
+            background=reference_raster.array,
+            background_extent=reference_raster.extent,
+            deposit_index=window_matrix.deposit_index,
+            deposit_polygon=_get_reference_deposit_polygon(template, summary_variables[0]),
+            variable_name=variable_name,
+            output_path=output_dir / "pc_score_map.png",
+        )
     diagnostic_paths = _build_diagnostic_paths(
         config=config,
         deposit_1based=deposit_1based,
@@ -417,16 +452,17 @@ def run_single_case(
         top_window_indices=top_window_indices,
         image_cmap=_get_image_colormap(config),
     )
-    score_pairs_path = plot_score_pairs(
-        comparison_space=ranking_result.comparison_space,
-        weights=ranking_result.weights,
-        deposit_index=window_matrix.deposit_index,
-        output_path=output_dir / "score_pairs.png",
-        ranked_idx=valid_ranked_idx,
-        top_n_to_plot=int(config.get("visualization", {}).get("score_pairs_top_n_to_plot", 3)),
-    )
-    if score_pairs_path is not None:
-        diagnostic_paths["score_pairs"] = score_pairs_path
+    if not is_raw_comparison:
+        score_pairs_path = plot_score_pairs(
+            comparison_space=ranking_result.comparison_space,
+            weights=ranking_result.weights,
+            deposit_index=window_matrix.deposit_index,
+            output_path=output_dir / "score_pairs.png",
+            ranked_idx=valid_ranked_idx,
+            top_n_to_plot=int(config.get("visualization", {}).get("score_pairs_top_n_to_plot", 3)),
+        )
+        if score_pairs_path is not None:
+            diagnostic_paths["score_pairs"] = score_pairs_path
 
     return SPCAOutput(
         deposit_1based=deposit_1based,
@@ -532,6 +568,17 @@ def _get_ranking_options(config: dict[str, Any]) -> dict[str, Any]:
         "normalize_weights_over": str(ranking.get("normalize_weights_over", "selected_pcs")),
         "stage1_pca_svd_solver": str(ranking.get("stage1_pca_svd_solver", "auto")),
         "fused_pca_svd_solver": str(ranking.get("fused_pca_svd_solver", "auto")),
+    }
+
+
+def _get_raw_comparison_options(config: dict[str, Any]) -> dict[str, Any]:
+    raw = config.get("raw_comparison", {})
+    if raw is None:
+        raw = {}
+    if not isinstance(raw, dict):
+        raise ValueError("Config section 'raw_comparison' must be an object when provided.")
+    return {
+        "standardize": bool(raw.get("standardize", True)),
     }
 
 
@@ -758,16 +805,17 @@ def _build_diagnostic_paths(
     summary_variables: list[str],
     template: TemplateData | dict[str, TemplateData],
     window_matrix: WindowMatrix,
-    pca_result: PCAResult,
+    pca_result: PCAResult | None,
     ranking_result: RankingResult,
     valid_ranked_idx: np.ndarray,
     valid_ranked_dists: np.ndarray,
     top_window_indices: np.ndarray,
     image_cmap: str | None,
 ) -> dict[str, Path]:
+    is_raw_comparison = config["run"]["method_name"] == "Raw_comparison"
     if config["run"]["analysis_type"] == "Uni":
         vmin, vmax = _get_variable_limits(config, variable_name, deposit_1based)
-        return {
+        diagnostic_paths = {
             "rotated_deposit": plot_rotated_deposit(
                 deposit_array=template.array,
                 deposit_extent=template.extent,
@@ -798,43 +846,52 @@ def _build_diagnostic_paths(
                     None if window_matrix.display_sliding_windows is not None else window_matrix.feature_mask
                 ),
             ),
-            "component_weights": plot_deposit_scores_and_weights(
-                scores=pca_result.scores,
-                explained_variance_ratio=pca_result.explained_variance_ratio,
-                weights=ranking_result.weights,
-                deposit_index=window_matrix.deposit_index,
-                k_used=ranking_result.k_used,
-                output_path=output_dir / "component_weights.png",
-            ),
-            "loading_maps": plot_loading_maps(
-                loadings=pca_result.loadings,
-                scores=pca_result.scores,
-                weights=ranking_result.weights,
-                deposit_index=window_matrix.deposit_index,
-                window_shape=window_matrix.window_shape,
-                output_path=output_dir / "loading_maps.png",
-                max_pcs=min(4, int(ranking_result.k_used)),
-                image_cmap=image_cmap,
-                feature_mask=window_matrix.feature_mask,
-            ),
-            "reconstruction_progression": plot_reconstruction_progression(
-                scores=pca_result.scores,
-                loadings=pca_result.loadings,
-                mean=pca_result.mean,
-                std_safe=pca_result.std_safe,
-                deposit_index=window_matrix.deposit_index,
-                deposit_1based=deposit_1based,
-                window_shape=window_matrix.window_shape,
-                optimal_k=k_pcs,
-                output_path=output_dir / "reconstruction_progression.png",
-                variable_name=variable_name,
-                vmin=vmin,
-                vmax=vmax,
-                max_k=_get_reconstruction_max_k(config, k_pcs, pca_result.num_pcs),
-                image_cmap=image_cmap,
-                feature_mask=window_matrix.feature_mask,
-            ),
         }
+        if is_raw_comparison:
+            return diagnostic_paths
+        if pca_result is None:
+            raise ValueError("SPCA diagnostics require a PCA result.")
+        diagnostic_paths.update(
+            {
+                "component_weights": plot_deposit_scores_and_weights(
+                    scores=pca_result.scores,
+                    explained_variance_ratio=pca_result.explained_variance_ratio,
+                    weights=ranking_result.weights,
+                    deposit_index=window_matrix.deposit_index,
+                    k_used=ranking_result.k_used,
+                    output_path=output_dir / "component_weights.png",
+                ),
+                "loading_maps": plot_loading_maps(
+                    loadings=pca_result.loadings,
+                    scores=pca_result.scores,
+                    weights=ranking_result.weights,
+                    deposit_index=window_matrix.deposit_index,
+                    window_shape=window_matrix.window_shape,
+                    output_path=output_dir / "loading_maps.png",
+                    max_pcs=min(4, int(ranking_result.k_used)),
+                    image_cmap=image_cmap,
+                    feature_mask=window_matrix.feature_mask,
+                ),
+                "reconstruction_progression": plot_reconstruction_progression(
+                    scores=pca_result.scores,
+                    loadings=pca_result.loadings,
+                    mean=pca_result.mean,
+                    std_safe=pca_result.std_safe,
+                    deposit_index=window_matrix.deposit_index,
+                    deposit_1based=deposit_1based,
+                    window_shape=window_matrix.window_shape,
+                    optimal_k=k_pcs,
+                    output_path=output_dir / "reconstruction_progression.png",
+                    variable_name=variable_name,
+                    vmin=vmin,
+                    vmax=vmax,
+                    max_k=_get_reconstruction_max_k(config, k_pcs, pca_result.num_pcs),
+                    image_cmap=image_cmap,
+                    feature_mask=window_matrix.feature_mask,
+                ),
+            }
+        )
+        return diagnostic_paths
 
     variable_names = tuple(summary_variables)
     vmin_by_var = {var: _get_variable_limits(config, var, deposit_1based)[0] for var in variable_names}
@@ -899,6 +956,11 @@ def _build_diagnostic_paths(
             ),
         )
         return diagnostic_paths
+
+    if is_raw_comparison:
+        return diagnostic_paths
+    if pca_result is None:
+        raise ValueError("SPCA diagnostics require a PCA result.")
 
     diagnostic_paths["component_weights"] = plot_deposit_scores_and_weights(
         scores=pca_result.scores,

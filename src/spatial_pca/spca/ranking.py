@@ -76,6 +76,70 @@ def rank_spca_windows(
     )
 
 
+def rank_raw_windows(
+    *,
+    features: Any,
+    deposit_index: int,
+    top_k: int | None = None,
+    standardize: bool = True,
+    return_squared: bool = False,
+) -> RankingResult:
+    """Rank windows by direct L2 distance to the deposit in feature space."""
+
+    X = np.asarray(features, dtype=float)
+    if X.ndim != 2:
+        raise ValueError(f"features must be a 2D matrix, got shape {X.shape}.")
+    if X.shape[0] < 1 or X.shape[1] < 1:
+        raise ValueError(f"features must be non-empty, got shape {X.shape}.")
+    if not np.isfinite(X).all():
+        raise ValueError("features contain non-finite values.")
+    if not (0 <= int(deposit_index) < X.shape[0]):
+        raise IndexError("deposit_index is out of bounds for features.")
+
+    if standardize:
+        mean = X.mean(axis=0, keepdims=True)
+        std = X.std(axis=0, ddof=1, keepdims=True) if X.shape[0] > 1 else np.ones_like(mean)
+        std_safe = np.where(std == 0, 1.0, std)
+        comparison_space = (X - mean) / std_safe
+        ranking_mode = "raw_feature_l2_standardized"
+    else:
+        comparison_space = X.copy()
+        ranking_mode = "raw_feature_l2"
+
+    deposit_space = comparison_space[int(deposit_index)]
+    diff = comparison_space - deposit_space
+    dists_sq = np.sum(diff**2, axis=1)
+    dists = dists_sq if return_squared else np.sqrt(dists_sq)
+    order = np.argsort(dists)
+    ranked_idx = order
+    ranked_dists = dists[order]
+
+    if top_k is not None:
+        top_k = max(1, min(int(top_k), ranked_idx.shape[0]))
+        ranked_idx = ranked_idx[:top_k]
+        ranked_dists = ranked_dists[:top_k]
+
+    n_features = int(comparison_space.shape[1])
+    weights = np.ones(n_features, dtype=float) / float(n_features)
+    return RankingResult(
+        ranked_idx=ranked_idx,
+        ranked_dists=ranked_dists,
+        weights=weights,
+        comparison_space=comparison_space,
+        k_used=n_features,
+        use_whitening=False,
+        use_weights=False,
+        return_squared=return_squared,
+        weight_mode="uniform",
+        normalize_weights_over="all_features",
+        ranking_mode=ranking_mode,
+        fusion_details={
+            "standardize_raw_features": bool(standardize),
+            "n_features": n_features,
+        },
+    )
+
+
 def run_spca_ranking_pipeline(
     *,
     X_multi: Any,

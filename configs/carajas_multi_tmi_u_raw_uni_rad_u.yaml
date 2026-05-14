@@ -1,0 +1,80 @@
+project:
+  name: "Carajas IOCG raw univariate Radiometric U comparison"
+  case: "Raw Radiometric U comparison for TMI + Radiometric U multivariate setup"
+  selected_variables: ["Radiometric_U"]
+  training_deposit_id: 3
+  analysis_type: "Uni"
+
+run:
+  base_output_dir: "outputs"
+  run_mode: "sweep_kpcs"
+  analysis_type: "Uni"
+  method_name: "Raw_comparison"
+  outputs_subdir: "Output_Carajas_Brazil_Multivariate_TMI_U_clean_sweep_current_20260514"
+  uni_selected_variable: "Radiometric_U"
+  multi_ranking_mode: "raw_feature_l2"
+
+raw_comparison:
+  standardize: true
+
+paths:
+  variable_1_file_path: "data/Carajas_Brazil_Multivariate_TMI_U/1097_1125_1129_RAD_eU_merged.ers"
+  polygon_path: "data/Carajas_Brazil_Univariate_TMI/Demo_area_polygon.shp"
+  nodata_to_nan: -99999.0
+
+targets:
+  deposit_crs_policy: "assume_raster"
+  validation_deposit_crs_policy: "reproject_to_raster"
+  deposits_shp_paths:
+    carajas: "data/Carajas_Brazil_Multivariate_TMI_U/Prospect_in Carajas_multi.shp"
+
+sweep:
+  deposits_1based: [1,2,3,4,5]
+  kpcs: [1]
+  score_w_auc: 0.45
+  score_w_red_points: 0.35
+  score_w_hit_early: 0.2
+  targets_shp_mode: "carajas"
+  best_kpcs_source_tag: "carajas"
+  fusion_weight_var1: 0.5
+  fusion_weight_var2: 0.5
+  top_windows_color_scale_mode: "config_range"
+
+reconstruction:
+  extra_pcs: 3
+  enable: false
+
+analysis_defaults:
+  variable_1: "Radiometric_U"
+  rotation_angle: 0
+  stride_x: 8
+  stride_y: 8
+  n_top_windows: 250
+  top_windows_plot_n_rows: 2
+  top_windows_plot_n_cols: 4
+  force_crs: "EPSG:32722"
+  show_plots: false
+  min_cover: 0.5
+
+visualization:
+  image_colormap: "spatial_pca_paper"
+  score_pairs_top_n_to_plot: 3
+  deposit_limits_tmi:
+    "1": [-250, 300]
+    "2": [-200, 400]
+    "3": [-150, 150]
+    "4": [-600, 400]
+    "5": [-200, 400]
+    "6": [-200, 400]
+    "7": [-150, 300]
+    "8": [-200, 300]
+    "9": [-100, 100]
+    "10": [-200, 300]
+    "11": [-300, 500]
+    "12": [-200, 400]
+
+best_kpcs_files:
+  multicriteria_filename_template: "kpcs_best_multicriteria_by_deposit_{csv_file_tag}.csv"
+  multicriteria_legacy_filename_template: "kpcs_best_multicriteria_by_deposit_{best_kpcs_source_tag}.csv"
+  var1_filename: "kpcs_best_multicriteria_by_deposit_raw_uni_radiometric_u.csv"
+  var1_legacy_filename: "kpcs_best_multicriteria_by_deposit_uni_radiometric_u.csv"
