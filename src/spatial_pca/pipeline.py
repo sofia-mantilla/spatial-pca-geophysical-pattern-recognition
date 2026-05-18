@@ -101,9 +101,14 @@ def run_spca_from_config(
 
     plan = _build_run_plan(config, deposit_1based=deposit_1based, k_pcs=k_pcs)
     results: list[SPCAOutput] = []
+    case_runner = (
+        run_multivariate_case
+        if str(config["run"]["analysis_type"]) == "Multi"
+        else run_univariate_case
+    )
 
     for deposit_value, k_value in plan:
-        result = run_single_case(
+        result = case_runner(
             config=config,
             deposit_1based=deposit_value,
             k_pcs=k_value,
@@ -123,7 +128,66 @@ def run_spca_from_config(
     return results
 
 
+def run_univariate_case(
+    *,
+    config: dict[str, Any],
+    deposit_1based: int,
+    k_pcs: int,
+    top_k: int | None = None,
+) -> SPCAOutput:
+    """Run one univariate SPCA case and write case outputs to disk."""
+
+    if str(config["run"]["analysis_type"]) != "Uni":
+        raise ValueError("run_univariate_case requires run.analysis_type = 'Uni'.")
+    return _run_case_impl(
+        config=config,
+        deposit_1based=deposit_1based,
+        k_pcs=k_pcs,
+        top_k=top_k,
+    )
+
+
+def run_multivariate_case(
+    *,
+    config: dict[str, Any],
+    deposit_1based: int,
+    k_pcs: int,
+    top_k: int | None = None,
+) -> SPCAOutput:
+    """Run one multivariate SPCA case and write case outputs to disk."""
+
+    if str(config["run"]["analysis_type"]) != "Multi":
+        raise ValueError("run_multivariate_case requires run.analysis_type = 'Multi'.")
+    return _run_case_impl(
+        config=config,
+        deposit_1based=deposit_1based,
+        k_pcs=k_pcs,
+        top_k=top_k,
+    )
+
+
 def run_single_case(
+    *,
+    config: dict[str, Any],
+    deposit_1based: int,
+    k_pcs: int,
+    top_k: int | None = None,
+) -> SPCAOutput:
+    """Run one SPCA case and write case outputs to disk.
+
+    Kept as a compatibility wrapper; new callers should use
+    run_univariate_case or run_multivariate_case for clearer workflow traces.
+    """
+
+    return _run_case_impl(
+        config=config,
+        deposit_1based=deposit_1based,
+        k_pcs=k_pcs,
+        top_k=top_k,
+    )
+
+
+def _run_case_impl(
     *,
     config: dict[str, Any],
     deposit_1based: int,
@@ -259,16 +323,12 @@ def run_single_case(
                 "k_pcs_fused": np.nan,
             }
         else:
-            pca_result = fit_spca(
-                window_matrix.data_for_pca,
-                var_name="Combined",
-                patch_size=window_matrix.window_shape,
-            )
+            pca_result = None
             k_pcs_var1, k_pcs_var2 = _resolve_multivariate_best_kpcs(config, deposit_1based)
             ranking_out = run_spca_ranking_pipeline(
                 X_multi=window_matrix.data_for_pca,
-                Z=pca_result.scores,
-                eigvals=pca_result.eigvals,
+                Z=None,
+                eigvals=None,
                 deposit_index=window_matrix.deposit_index,
                 window_shape=window_matrix.window_shape,
                 analysis_type=analysis_type,

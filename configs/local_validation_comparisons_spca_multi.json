@@ -1,0 +1,68 @@
+{
+  "inputs": {
+    "output_roots": [
+      "/Users/sofiamantillasalas/Documents/GitHub_Sofia/EroCopper_Xcalibur_Project/Code/Spatial_PCA_Multivariate_Repo/outputs/Output_Carajas_Brazil_Multivariate_TMI_U_clean_sweep_current_20260514"
+    ],
+    "deposits_1based": [1, 2, 3, 4, 5],
+    "best_kpcs_csv": "/Users/sofiamantillasalas/Documents/GitHub_Sofia/EroCopper_Xcalibur_Project/Code/Spatial_PCA_Multivariate_Repo/outputs/Output_Carajas_Brazil_Multivariate_TMI_U_clean_sweep_current_20260514/kpcs_best_multicriteria_by_deposit_spca_multi_two_stage_pca_fusion.csv",
+    "compare_outdir": "/Users/sofiamantillasalas/Documents/GitHub_Sofia/EroCopper_Xcalibur_Project/Code/Spatial_PCA_Multivariate_Repo/outputs/Output_Carajas_Brazil_Multivariate_TMI_U_clean_sweep_current_20260514/_validation_comparisons"
+  },
+  "filters": {
+    "default_min_cover": 0.5,
+    "use_best_kpcs_filter": true
+  },
+  "plot": {
+    "default_ymax": 0.95
+  },
+  "comparison": {
+    "name": "spca_uni_tmi_uni_u_raw_multi_spca_multi",
+    "groups": [
+      {
+        "method_name": "Spatial_PCA",
+        "analysis_type": "Uni",
+        "selected_variable": "TMI",
+        "min_cover": 0.5,
+        "label": "SPCA Uni (TMI)",
+        "color": "blue",
+        "best_kpcs_csv": "/Users/sofiamantillasalas/Documents/GitHub_Sofia/EroCopper_Xcalibur_Project/Code/Spatial_PCA_Multivariate_Repo/outputs/Output_Carajas_Brazil_Multivariate_TMI_U_clean_sweep_current_20260514/kpcs_best_multicriteria_by_deposit_spca_uni_tmi.csv",
+        "best_kpcs_column": "k_pcs"
+      },
+      {
+        "method_name": "Spatial_PCA",
+        "analysis_type": "Uni",
+        "selected_variable": "Radiometric_U",
+        "min_cover": 0.5,
+        "label": "SPCA Uni (Radiometric_U)",
+        "color": "purple",
+        "best_kpcs_csv": "/Users/sofiamantillasalas/Documents/GitHub_Sofia/EroCopper_Xcalibur_Project/Code/Spatial_PCA_Multivariate_Repo/outputs/Output_Carajas_Brazil_Multivariate_TMI_U_clean_sweep_current_20260514/kpcs_best_multicriteria_by_deposit_spca_uni_radiometric_u.csv",
+        "best_kpcs_column": "k_pcs"
+      },
+      {
+        "method_name": "Raw_comparison",
+        "analysis_type": "Multi",
+        "min_cover": 0.5,
+        "label": "Raw Multi (TMI+U)",
+        "color": "darkorange"
+      },
+      {
+        "method_name": "Spatial_PCA",
+        "analysis_type": "Multi",
+        "min_cover": 0.5,
+        "label": "SPCA Multi (TMI+U)",
+        "color": "green",
+        "best_kpcs_csv": "/Users/sofiamantillasalas/Documents/GitHub_Sofia/EroCopper_Xcalibur_Project/Code/Spatial_PCA_Multivariate_Repo/outputs/Output_Carajas_Brazil_Multivariate_TMI_U_clean_sweep_current_20260514/kpcs_best_multicriteria_by_deposit_spca_multi_two_stage_pca_fusion.csv",
+        "best_kpcs_column": "k_pcs"
+      }
+    ],
+    "aggregate_title": "All deposits: footprint recovery (SPCA Uni TMI, SPCA Uni U, Raw Multi, SPCA Multi)",
+    "curves_title": "All cumulative footprint recovery curves: SPCA Uni TMI, SPCA Uni U, Raw Multi, SPCA Multi"
+  },
+  "run": {
+    "run_raw_spca_diagnostics": false,
+    "run_top_gain_subplots": true,
+    "top_gain_n": 4,
+    "top_gain_base_group_index": 2,
+    "top_gain_target_group_index": 3,
+    "selected_deposits_for_subplots": null
+  }
+}

@@ -356,7 +356,7 @@ def rank_multi_two_stage_pca_fusion(
     F = np.hstack([Z1k, Z2k])
     if standardize_fused_input:
         F_mu = F.mean(axis=0)
-        F_sd = F.std(axis=0, ddof=0)
+        F_sd = F.std(axis=0, ddof=1)
         F_sd_safe = np.where(F_sd == 0, 1.0, F_sd)
         F_in = (F - F_mu) / F_sd_safe
     else:
@@ -418,6 +418,7 @@ def rank_multi_two_stage_pca_fusion(
             dtype=float,
         ),
         "standardize_fused_input": bool(standardize_fused_input),
+        "standardization_ddof": 1,
         "weight_mode": weight_mode,
         "normalize_weights_over": normalize_weights_over,
         "stage1_pca_svd_solver": stage1_pca_svd_solver,
@@ -458,7 +459,7 @@ def _fit_block_scores(
     svd_solver: str = "auto",
 ) -> tuple[np.ndarray, int, PCA, np.ndarray, np.ndarray]:
     X_mean = X_block.mean(axis=0)
-    X_std = X_block.std(axis=0, ddof=0)
+    X_std = X_block.std(axis=0, ddof=1)
     X_std_safe = np.where(X_std == 0, 1.0, X_std)
     X_stdzd = (X_block - X_mean) / X_std_safe
 
