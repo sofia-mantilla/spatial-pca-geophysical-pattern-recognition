@@ -28,6 +28,7 @@ from spatial_pca.geodata.surfaces import (
     plot_deposit_and_loading_surfaces,
     plot_deposit_surface,
     plot_deposit_surfaces,
+    plot_reconstruction_surface_animation,
 )
 from spatial_pca.provenance import build_provenance, write_provenance
 from spatial_pca.spca.pca import PCAResult, fit_spca
@@ -974,6 +975,25 @@ def _build_diagnostic_paths(
                     window_shape=window_matrix.window_shape,
                     optimal_k=k_pcs,
                     output_path=output_dir / "reconstruction_progression.png",
+                    variable_name=variable_name,
+                    vmin=vmin,
+                    vmax=vmax,
+                    max_k=_get_reconstruction_max_k(config, k_pcs, pca_result.num_pcs),
+                    image_cmap=image_cmap,
+                    feature_mask=window_matrix.feature_mask,
+                ),
+                "reconstruction_progression_3d": plot_reconstruction_surface_animation(
+                    scores=pca_result.scores,
+                    loadings=pca_result.loadings,
+                    mean=pca_result.mean,
+                    std_safe=pca_result.std_safe,
+                    deposit_index=window_matrix.deposit_index,
+                    deposit_1based=deposit_1based,
+                    deposit_extent=template.extent,
+                    deposit_reference_array=template.array,
+                    window_shape=window_matrix.window_shape,
+                    optimal_k=k_pcs,
+                    output_path=output_dir / "reconstruction_progression_3d.gif",
                     variable_name=variable_name,
                     vmin=vmin,
                     vmax=vmax,

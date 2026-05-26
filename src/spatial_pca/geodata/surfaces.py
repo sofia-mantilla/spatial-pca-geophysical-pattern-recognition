@@ -211,7 +211,7 @@ def plot_deposit_and_loading_surfaces(
     view_azim: float = 28.0,
     mesh_linewidth: float = 0.2,
     mesh_alpha: float = 0.3,
-    vertical_exaggeration: float = 1.5,
+    vertical_exaggeration: float = 1.2,
 ) -> Path:
     """Plot the training deposit above top-weighted loading maps as 3D surfaces."""
 
@@ -349,6 +349,137 @@ def plot_deposit_and_loading_surfaces(
     return path
 
 
+def plot_reconstruction_surface_animation(
+    *,
+    scores: Any,
+    loadings: Any,
+    mean: Any,
+    std_safe: Any,
+    deposit_index: int,
+    deposit_1based: int,
+    deposit_extent: tuple[float, float, float, float],
+    deposit_reference_array: Any,
+    window_shape: tuple[int, int],
+    optimal_k: int,
+    output_path: str | Path,
+    variable_name: str,
+    vmin: float | None = None,
+    vmax: float | None = None,
+    max_k: int = 10,
+    image_cmap: str | Any | None = None,
+    feature_mask: np.ndarray | None = None,
+    surface_alpha: float = 0.42,
+    view_elev: float = 25.0,
+    view_azim: float = 28.0,
+    mesh_linewidth: float = 0.2,
+    mesh_alpha: float = 0.3,
+    vertical_exaggeration: float = 1.2,
+    duration_ms: int = 650,
+) -> Path:
+    """Animate training-deposit reconstruction as PCs are added."""
+
+    from PIL import Image
+
+    Z = np.asarray(scores, dtype=float)
+    components = np.asarray(loadings, dtype=float)
+    x_mean = np.asarray(mean, dtype=float).reshape(-1)
+    x_std = np.asarray(std_safe, dtype=float).reshape(-1)
+    win_h, win_w = int(window_shape[0]), int(window_shape[1])
+    n_show = min(int(max_k), Z.shape[1], components.shape[0])
+    if n_show < 1:
+        raise ValueError("No reconstruction frames are available.")
+
+    path = Path(output_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    cmap = resolve_colormap(image_cmap or DEFAULT_SURFACE_CMAP)
+    z_dep = Z[int(deposit_index)]
+    reconstructions: list[np.ndarray] = []
+    for k in range(1, n_show + 1):
+        x_stdzd = z_dep[:k] @ components[:k, :]
+        reconstructions.append(
+            _vector_to_display_patch(
+                x_stdzd * x_std + x_mean,
+                (win_h, win_w),
+                feature_mask=feature_mask,
+            )
+    )
+    deposit_min, deposit_max = _finite_min_max(np.asarray(deposit_reference_array, dtype=float))
+    z_min = deposit_min
+    z_max = deposit_max
+    if z_min == z_max:
+        z_max = z_min + 1.0
+    zlim = (z_min, z_max)
+    color_vmin = deposit_min if vmin is None else float(vmin)
+    color_vmax = deposit_max if vmax is None else float(vmax)
+
+    frames: list[Image.Image] = []
+    frame_paths: list[Path] = []
+
+    with tempfile.TemporaryDirectory(prefix="spatial_pca_recon3d_") as tmpdir:
+        tmp_path = Path(tmpdir)
+        for k, reconstruction in enumerate(reconstructions, start=1):
+            fig = plt.figure(figsize=(8.8, 7.6), dpi=150)
+            fig.suptitle(
+                f"Deposit {deposit_1based} geometry reconstruction",
+                fontsize=TITLE_FONTSIZE,
+            )
+            ax = fig.add_subplot(1, 1, 1, projection="3d")
+            surface = _plot_surface_on_axis(
+                ax,
+                reconstruction,
+                deposit_extent,
+                cmap=cmap,
+                vmin=color_vmin,
+                vmax=color_vmax,
+                label=variable_name,
+                view_elev=view_elev,
+                view_azim=view_azim,
+                surface_alpha=surface_alpha,
+                mesh_linewidth=mesh_linewidth,
+                mesh_alpha=mesh_alpha,
+                vertical_exaggeration=vertical_exaggeration,
+                show_xy_labels=False,
+                zlim=zlim,
+            )
+            ax.set_title(
+                f"Using first {k} PC{'s' if k != 1 else ''}"
+                + (f" | optimal k={optimal_k}" if int(optimal_k) == k else ""),
+                fontsize=LABEL_FONTSIZE,
+                pad=14,
+            )
+            cbar_ax = fig.add_axes([0.88, 0.22, 0.018, 0.54])
+            cbar = fig.colorbar(surface, cax=cbar_ax)
+            _set_min_max_colorbar_ticks(
+                cbar,
+                reconstruction,
+                vmin=color_vmin,
+                vmax=color_vmax,
+            )
+            cbar.set_label(variable_name, fontsize=COLORBAR_LABEL_FONTSIZE)
+            cbar.ax.tick_params(labelsize=TICK_FONTSIZE)
+            fig.subplots_adjust(left=0.04, right=0.84, top=0.86, bottom=0.08)
+
+            frame_path = tmp_path / f"frame_{k:03d}.png"
+            fig.savefig(frame_path, dpi=160, bbox_inches="tight", facecolor="white")
+            plt.close(fig)
+            frame_paths.append(frame_path)
+
+        for frame_path in frame_paths:
+            with Image.open(frame_path) as image:
+                frames.append(image.convert("P", palette=Image.ADAPTIVE).copy())
+
+    frames[0].save(
+        path,
+        save_all=True,
+        append_images=frames[1:],
+        duration=int(duration_ms),
+        loop=0,
+        optimize=False,
+    )
+    return path
+
+
 def _plot_surface_on_axis(
     ax: Any,
     z_values: Any,
@@ -366,6 +497,7 @@ def _plot_surface_on_axis(
     vertical_exaggeration: float,
     show_xy_labels: bool,
     show_variable_label: bool = True,
+    zlim: tuple[float, float] | None = None,
 ) -> Any:
     x_grid, y_grid, z_grid = _surface_grids(
         np.asarray(z_values, dtype=float),
@@ -415,6 +547,10 @@ def _plot_surface_on_axis(
             va="center",
         )
     _set_min_max_axis_ticks(ax, x_grid, y_grid, z_grid)
+    if zlim is not None:
+        ax.set_zlim(float(zlim[0]), float(zlim[1]))
+        ax.set_zticks([float(zlim[0]), float(zlim[1])])
+        ax.set_zticklabels([_format_tick(float(zlim[0])), _format_tick(float(zlim[1]))])
     ax.tick_params(axis="both", which="major", labelsize=TICK_FONTSIZE, pad=6)
     ax.zaxis.set_tick_params(labelsize=TICK_FONTSIZE, pad=8)
     _set_surface_box_aspect(
