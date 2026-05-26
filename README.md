@@ -315,3 +315,33 @@ This project is released under the MIT License. See [LICENSE](LICENSE).
 If you use this repository, please cite the archived Zenodo release:
 
 Mantilla Salas, S. (2026). *Spatial PCA for Geophysical Pattern Recognition in Mineral Exploration* (v1.0.1). Zenodo. https://doi.org/10.5281/zenodo.20168910
+
+I would like to chnage this things a bit: scripts/run_project_from_config.py
+  -> run_config()
+  -> spatial_pca.pipeline.run_spca_from_config()
+     -> load_run_config()
+     -> _build_run_plan()
+     -> run_multivariate_case()
+        -> load_multivariate_rasters()
+           -> load_variable_raster()
+           -> load_raster()
+        -> _validate_multivariate_rasters()
+        -> _load_case_deposits()
+        -> get_deposit_template() for TMI
+        -> get_deposit_template() for Radiometric_U
+        -> _resolve_multivariate_best_kpcs()
+        -> run_spca_multi_ranking_pipeline()
+          -> run_single_case_var_1()
+            (here I get Z for var_1 and I keep Z[:kpcs for var_1])
+          -> run_single_case_var_2()
+            (here I get Z for var_2 and I keep Z[:kpcs for var_2])
+          -> I get the concatenated horizontally of Z (including the deposit window)
+          -> run_single_case_combined_z()
+          (here I get Z form combined Z and keep Z[:kpcs for var_multi])
+          -> rank_spca_windows()
+        -> build_top_windows_gdf()
+        -> save_geopackage()
+        -> validate_footprint_recovery()
+        -> write_validation_payload()
+        -> plot diagnostics
+     -> write_sweep_summary_tables()

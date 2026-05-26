@@ -24,6 +24,10 @@ from spatial_pca.geodata.exports import (
     save_geopackage,
 )
 from spatial_pca.geodata.rasters import RasterData, load_raster
+from spatial_pca.geodata.surfaces import (
+    plot_deposit_surface,
+    plot_deposit_surfaces,
+)
 from spatial_pca.provenance import build_provenance, write_provenance
 from spatial_pca.spca.pca import PCAResult, fit_spca
 from spatial_pca.spca.ranking import (
@@ -887,6 +891,16 @@ def _build_diagnostic_paths(
                 vmax=vmax,
                 image_cmap=image_cmap,
             ),
+            "deposit_surface": plot_deposit_surface(
+                deposit_array=template.array,
+                deposit_extent=template.extent,
+                deposit_1based=deposit_1based,
+                variable_name=variable_name,
+                output_path=output_dir / "deposit_surface.png",
+                vmin=vmin,
+                vmax=vmax,
+                image_cmap=image_cmap,
+            ),
             "top_similar_windows": plot_top_similar_windows(
                 flattened_windows=window_matrix.display_sliding_windows
                 if window_matrix.display_sliding_windows is not None
@@ -966,6 +980,15 @@ def _build_diagnostic_paths(
             deposit_1based=deposit_1based,
             rotation_angle=float(config["analysis_defaults"]["rotation_angle"]),
             output_path=output_dir / "rotated_deposit.png",
+            vmin_by_var=vmin_by_var,
+            vmax_by_var=vmax_by_var,
+            image_cmap=image_cmap,
+        ),
+        "deposit_surface": plot_deposit_surfaces(
+            deposit_arrays={var: template[var].array for var in variable_names},
+            deposit_extents={var: template[var].extent for var in variable_names},
+            deposit_1based=deposit_1based,
+            output_path=output_dir / "deposit_surface.png",
             vmin_by_var=vmin_by_var,
             vmax_by_var=vmax_by_var,
             image_cmap=image_cmap,

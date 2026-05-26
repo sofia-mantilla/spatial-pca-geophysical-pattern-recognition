@@ -1,7 +1,7 @@
 project:
-  name: "Carajas IOCG univariate RAD_U demo"
-  case: "Paulo Afonso / Deposit 3"
-  selected_variables: ["Radiometric_U"]
+  name: "Carajas IOCG Multivariate TMI demo"
+  case: "Alemao / Deposit 3"
+  selected_variables: ["TMI"]
   training_deposit_id: 3
   analysis_type: "Uni"
 
@@ -11,11 +11,11 @@ run:
   analysis_type: "Uni"
   method_name: "Spatial_PCA"
   outputs_subdir: "Output_Carajas_Brazil_Multivariate_TMI_U_clean_sweep_current_20260514"
-  uni_selected_variable: "Radiometric_U"
+  uni_selected_variable: "TMI"
   multi_ranking_mode: "two_stage_pca_fusion"
 
 paths:
-  variable_1_file_path: "data/Carajas_Brazil_Multivariate_TMI_U/1097_1125_1129_RAD_eU_merged.ers"
+  variable_1_file_path: "data/Carajas_Brazil_Univariate_TMI/1097_1125_1129_TMI_merged.ers"
   polygon_path: "data/Carajas_Brazil_Univariate_TMI/Demo_area_polygon.shp"
   nodata_to_nan: -99999.0
 
@@ -42,7 +42,7 @@ reconstruction:
   enable: true
 
 analysis_defaults:
-  variable_1: "Radiometric_U"
+  variable_1: "TMI"
   rotation_angle: 0
   stride_x: 8
   stride_y: 8
