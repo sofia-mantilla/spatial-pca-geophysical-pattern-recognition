@@ -25,6 +25,7 @@ from spatial_pca.geodata.exports import (
 )
 from spatial_pca.geodata.rasters import RasterData, load_raster
 from spatial_pca.geodata.surfaces import (
+    plot_deposit_and_loading_surfaces,
     plot_deposit_surface,
     plot_deposit_surfaces,
 )
@@ -943,6 +944,23 @@ def _build_diagnostic_paths(
                     window_shape=window_matrix.window_shape,
                     output_path=output_dir / "loading_maps.png",
                     max_pcs=min(4, int(ranking_result.k_used)),
+                    image_cmap=image_cmap,
+                    feature_mask=window_matrix.feature_mask,
+                ),
+                "loading_maps_3d": plot_deposit_and_loading_surfaces(
+                    deposit_array=template.array,
+                    deposit_extent=template.extent,
+                    loadings=pca_result.loadings,
+                    scores=pca_result.scores,
+                    weights=ranking_result.weights,
+                    deposit_index=window_matrix.deposit_index,
+                    deposit_1based=deposit_1based,
+                    window_shape=window_matrix.window_shape,
+                    output_path=output_dir / "loading_maps_3d.png",
+                    variable_name=variable_name,
+                    max_pcs=min(4, int(ranking_result.k_used)),
+                    deposit_vmin=vmin,
+                    deposit_vmax=vmax,
                     image_cmap=image_cmap,
                     feature_mask=window_matrix.feature_mask,
                 ),

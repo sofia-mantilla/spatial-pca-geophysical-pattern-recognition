@@ -15,6 +15,7 @@ os.environ.setdefault(
 
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib import cm, colors
 
 from spatial_pca.colormaps import DEFAULT_PAPER_CMAP, resolve_colormap
 
@@ -22,7 +23,7 @@ from spatial_pca.colormaps import DEFAULT_PAPER_CMAP, resolve_colormap
 DEFAULT_SURFACE_CMAP = DEFAULT_PAPER_CMAP
 TITLE_FONTSIZE = 28
 LABEL_FONTSIZE = 22
-TICK_FONTSIZE = 20
+TICK_FONTSIZE = 18
 COLORBAR_LABEL_FONTSIZE = 22
 
 
@@ -187,6 +188,245 @@ def plot_deposit_surfaces(
     return path
 
 
+def plot_deposit_and_loading_surfaces(
+    *,
+    deposit_array: Any,
+    deposit_extent: tuple[float, float, float, float],
+    loadings: Any,
+    scores: Any,
+    weights: Any,
+    deposit_index: int,
+    deposit_1based: int,
+    window_shape: tuple[int, int],
+    output_path: str | Path,
+    variable_name: str,
+    max_pcs: int = 4,
+    deposit_vmin: float | None = None,
+    deposit_vmax: float | None = None,
+    image_cmap: str | Any | None = None,
+    loading_cmap: str | Any | None = None,
+    feature_mask: np.ndarray | None = None,
+    surface_alpha: float = 0.42,
+    view_elev: float = 25.0,
+    view_azim: float = 28.0,
+    mesh_linewidth: float = 0.2,
+    mesh_alpha: float = 0.3,
+    vertical_exaggeration: float = 1.5,
+) -> Path:
+    """Plot the training deposit above top-weighted loading maps as 3D surfaces."""
+
+    load = np.asarray(loadings, dtype=float)
+    Z = np.asarray(scores, dtype=float)
+    w = np.asarray(weights, dtype=float).ravel()
+    win_h, win_w = int(window_shape[0]), int(window_shape[1])
+
+    expected_features = win_h * win_w
+    if load.shape[0] == expected_features and load.shape[1] != expected_features:
+        load = load.T
+
+    n_available = min(load.shape[0], Z.shape[1], w.size)
+    n_show = min(int(max_pcs), n_available)
+    if n_show < 1:
+        raise ValueError("No loading maps are available to plot as 3D surfaces.")
+
+    order = np.argsort(w[:n_available])[::-1][:n_show]
+    loading_maps = [
+        _vector_to_display_patch(
+            load[pc_idx],
+            (win_h, win_w),
+            feature_mask=feature_mask,
+        )
+        for pc_idx in order
+    ]
+    loading_vmax = float(np.nanmax(np.abs(np.asarray(loading_maps, dtype=float))))
+    if not np.isfinite(loading_vmax) or loading_vmax == 0.0:
+        loading_vmax = 1.0
+
+    deposit_cmap = resolve_colormap(image_cmap or DEFAULT_SURFACE_CMAP)
+    load_cmap = resolve_colormap(loading_cmap or image_cmap or DEFAULT_SURFACE_CMAP)
+    path = Path(output_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    n_grid_cols = max(6, 2 * n_show)
+    top_margin_cols = max(1, n_grid_cols // 4)
+    fig = plt.figure(figsize=(5.6 * n_show, 12.5), dpi=150)
+    grid = fig.add_gridspec(
+        2,
+        n_grid_cols,
+        height_ratios=[1.30, 1.0],
+        hspace=0.32,
+        wspace=0.20,
+    )
+    fig.suptitle(
+        f"Training Deposit ID={deposit_1based} and PCA Loading Maps",
+        fontsize=TITLE_FONTSIZE,
+        y=0.98,
+    )
+
+    ax_top = fig.add_subplot(
+        grid[0, top_margin_cols : n_grid_cols - top_margin_cols],
+        projection="3d",
+    )
+    top_surface = _plot_surface_on_axis(
+        ax_top,
+        deposit_array,
+        deposit_extent,
+        cmap=deposit_cmap,
+        vmin=deposit_vmin,
+        vmax=deposit_vmax,
+        label=variable_name,
+        view_elev=view_elev,
+        view_azim=view_azim,
+        surface_alpha=surface_alpha,
+        mesh_linewidth=mesh_linewidth,
+        mesh_alpha=mesh_alpha,
+        vertical_exaggeration=vertical_exaggeration,
+        show_xy_labels=True,
+    )
+    ax_top.set_position([0.30, 0.53, 0.40, 0.34])
+    cbar_top_ax = fig.add_axes([0.72, 0.58, 0.012, 0.24])
+    cbar_top = fig.colorbar(top_surface, cax=cbar_top_ax)
+    _set_min_max_colorbar_ticks(
+        cbar_top,
+        np.asarray(deposit_array, dtype=float),
+        vmin=deposit_vmin,
+        vmax=deposit_vmax,
+    )
+    cbar_top.set_label(variable_name, fontsize=COLORBAR_LABEL_FONTSIZE)
+    cbar_top.ax.tick_params(labelsize=TICK_FONTSIZE)
+
+    bottom_axes = []
+    for col, pc_idx in enumerate(order):
+        col_start = int(round(col * n_grid_cols / n_show))
+        col_stop = int(round((col + 1) * n_grid_cols / n_show))
+        ax = fig.add_subplot(grid[1, col_start:col_stop], projection="3d")
+        _plot_surface_on_axis(
+            ax,
+            loading_maps[col],
+            deposit_extent,
+            cmap=load_cmap,
+            vmin=-loading_vmax,
+            vmax=loading_vmax,
+            label="Loading",
+            view_elev=view_elev,
+            view_azim=view_azim,
+            surface_alpha=surface_alpha,
+            mesh_linewidth=mesh_linewidth,
+            mesh_alpha=mesh_alpha,
+            vertical_exaggeration=vertical_exaggeration,
+            show_xy_labels=False,
+            show_variable_label=False,
+        )
+        ax.set_title(
+            f"PC {pc_idx + 1}\n"
+            rf"$z_{{dep}}$={Z[int(deposit_index), pc_idx]:.2f} | "
+            f"w={100 * w[pc_idx]:.1f}%",
+            fontsize=22,
+            pad=8,
+        )
+        bottom_axes.append(ax)
+
+    norm = colors.Normalize(vmin=-loading_vmax, vmax=loading_vmax)
+    sm = cm.ScalarMappable(norm=norm, cmap=load_cmap)
+    sm.set_array([])
+    cbar_bottom_ax = fig.add_axes([0.945, 0.13, 0.012, 0.24])
+    cbar_bottom = fig.colorbar(sm, cax=cbar_bottom_ax)
+    _set_min_max_colorbar_ticks(
+        cbar_bottom,
+        np.asarray(loading_maps, dtype=float),
+        vmin=-loading_vmax,
+        vmax=loading_vmax,
+    )
+    cbar_bottom.set_label("PCA loading", fontsize=COLORBAR_LABEL_FONTSIZE)
+    cbar_bottom.ax.tick_params(labelsize=TICK_FONTSIZE)
+
+    fig.subplots_adjust(left=0.03, right=0.90, top=0.91, bottom=0.05)
+    ax_top.set_position([0.30, 0.53, 0.40, 0.34])
+    cbar_top_ax.set_position([0.72, 0.58, 0.012, 0.24])
+    cbar_bottom_ax.set_position([0.945, 0.13, 0.012, 0.24])
+    fig.savefig(path, dpi=200, bbox_inches="tight", facecolor="white")
+    plt.close(fig)
+    return path
+
+
+def _plot_surface_on_axis(
+    ax: Any,
+    z_values: Any,
+    extent: tuple[float, float, float, float],
+    *,
+    cmap: Any,
+    vmin: float | None,
+    vmax: float | None,
+    label: str,
+    view_elev: float,
+    view_azim: float,
+    surface_alpha: float,
+    mesh_linewidth: float,
+    mesh_alpha: float,
+    vertical_exaggeration: float,
+    show_xy_labels: bool,
+    show_variable_label: bool = True,
+) -> Any:
+    x_grid, y_grid, z_grid = _surface_grids(
+        np.asarray(z_values, dtype=float),
+        extent,
+        max_grid_points=40_000,
+    )
+    surface = ax.plot_surface(
+        x_grid,
+        y_grid,
+        z_grid,
+        cmap=cmap,
+        vmin=vmin,
+        vmax=vmax,
+        linewidth=0.2,
+        edgecolor=(0.2, 0.2, 0.2, 0.28),
+        alpha=float(surface_alpha),
+        antialiased=True,
+        shade=True,
+    )
+    if float(mesh_linewidth) > 0.0 and float(mesh_alpha) > 0.0:
+        ax.plot_wireframe(
+            x_grid,
+            y_grid,
+            z_grid,
+            color=(0.05, 0.05, 0.05, float(mesh_alpha)),
+            linewidth=float(mesh_linewidth),
+            rstride=1,
+            cstride=1,
+        )
+    ax.view_init(elev=float(view_elev), azim=float(view_azim))
+    if show_xy_labels:
+        ax.set_xlabel("Easting", fontsize=LABEL_FONTSIZE, labelpad=16)
+        ax.set_ylabel("Northing", fontsize=LABEL_FONTSIZE, labelpad=16)
+    else:
+        ax.set_xlabel("")
+        ax.set_ylabel("")
+    ax.set_zlabel("")
+    if show_variable_label:
+        ax.text2D(
+            0.02,
+            0.37,
+            label,
+            transform=ax.transAxes,
+            rotation=90,
+            fontsize=LABEL_FONTSIZE,
+            ha="center",
+            va="center",
+        )
+    _set_min_max_axis_ticks(ax, x_grid, y_grid, z_grid)
+    ax.tick_params(axis="both", which="major", labelsize=TICK_FONTSIZE, pad=6)
+    ax.zaxis.set_tick_params(labelsize=TICK_FONTSIZE, pad=8)
+    _set_surface_box_aspect(
+        ax,
+        x_grid,
+        y_grid,
+        z_grid,
+        vertical_exaggeration=float(vertical_exaggeration),
+    )
+    return surface
+
+
 def _surface_grids(
     z_values: np.ndarray,
     extent: tuple[float, float, float, float],
@@ -300,6 +540,31 @@ def _format_scientific_tick(value: float) -> str:
     mantissa = mantissa.rstrip("0").rstrip(".")
     exponent_value = int(exponent)
     return f"{mantissa}e{exponent_value}"
+
+
+def _vector_to_display_patch(
+    vector: Any,
+    window_shape: tuple[int, int],
+    *,
+    feature_mask: np.ndarray | None = None,
+) -> np.ndarray:
+    arr = np.asarray(vector, dtype=float).ravel()
+    win_h, win_w = int(window_shape[0]), int(window_shape[1])
+    if feature_mask is None:
+        return arr.reshape((win_h, win_w))
+
+    mask = np.asarray(feature_mask, dtype=bool)
+    if mask.shape != (win_h, win_w):
+        raise ValueError(
+            f"feature_mask shape {mask.shape} does not match window_shape {(win_h, win_w)}."
+        )
+    if arr.size != int(mask.sum()):
+        raise ValueError(
+            f"Vector length {arr.size} does not match number of True cells in feature_mask {int(mask.sum())}."
+        )
+    out = np.full(mask.shape, np.nan, dtype=float)
+    out[mask] = arr
+    return out
 
 
 def _finite_span(values: np.ndarray) -> float:
