@@ -29,6 +29,7 @@ from spatial_pca.geodata.surfaces import (
     plot_deposit_surface,
     plot_deposit_surfaces,
     plot_reconstruction_surface_animation,
+    plot_top_similar_windows_surfaces,
 )
 from spatial_pca.provenance import build_provenance, write_provenance
 from spatial_pca.spca.pca import PCAResult, fit_spca
@@ -913,6 +914,25 @@ def _build_diagnostic_paths(
                 window_shape=window_matrix.window_shape,
                 variable_name=variable_name,
                 output_path=output_dir / "top_similar_windows.png",
+                n_rows=int(config["analysis_defaults"]["top_windows_plot_n_rows"]),
+                n_cols=int(config["analysis_defaults"]["top_windows_plot_n_cols"]),
+                vmin=vmin,
+                vmax=vmax,
+                image_cmap=image_cmap,
+                feature_mask=(
+                    None if window_matrix.display_sliding_windows is not None else window_matrix.feature_mask
+                ),
+            ),
+            "top_similar_windows_3d": plot_top_similar_windows_surfaces(
+                flattened_windows=window_matrix.display_sliding_windows
+                if window_matrix.display_sliding_windows is not None
+                else window_matrix.combined_sliding_windows,
+                ranked_window_rows=valid_ranked_idx,
+                ranked_distances=valid_ranked_dists,
+                window_ids=top_window_indices[:, 2],
+                window_shape=window_matrix.window_shape,
+                output_path=output_dir / "top_similar_windows_3d.png",
+                variable_name=variable_name,
                 n_rows=int(config["analysis_defaults"]["top_windows_plot_n_rows"]),
                 n_cols=int(config["analysis_defaults"]["top_windows_plot_n_cols"]),
                 vmin=vmin,

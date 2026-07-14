@@ -349,6 +349,100 @@ def plot_deposit_and_loading_surfaces(
     return path
 
 
+def plot_top_similar_windows_surfaces(
+    *,
+    flattened_windows: Any,
+    ranked_window_rows: Any,
+    ranked_distances: Any,
+    window_ids: Any,
+    window_shape: tuple[int, int],
+    output_path: str | Path,
+    variable_name: str,
+    n_rows: int = 2,
+    n_cols: int = 4,
+    vmin: float | None = None,
+    vmax: float | None = None,
+    image_cmap: str | Any | None = None,
+    feature_mask: np.ndarray | None = None,
+    surface_alpha: float = 0.42,
+    view_elev: float = 25.0,
+    view_azim: float = 28.0,
+    mesh_linewidth: float = 0.2,
+    mesh_alpha: float = 0.3,
+    vertical_exaggeration: float = 0.7,
+) -> Path:
+    """Plot top-ranked similar windows as 3D surfaces."""
+
+    windows = np.asarray(flattened_windows, dtype=float)
+    rows = np.asarray(ranked_window_rows, dtype=int)
+    dists = np.asarray(ranked_distances, dtype=float)
+    ids = np.asarray(window_ids, dtype=int)
+    n_show = min(int(n_rows) * int(n_cols), rows.size)
+    if n_show < 1:
+        raise ValueError("No top similar windows are available to plot as 3D surfaces.")
+
+    cmap = resolve_colormap(image_cmap or DEFAULT_SURFACE_CMAP)
+    path = Path(output_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    patches = [
+        _vector_to_display_patch(
+            windows[rows[i]],
+            window_shape,
+            feature_mask=feature_mask,
+        )
+        for i in range(n_show)
+    ]
+    fig = plt.figure(figsize=(5.3 * int(n_cols), 4.6 * int(n_rows) + 1.1), dpi=150)
+    fig.suptitle(
+        f"Top {n_show} Most Similar Windows - 3D",
+        fontsize=TITLE_FONTSIZE,
+        y=0.98,
+    )
+    grid = fig.add_gridspec(int(n_rows), int(n_cols), hspace=0.34, wspace=0.18)
+    axes = []
+    for i, patch in enumerate(patches):
+        ax = fig.add_subplot(grid[i // int(n_cols), i % int(n_cols)], projection="3d")
+        surface = _plot_surface_on_axis(
+            ax,
+            patch,
+            _unit_extent(patch),
+            cmap=cmap,
+            vmin=vmin,
+            vmax=vmax,
+            label=variable_name,
+            view_elev=view_elev,
+            view_azim=view_azim,
+            surface_alpha=surface_alpha,
+            mesh_linewidth=mesh_linewidth,
+            mesh_alpha=mesh_alpha,
+            vertical_exaggeration=vertical_exaggeration,
+            show_xy_labels=False,
+            show_variable_label=i % int(n_cols) == 0,
+        )
+        ax.set_title(
+            f"Rank {i + 1} | idx={int(ids[i])}\nd={float(dists[i]):.3f}",
+            fontsize=16,
+            pad=8,
+        )
+        axes.append(ax)
+
+    cbar = fig.colorbar(surface, ax=axes, fraction=0.018, pad=0.03, shrink=0.72)
+    _set_min_max_colorbar_ticks(
+        cbar,
+        np.asarray(patches, dtype=float),
+        vmin=vmin,
+        vmax=vmax,
+    )
+    cbar.set_label(variable_name, fontsize=COLORBAR_LABEL_FONTSIZE)
+    cbar.ax.tick_params(labelsize=TICK_FONTSIZE)
+
+    fig.subplots_adjust(left=0.03, right=0.91, top=0.90, bottom=0.05)
+    fig.savefig(path, dpi=200, bbox_inches="tight", facecolor="white")
+    plt.close(fig)
+    return path
+
+
 def plot_reconstruction_surface_animation(
     *,
     scores: Any,
@@ -561,6 +655,14 @@ def _plot_surface_on_axis(
         vertical_exaggeration=float(vertical_exaggeration),
     )
     return surface
+
+
+def _unit_extent(array: Any) -> tuple[float, float, float, float]:
+    arr = np.asarray(array)
+    if arr.ndim != 2:
+        raise ValueError(f"array must be 2D, got shape {arr.shape}.")
+    rows, cols = arr.shape
+    return 0.0, float(cols), 0.0, float(rows)
 
 
 def _surface_grids(
