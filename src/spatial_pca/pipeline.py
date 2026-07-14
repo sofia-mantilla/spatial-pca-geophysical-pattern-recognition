@@ -438,6 +438,7 @@ def _run_case_impl(
                 "standardize_fused_input": bool(fusion_details["standardize_fused_input"]),
                 "stage1_pca_svd_solver": str(fusion_details["stage1_pca_svd_solver"]),
                 "fused_pca_svd_solver": str(fusion_details["fused_pca_svd_solver"]),
+                "fused_eigenvalues": [float(v) for v in fusion_details.get("fused_eigenvalues", [])],
             }
         )
     elif is_raw_comparison:
