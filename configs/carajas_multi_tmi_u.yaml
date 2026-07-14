@@ -84,3 +84,13 @@ best_kpcs_files:
   var2_filename: "kpcs_best_multicriteria_by_deposit_spca_uni_radiometric_u.csv"
   var2_legacy_filename: "kpcs_best_multicriteria_by_deposit_uni_radiometric_u.csv"
   var2_path: "outputs/Output_Carajas_Brazil_Multivariate_TMI_U_clean_sweep_current_20260514/kpcs_best_multicriteria_by_deposit_spca_uni_radiometric_u.csv"
+
+# Reproducibility: explicit ranking options (added for publication; defaults
+# in code are now deterministic as well). See docs/reproducibility_debug_deposit3_multivariate.md.
+ranking:
+  weight_mode: "square"
+  normalize_weights_over: "selected_pcs"
+  use_whitening: false
+  use_weights: true
+  stage1_pca_svd_solver: "full"
+  fused_pca_svd_solver: "full"

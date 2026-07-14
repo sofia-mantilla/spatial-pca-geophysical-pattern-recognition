@@ -160,8 +160,8 @@ def run_spca_ranking_pipeline(
     use_weights: bool = True,
     weight_mode: str = "square",
     normalize_weights_over: str = "selected_pcs",
-    stage1_pca_svd_solver: str = "auto",
-    fused_pca_svd_solver: str = "auto",
+    stage1_pca_svd_solver: str = "full",
+    fused_pca_svd_solver: str = "full",
 ) -> dict[str, Any]:
     """Run the paper SPCA ranking dispatcher with the maintained return contract."""
 
@@ -315,8 +315,8 @@ def rank_multi_two_stage_pca_fusion(
     features_per_variable: int | None = None,
     weight_mode: str = "square",
     normalize_weights_over: str = "selected_pcs",
-    stage1_pca_svd_solver: str = "auto",
-    fused_pca_svd_solver: str = "auto",
+    stage1_pca_svd_solver: str = "full",
+    fused_pca_svd_solver: str = "full",
 ) -> RankingResult:
     """Rank multivariate windows using the paper two-stage fused PCA method."""
 
@@ -372,6 +372,26 @@ def rank_multi_two_stage_pca_fusion(
     Kf_eff = M_fused if k_pcs_fused is None else max(1, min(int(k_pcs_fused), M_fused))
     lam = eig_fused[:Kf_eff].copy()
     lam[lam < eps] = eps
+
+    # Reproducibility guard: truncating inside a (near-)degenerate eigenvalue
+    # block makes the retained fused basis rotation-dependent, so rankings can
+    # change between otherwise identical runs (see
+    # docs/reproducibility_debug_deposit3_multivariate.md).
+    if 0 < Kf_eff < M_fused:
+        lam_cut = float(eig_fused[Kf_eff - 1])
+        lam_next = float(eig_fused[Kf_eff])
+        rel_gap = (lam_cut - lam_next) / max(abs(lam_cut), eps)
+        if rel_gap < 1e-4:
+            import warnings
+
+            warnings.warn(
+                "Two-stage fused PCA: k_pcs_fused=%d cuts inside a near-degenerate "
+                "eigenvalue block (relative gap %.2e between eigenvalues %d and %d). "
+                "The ranking is not stable at this K; choose K at a spectral gap."
+                % (Kf_eff, rel_gap, Kf_eff, Kf_eff + 1),
+                RuntimeWarning,
+                stacklevel=2,
+            )
 
     if use_whitening:
         sqrt_lam = np.sqrt(lam)
@@ -456,7 +476,7 @@ def _fit_block_scores(
     X_block: np.ndarray,
     k_req: int,
     *,
-    svd_solver: str = "auto",
+    svd_solver: str = "full",
 ) -> tuple[np.ndarray, int, PCA, np.ndarray, np.ndarray]:
     X_mean = X_block.mean(axis=0)
     X_std = X_block.std(axis=0, ddof=1)

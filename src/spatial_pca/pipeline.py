@@ -633,8 +633,8 @@ def _get_ranking_options(config: dict[str, Any]) -> dict[str, Any]:
         "use_weights": bool(ranking.get("use_weights", True)),
         "weight_mode": str(ranking.get("weight_mode", "square")),
         "normalize_weights_over": str(ranking.get("normalize_weights_over", "selected_pcs")),
-        "stage1_pca_svd_solver": str(ranking.get("stage1_pca_svd_solver", "auto")),
-        "fused_pca_svd_solver": str(ranking.get("fused_pca_svd_solver", "auto")),
+        "stage1_pca_svd_solver": str(ranking.get("stage1_pca_svd_solver", "full")),
+        "fused_pca_svd_solver": str(ranking.get("fused_pca_svd_solver", "full")),
     }
 
 
