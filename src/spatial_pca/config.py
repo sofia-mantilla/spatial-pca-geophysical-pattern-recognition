@@ -155,14 +155,20 @@ def validate_run_config(config: dict[str, Any]) -> None:
         raise ConfigError("run.method_name must be 'Spatial_PCA' or 'Raw_comparison'.")
     if run["run_mode"] not in {"sweep_kpcs", "optimal_k_recon"}:
         raise ConfigError("run.run_mode must be 'sweep_kpcs' or 'optimal_k_recon'.")
+    _MULTI_RANKING_MODES = {
+        "two_stage_pca_fusion",
+        "late_fusion_sum",
+        "late_fusion_max",
+        "concat_scores",
+    }
     if (
         run["method_name"] == "Spatial_PCA"
         and run["analysis_type"] == "Multi"
-        and run["multi_ranking_mode"] != "two_stage_pca_fusion"
+        and run["multi_ranking_mode"] not in _MULTI_RANKING_MODES
     ):
         raise ConfigError(
-            "Multi Spatial_PCA runs must use run.multi_ranking_mode = "
-            "'two_stage_pca_fusion'."
+            "Multi Spatial_PCA runs must use run.multi_ranking_mode in "
+            f"{sorted(_MULTI_RANKING_MODES)}."
         )
     if run["analysis_type"] == "Multi":
         _require_keys(
