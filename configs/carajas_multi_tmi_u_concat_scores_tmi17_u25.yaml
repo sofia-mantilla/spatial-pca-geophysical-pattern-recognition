@@ -1,0 +1,95 @@
+project:
+  name: "Carajas IOCG multivariate TMI + Radiometric U, concat_scores fusion, stage-1 k by visual reconstruction (TMI 17, U 25)"
+  case: "Alemao / Deposit 3"
+  selected_variables: ["TMI", "Radiometric_U"]
+  training_deposit_id: 3
+  analysis_type: "Multi"
+
+run:
+  base_output_dir: "outputs"
+  run_mode: "sweep_kpcs"
+  analysis_type: "Multi"
+  method_name: "Spatial_PCA"
+  outputs_subdir: "Output_Carajas_Brazil_Multivariate_TMI_U_Concat_TMI17_U25"
+  uni_selected_variable: "TMI"
+  multi_ranking_mode: "concat_scores"
+
+paths:
+  variable_1_file_path: "data/Carajas_Brazil_Univariate_TMI/1097_1125_1129_TMI_merged.ers"
+  variable_2_file_path: "data/Carajas_Brazil_Multivariate_TMI_U/1097_1125_1129_RAD_eU_merged.ers"
+  polygon_path: "data/Carajas_Brazil_Univariate_TMI/Demo_area_polygon.shp"
+  nodata_to_nan: -99999.0
+
+targets:
+  deposit_crs_policy: "assume_raster"
+  validation_deposit_crs_policy: "reproject_to_raster"
+  deposits_shp_paths:
+    multi: "data/Carajas_Brazil_Multivariate_TMI_U/Prospect_in Carajas_multi.shp"
+
+sweep:
+  deposits_1based: [3]
+  kpcs: [42]
+  score_w_auc: 0.45
+  score_w_red_points: 0.35
+  score_w_hit_early: 0.2
+  targets_shp_mode: "multi"
+  best_kpcs_source_tag: "multi"
+  fusion_weight_var1: 0.5
+  fusion_weight_var2: 0.5
+  top_windows_color_scale_mode: "config_range"
+
+reconstruction:
+  extra_pcs: 3
+  enable: true
+
+analysis_defaults:
+  variable_1: "TMI"
+  variable_2: "Radiometric_U"
+  vmin_var2: 0
+  vmax_var2: 15
+  rotation_angle: 0
+  stride_x: 8
+  stride_y: 8
+  n_top_windows: 250
+  top_windows_plot_n_rows: 2
+  top_windows_plot_n_cols: 4
+  force_crs: "EPSG:32722"
+  show_plots: false
+  min_cover: 0.5
+
+visualization:
+  image_colormap: "spatial_pca_paper"
+  score_pairs_top_n_to_plot: 3
+  deposit_limits_tmi:
+    "1": [-250, 300]
+    "2": [-200, 400]
+    "3": [-150, 150]
+    "4": [-600, 400]
+    "5": [-200, 400]
+    "6": [-200, 400]
+    "7": [-150, 300]
+    "8": [-200, 300]
+    "9": [-100, 100]
+    "10": [-200, 300]
+    "11": [-300, 500]
+    "12": [-200, 400]
+
+best_kpcs_files:
+  multicriteria_filename_template: "kpcs_best_multicriteria_by_deposit_{csv_file_tag}.csv"
+  multicriteria_legacy_filename_template: "kpcs_best_multicriteria_by_deposit_{best_kpcs_source_tag}.csv"
+  var1_filename: "carajas_multi_tmi_fixed_uni_kpcs_17.csv"
+  var1_legacy_filename: "carajas_multi_tmi_fixed_uni_kpcs_17.csv"
+  var1_path: "configs/support/carajas_multi_tmi_fixed_uni_kpcs_17.csv"
+  var2_filename: "carajas_multi_u_fixed_uni_kpcs_25.csv"
+  var2_legacy_filename: "carajas_multi_u_fixed_uni_kpcs_25.csv"
+  var2_path: "configs/support/carajas_multi_u_fixed_uni_kpcs_25.csv"
+
+# Reproducibility: explicit ranking options (added for publication; defaults
+# in code are now deterministic as well). See docs/reproducibility_debug_deposit3_multivariate.md.
+ranking:
+  weight_mode: "square"
+  normalize_weights_over: "selected_pcs"
+  use_whitening: false
+  use_weights: true
+  stage1_pca_svd_solver: "full"
+  fused_pca_svd_solver: "full"

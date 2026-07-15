@@ -173,13 +173,41 @@ def run_spca_ranking_pipeline(
     mode = str(multi_ranking_mode)
 
     if analysis == "Multi":
+        if k_pcs_rank_var1 is None or k_pcs_rank_var2 is None:
+            raise ValueError("Multi ranking requires k_pcs_rank_var1 and k_pcs_rank_var2.")
+        if mode in ("late_fusion_sum", "late_fusion_max"):
+            result = rank_multi_late_fusion(
+                X_multi=X_multi,
+                deposit_index=deposit_index,
+                k_pcs_var1=int(k_pcs_rank_var1),
+                k_pcs_var2=int(k_pcs_rank_var2),
+                combine="sum" if mode == "late_fusion_sum" else "max",
+                alpha_var1=float(fusion_weight_var1),
+                features_per_variable=features_per_variable,
+                return_squared=False,
+                weight_mode=weight_mode,
+                normalize_weights_over=normalize_weights_over,
+                stage1_pca_svd_solver=stage1_pca_svd_solver,
+            )
+            return result.to_pipeline_dict()
+        if mode == "concat_scores":
+            result = rank_multi_concat_scores(
+                X_multi=X_multi,
+                deposit_index=deposit_index,
+                k_pcs_var1=int(k_pcs_rank_var1),
+                k_pcs_var2=int(k_pcs_rank_var2),
+                features_per_variable=features_per_variable,
+                return_squared=False,
+                weight_mode=weight_mode,
+                normalize_weights_over=normalize_weights_over,
+                stage1_pca_svd_solver=stage1_pca_svd_solver,
+            )
+            return result.to_pipeline_dict()
         if mode != "two_stage_pca_fusion":
             raise ValueError(
-                "Multi Spatial_PCA ranking is defined as two_stage_pca_fusion; "
-                f"got '{mode}'."
+                "Multi Spatial_PCA ranking modes: two_stage_pca_fusion, "
+                f"late_fusion_sum, late_fusion_max, concat_scores; got '{mode}'."
             )
-        if k_pcs_rank_var1 is None or k_pcs_rank_var2 is None:
-            raise ValueError("two_stage_pca_fusion requires k_pcs_rank_var1 and k_pcs_rank_var2.")
         result = rank_multi_two_stage_pca_fusion(
             X_multi=X_multi,
             deposit_index=deposit_index,
@@ -295,6 +323,173 @@ def rank_by_weighted_l2(
         normalize_weights_over=normalize_weights_over,
         ranking_mode="shared_weighted_l2",
         fusion_details={},
+    )
+
+
+def rank_multi_late_fusion(
+    *,
+    X_multi: Any,
+    deposit_index: int,
+    k_pcs_var1: int,
+    k_pcs_var2: int,
+    combine: str = "sum",
+    alpha_var1: float = 0.5,
+    features_per_variable: int | None = None,
+    return_squared: bool = False,
+    weight_mode: str = "square",
+    normalize_weights_over: str = "selected_pcs",
+    stage1_pca_svd_solver: str = "full",
+    eps: float = 1e-12,
+) -> RankingResult:
+    """Late fusion: per-variable deposit-weighted distances, combined at the end.
+
+    Each variable keeps its own sPCA space, its own visually chosen k, and its
+    own deposit weights, so variable-specific deposit signal is never discarded
+    (unlike two-stage fusion, whose retained components carry only cross-variable
+    shared variation). Per-variable squared distances are median-normalized and
+    combined either as a convex sum (``combine='sum'``, weight ``alpha_var1``)
+    or as an intersection-style maximum (``combine='max'``: a target must match
+    both geometries).
+    """
+
+    X = np.asarray(X_multi, dtype=float)
+    n_pix = int(features_per_variable) if features_per_variable else X.shape[1] // 2
+    X1 = X[:, :n_pix]
+    X2 = X[:, n_pix : 2 * n_pix]
+
+    dists_sq_norm = []
+    block_details = []
+    weights_all = []
+    spaces = []
+    for X_block, k_req in ((X1, k_pcs_var1), (X2, k_pcs_var2)):
+        Zk, k_eff, _pca, _mu, _sd = _fit_block_scores(
+            X_block, int(k_req), svd_solver=stage1_pca_svd_solver
+        )
+        w = _compute_deposit_weights(
+            scores=Zk,
+            deposit_index=deposit_index,
+            k_used=k_eff,
+            weight_mode=weight_mode,
+            normalize_weights_over=normalize_weights_over,
+        )
+        diff = Zk[:, :k_eff] - Zk[int(deposit_index), :k_eff]
+        d_sq = (diff**2) @ w
+        med = float(np.median(d_sq))
+        med_safe = med if med > eps else eps
+        dists_sq_norm.append(d_sq / med_safe)
+        block_details.append({"k_eff": int(k_eff), "median_d_sq": med})
+        weights_all.append(w)
+        spaces.append(Zk[:, :k_eff])
+
+    a = float(alpha_var1)
+    if combine == "sum":
+        combined = a * dists_sq_norm[0] + (1.0 - a) * dists_sq_norm[1]
+        mode_name = "late_fusion_sum"
+    elif combine == "max":
+        combined = np.maximum(dists_sq_norm[0], dists_sq_norm[1])
+        mode_name = "late_fusion_max"
+    else:
+        raise ValueError(f"Unknown late-fusion combine rule: {combine!r}")
+
+    dists = combined if return_squared else np.sqrt(combined)
+    order = np.argsort(dists)
+    k_total = block_details[0]["k_eff"] + block_details[1]["k_eff"]
+    return RankingResult(
+        ranked_idx=order,
+        ranked_dists=dists[order],
+        weights=np.concatenate(weights_all),
+        comparison_space=np.hstack(spaces),
+        k_used=int(k_total),
+        use_whitening=False,
+        use_weights=True,
+        return_squared=return_squared,
+        weight_mode=weight_mode,
+        normalize_weights_over=normalize_weights_over,
+        ranking_mode=mode_name,
+        fusion_details={
+            "K_var1": block_details[0]["k_eff"],
+            "K_var2": block_details[1]["k_eff"],
+            "K_fused": int(k_total),
+            "combine": combine,
+            "alpha_var1": a,
+            "median_d_sq_var1": block_details[0]["median_d_sq"],
+            "median_d_sq_var2": block_details[1]["median_d_sq"],
+            "standardize_fused_input": False,
+            "stage1_pca_svd_solver": stage1_pca_svd_solver,
+            "fused_pca_svd_solver": "none",
+            "features_per_variable": n_pix,
+        },
+    )
+
+
+def rank_multi_concat_scores(
+    *,
+    X_multi: Any,
+    deposit_index: int,
+    k_pcs_var1: int,
+    k_pcs_var2: int,
+    features_per_variable: int | None = None,
+    return_squared: bool = False,
+    weight_mode: str = "square",
+    normalize_weights_over: str = "selected_pcs",
+    stage1_pca_svd_solver: str = "full",
+) -> RankingResult:
+    """One-stage fusion: deposit-weighted L2 in the concatenated standardized
+    score space, with no second PCA and no ``k_pcs_fused`` truncation.
+
+    The fused correlation matrix of standardized stage-1 scores is I + C with
+    small cross-block C, so a second PCA is nearly a rotation-free identity;
+    its only material effect is the truncation, which is what made the
+    two-stage ranking unstable under (near-)degenerate eigenvalues. This mode
+    removes that step entirely.
+    """
+
+    X = np.asarray(X_multi, dtype=float)
+    n_pix = int(features_per_variable) if features_per_variable else X.shape[1] // 2
+    X1 = X[:, :n_pix]
+    X2 = X[:, n_pix : 2 * n_pix]
+
+    Z1k, K1_eff, _p1, _m1, _s1 = _fit_block_scores(X1, int(k_pcs_var1), svd_solver=stage1_pca_svd_solver)
+    Z2k, K2_eff, _p2, _m2, _s2 = _fit_block_scores(X2, int(k_pcs_var2), svd_solver=stage1_pca_svd_solver)
+    F = np.hstack([Z1k, Z2k])
+    F_mu = F.mean(axis=0)
+    F_sd = F.std(axis=0, ddof=1)
+    F_sd_safe = np.where(F_sd == 0, 1.0, F_sd)
+    Fs = (F - F_mu) / F_sd_safe
+
+    k_total = int(K1_eff + K2_eff)
+    w = _compute_deposit_weights(
+        scores=Fs,
+        deposit_index=deposit_index,
+        k_used=k_total,
+        weight_mode=weight_mode,
+        normalize_weights_over=normalize_weights_over,
+    )
+    diff = Fs - Fs[int(deposit_index)]
+    d_sq = (diff**2) @ w
+    dists = d_sq if return_squared else np.sqrt(d_sq)
+    order = np.argsort(dists)
+    return RankingResult(
+        ranked_idx=order,
+        ranked_dists=dists[order],
+        weights=w,
+        comparison_space=Fs,
+        k_used=k_total,
+        use_whitening=False,
+        use_weights=True,
+        return_squared=return_squared,
+        weight_mode=weight_mode,
+        normalize_weights_over=normalize_weights_over,
+        ranking_mode="concat_scores",
+        fusion_details={
+            "K_var1": int(K1_eff),
+            "K_var2": int(K2_eff),
+            "K_fused": k_total,
+            "standardize_fused_input": True,
+            "stage1_pca_svd_solver": stage1_pca_svd_solver,
+            "fused_pca_svd_solver": "none",
+            "features_per_variable": n_pix,
+        },
     )
 
 
