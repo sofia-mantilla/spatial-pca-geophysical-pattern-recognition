@@ -165,10 +165,10 @@ def run_spca_ranking_pipeline(
 ) -> dict[str, Any]:
     """Run the paper SPCA ranking dispatcher with the maintained return contract."""
 
-    # Kept in the signature for compatibility with the paper driver. Two-stage
-    # fused PCA does not use late variable-distance weights, and top-window
-    # slicing happens after the appended training deposit row is removed.
-    del n_top_windows, fusion_weight_var1, fusion_weight_var2
+    # Kept in the signature for compatibility with the paper driver. Top-window
+    # slicing happens after the appended training deposit row is removed. The
+    # fusion weights are used by the late-fusion modes (alpha_var1).
+    del n_top_windows
     analysis = str(analysis_type)
     mode = str(multi_ranking_mode)
 

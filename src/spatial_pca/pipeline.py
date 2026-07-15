@@ -1102,6 +1102,15 @@ def _build_diagnostic_paths(
     if is_raw_comparison:
         return diagnostic_paths
     if pca_result is None:
+        if getattr(ranking_result, "ranking_mode", "") in (
+            "late_fusion_sum",
+            "late_fusion_max",
+            "concat_scores",
+        ):
+            # These fusion modes have no single global PCA object; per-variable
+            # spectra and reconstructions live in the univariate runs, so the
+            # PCA-dependent diagnostic plots are skipped here.
+            return diagnostic_paths
         raise ValueError("SPCA diagnostics require a PCA result.")
 
     diagnostic_paths["component_weights"] = plot_deposit_scores_and_weights(
