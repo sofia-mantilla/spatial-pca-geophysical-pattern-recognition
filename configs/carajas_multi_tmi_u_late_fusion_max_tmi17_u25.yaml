@@ -8,6 +8,7 @@ project:
 run:
   base_output_dir: "outputs"
   run_mode: "sweep_kpcs"
+  skip_case_plots: true
   analysis_type: "Multi"
   method_name: "Spatial_PCA"
   outputs_subdir: "Output_Carajas_Brazil_Multivariate_TMI_U_LateMax_TMI17_U25"

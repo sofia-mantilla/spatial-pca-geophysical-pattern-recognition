@@ -1,5 +1,5 @@
 project:
-  name: "Carajas IOCG multivariate TMI + Radiometric U, late_fusion_sum fusion, stage-1 k by visual reconstruction (TMI 17, U 25)"
+  name: "Carajas IOCG multivariate TMI + Radiometric U, stage-1 k by visual reconstruction (TMI 17, U 25)"
   case: "Alemao / Deposit 3"
   selected_variables: ["TMI", "Radiometric_U"]
   training_deposit_id: 3
@@ -11,9 +11,9 @@ run:
   skip_case_plots: true
   analysis_type: "Multi"
   method_name: "Spatial_PCA"
-  outputs_subdir: "Output_Carajas_Brazil_Multivariate_TMI_U_LateSum_TMI17_U25"
+  outputs_subdir: "Output_Carajas_Brazil_Multivariate_TMI_U_Square_TMI17_U25"
   uni_selected_variable: "TMI"
-  multi_ranking_mode: "late_fusion_sum"
+  multi_ranking_mode: "two_stage_pca_fusion"
 
 paths:
   variable_1_file_path: "data/Carajas_Brazil_Univariate_TMI/1097_1125_1129_TMI_merged.ers"
@@ -28,8 +28,8 @@ targets:
     multi: "data/Carajas_Brazil_Multivariate_TMI_U/Prospect_in Carajas_multi.shp"
 
 sweep:
-  deposits_1based: [1,2,3,4,5]
-  kpcs: [42]
+  deposits_1based: [5]
+  kpcs: [2,3,4,5,6,8,10,12,14,17]
   score_w_auc: 0.45
   score_w_red_points: 0.35
   score_w_hit_early: 0.2

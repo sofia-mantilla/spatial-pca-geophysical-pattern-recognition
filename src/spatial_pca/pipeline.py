@@ -465,7 +465,10 @@ def _run_case_impl(
         validation_payload,
         output_dir / "validation_topk_results.pkl",
     )
-    recovery_plot_path = plot_cumulative_recovery(
+    # Fast experiment mode: keep all data products (gpkg, validation pkl,
+    # provenance) but skip figure rendering, which dominates sweep runtime.
+    skip_plots = bool(config.get("run", {}).get("skip_case_plots", False))
+    recovery_plot_path = None if skip_plots else plot_cumulative_recovery(
         recovery_result,
         output_dir / "cumulative_footprint_recovery_fraction.png",
         deposit_1based=deposit_1based,
@@ -475,7 +478,7 @@ def _run_case_impl(
     top_windows_title = (
         f"{' + '.join(summary_variables)}: Top {n_top_windows} Prediction Windows"
     )
-    top_windows_plot_path = plot_top_windows_overlay(
+    top_windows_plot_path = None if skip_plots else plot_top_windows_overlay(
         top_windows_gdf=top_windows_gdf,
         deposits_gdf=validation_deposits_gdf,
         reference_deposit_index=deposit_1based - 1,
@@ -489,7 +492,7 @@ def _run_case_impl(
         title=top_windows_title,
         image_cmap=_get_image_colormap(config),
     )
-    if pca_result is None:
+    if pca_result is None or skip_plots:
         pc_score_map_path = None
     else:
         pc_score_map_path = plot_pc_score_map(
@@ -504,7 +507,7 @@ def _run_case_impl(
             variable_name=variable_name,
             output_path=output_dir / "pc_score_map.png",
         )
-    diagnostic_paths = _build_diagnostic_paths(
+    diagnostic_paths = {} if skip_plots else _build_diagnostic_paths(
         config=config,
         deposit_1based=deposit_1based,
         k_pcs=k_pcs,
