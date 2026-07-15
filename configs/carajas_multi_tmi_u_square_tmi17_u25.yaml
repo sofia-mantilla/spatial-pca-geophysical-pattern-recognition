@@ -27,7 +27,7 @@ targets:
     multi: "data/Carajas_Brazil_Multivariate_TMI_U/Prospect_in Carajas_multi.shp"
 
 sweep:
-  deposits_1based: [3]
+  deposits_1based: [1,2,3,4,5]
   kpcs: [2,3,4,5,6,8,10,12,14,17]
   score_w_auc: 0.45
   score_w_red_points: 0.35
