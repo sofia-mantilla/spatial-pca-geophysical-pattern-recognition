@@ -106,7 +106,7 @@ def plot_deposit_surfaces(
 
     fig = plt.figure(figsize=(8.8 * len(ordered_vars), 7.6), dpi=150)
     fig.suptitle(
-        f"Geometry of Training Deposit ID={deposit_1based}",
+        f"Geometry of Reference Deposit {deposit_1based}",
         fontsize=TITLE_FONTSIZE,
     )
 
@@ -258,7 +258,7 @@ def plot_deposit_and_loading_surfaces(
         wspace=0.20,
     )
     fig.suptitle(
-        f"Training Deposit ID={deposit_1based} and PCA Loading Maps",
+        f"Reference Deposit {deposit_1based} and PCA Loading Maps",
         fontsize=TITLE_FONTSIZE,
         y=0.98,
     )

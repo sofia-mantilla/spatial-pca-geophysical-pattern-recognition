@@ -262,7 +262,7 @@ def plot_cumulative_recovery(
     if deposit_1based is None:
         ax.set_xlabel("Prediction rank (1 = most similar)")
     else:
-        ax.set_xlabel(f"Prediction rank (1 = most similar to training deposit #{deposit_1based})")
+        ax.set_xlabel(f"Prediction rank (1 = most similar to reference deposit {deposit_1based})")
     ax.set_ylabel("Cumulative recovered fraction of all test-deposit area")
     ax.set_title(title)
     if recovery.overlap_by_rank:
@@ -415,14 +415,14 @@ def plot_top_windows_overlay(
                 ax=ax,
                 color="black",
                 linewidth=testing_linewidth,
-                label="Testing Known Deposits",
+                label="Test deposits",
                 zorder=7,
             )
         reference.boundary.plot(
             ax=ax,
             color="red",
             linewidth=training_linewidth,
-            label="Training Known Deposit",
+            label="Reference deposit",
             zorder=8,
         )
 
@@ -478,8 +478,8 @@ def plot_top_windows_overlay(
             ax.set_title(variable_name, fontsize=annotation_fontsize, fontweight="bold")
 
     legend_handles = [
-        Line2D([0], [0], color="black", linewidth=testing_linewidth, label="Testing Known Deposits"),
-        Line2D([0], [0], color="red", linewidth=training_linewidth, label="Training Known Deposit"),
+        Line2D([0], [0], color="black", linewidth=testing_linewidth, label="Test deposits"),
+        Line2D([0], [0], color="red", linewidth=training_linewidth, label="Reference deposit"),
         Line2D([0], [0], color="white", linewidth=predicted_linewidth, label=top_windows_label),
         Line2D([0], [0], color="black", marker=r"$\uparrow$", linestyle="None", markersize=12, label="N"),
     ]

@@ -288,7 +288,7 @@ def plot_known_deposit_windows(
 
     ax_deposits.legend(
         handles=[
-            Line2D([0], [0], color="red", linewidth=2.8, label="Training known deposit"),
+            Line2D([0], [0], color="red", linewidth=2.8, label="Reference deposit"),
             Line2D([0], [0], color="black", linewidth=2.2, label="Testing known deposits"),
         ],
         loc="upper left",

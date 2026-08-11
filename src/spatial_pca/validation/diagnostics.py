@@ -636,7 +636,7 @@ def plot_score_pairs(
             c="none",
             edgecolors="black",
             linewidths=1.5,
-            label="Training deposit",
+            label="Reference deposit",
             zorder=5,
         )
         if highlight_indices.size:

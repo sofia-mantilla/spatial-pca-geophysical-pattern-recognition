@@ -928,7 +928,7 @@ def plot_top_gain_subplots_two_groups(
         _plot_rank_events_single_curve(ax, y_a, outvals_a.get(dep, {}))
         _plot_rank_events_single_curve(ax, y_b, outvals_b.get(dep, {}))
 
-        ax.set_title(f"Training Deposit #{dep}", fontsize=10)
+        ax.set_title(f"Reference Deposit {dep}", fontsize=10)
         ax.set_xlabel("Prediction rank")
         ax.set_ylabel("Cumulative recovered fraction")
         ax.set_ylim(0, float(ymax) if ymax is not None else 1.02)
@@ -1033,7 +1033,7 @@ def plot_top_gain_subplots_three_groups(
         _plot_rank_events_single_curve(ax, y_b, outvals_b.get(dep, {}))
         _plot_rank_events_single_curve(ax, y_c, outvals_c.get(dep, {}))
 
-        ax.set_title(f"Training Deposit #{dep}", fontsize=10)
+        ax.set_title(f"Reference Deposit {dep}", fontsize=10)
         ax.set_xlabel("Prediction rank")
         ax.set_ylabel("Cumulative recovered fraction")
         ax.set_ylim(0, float(ymax) if ymax is not None else 1.02)
@@ -1284,7 +1284,7 @@ def plot_top_gain_subplots_n_groups(
                 bbox={"facecolor": "white", "alpha": 0.7, "edgecolor": "none"},
             )
 
-        ax.set_title(f"Training Deposit #{dep}", fontsize=10)
+        ax.set_title(f"Reference Deposit {dep}", fontsize=10)
         ax.set_xlabel("Prediction rank")
         ax.set_ylabel("Cumulative recovered fraction")
         ax.set_ylim(0, float(ymax) if ymax is not None else 1.02)
