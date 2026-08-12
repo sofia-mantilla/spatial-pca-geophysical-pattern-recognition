@@ -39,11 +39,11 @@ def plot_deposit_surface(
     image_cmap: str | Any | None = None,
     max_grid_points: int = 40_000,
     surface_alpha: float = 0.42,
-    view_elev: float = 25.0,
+    view_elev: float = 26.0,
     view_azim: float = 28.0,
     mesh_linewidth: float = 0.3,
     mesh_alpha: float = 0.8,
-    vertical_exaggeration: float = 1.2,
+    vertical_exaggeration: float = 0.6,
 ) -> Path:
     """Plot one deposit template as a 3D x/y/z surface.
 
@@ -84,7 +84,7 @@ def plot_deposit_surfaces(
     view_azim: float = 28.0,
     mesh_linewidth: float = 0.2,
     mesh_alpha: float = 0.3,
-    vertical_exaggeration: float = 2.5,
+    vertical_exaggeration: float = 1.25,
 ) -> Path:
     """Plot one or more deposit raster templates as 3D surfaces."""
 
@@ -207,11 +207,11 @@ def plot_deposit_and_loading_surfaces(
     loading_cmap: str | Any | None = None,
     feature_mask: np.ndarray | None = None,
     surface_alpha: float = 0.42,
-    view_elev: float = 25.0,
+    view_elev: float = 26.0,
     view_azim: float = 28.0,
     mesh_linewidth: float = 0.2,
     mesh_alpha: float = 0.3,
-    vertical_exaggeration: float = 1.2,
+    vertical_exaggeration: float = 0.6,
 ) -> Path:
     """Plot the training deposit above top-weighted loading maps as 3D surfaces."""
 
@@ -365,11 +365,11 @@ def plot_top_similar_windows_surfaces(
     image_cmap: str | Any | None = None,
     feature_mask: np.ndarray | None = None,
     surface_alpha: float = 0.42,
-    view_elev: float = 25.0,
+    view_elev: float = 26.0,
     view_azim: float = 28.0,
     mesh_linewidth: float = 0.2,
     mesh_alpha: float = 0.3,
-    vertical_exaggeration: float = 0.7,
+    vertical_exaggeration: float = 0.35,
 ) -> Path:
     """Plot top-ranked similar windows as 3D surfaces."""
 
@@ -463,11 +463,11 @@ def plot_reconstruction_surface_animation(
     image_cmap: str | Any | None = None,
     feature_mask: np.ndarray | None = None,
     surface_alpha: float = 0.42,
-    view_elev: float = 25.0,
+    view_elev: float = 26.0,
     view_azim: float = 28.0,
     mesh_linewidth: float = 0.2,
     mesh_alpha: float = 0.3,
-    vertical_exaggeration: float = 1.2,
+    vertical_exaggeration: float = 0.6,
     duration_ms: int = 650,
 ) -> Path:
     """Animate training-deposit reconstruction as PCs are added."""
@@ -684,7 +684,7 @@ def _surface_grids(
     dx = (right - left) / float(cols)
     dy = (top - bottom) / float(rows)
     x = np.linspace(left + 0.5 * dx, right - 0.5 * dx, cols)
-    y = np.linspace(top - 0.5 * dy, bottom + 0.5 * dy, rows)
+    y = np.linspace(top - 0.5 * dy, bottom + 0.5 * dy, rows)  # row 0 = north, matching imshow(origin='upper') in the 2D plots
 
     step = int(np.ceil(np.sqrt(z_values.size / float(max_grid_points))))
     step = max(1, step)
@@ -699,7 +699,7 @@ def _set_surface_box_aspect(
     y_grid: np.ndarray,
     z_grid: np.ndarray,
     *,
-    vertical_exaggeration: float = 1.0,
+    vertical_exaggeration: float = 0.5,
 ) -> None:
     finite_z = z_grid[np.isfinite(z_grid)]
     if finite_z.size == 0:
