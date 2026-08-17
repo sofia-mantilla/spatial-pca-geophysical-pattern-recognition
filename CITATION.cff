@@ -1,23 +1,26 @@
 cff-version: 1.2.0
-title: "Spatial PCA for Geophysical Pattern Recognition in Mineral Exploration"
-message: "If you use this repository, please cite the archived Zenodo release."
+title: "Windowed PCA (wPCA) for Geophysical Pattern Recognition in Mineral Exploration"
+message: "If you use this repository, please cite the archived Zenodo release and the associated paper."
 type: software
 
 authors:
   - family-names: "Mantilla Salas"
     given-names: "Sofia"
     affiliation: "Stanford University"
+    orcid: "https://orcid.org/0009-0002-1423-8370"
 
 repository-code: "https://github.com/sofia-mantilla/spatial-pca-geophysical-pattern-recognition"
 url: "https://zenodo.org/records/20168910"
 doi: "10.5281/zenodo.20168910"
 
-version: "v1.0.1"
-date-released: "2026-05-13"
+version: "v2.0.0"
+date-released: "2026-08-17"
 
-abstract: "A reproducible spatial PCA workflow for learning deposit-scale geophysical geometry and ranking mineral exploration targets by similarity to known mineralization."
+abstract: "A reproducible windowed PCA (wPCA) workflow for learning deposit-scale geophysical geometry and ranking mineral exploration targets by similarity to known mineralization. Formerly released under the working name Spatial PCA; the method and code are the same."
 
 keywords:
+  - windowed PCA
+  - wPCA
   - spatial PCA
   - geophysical pattern recognition
   - mineral exploration
@@ -28,3 +31,23 @@ keywords:
   - Carajas
 
 license: "MIT"
+
+preferred-citation:
+  type: article
+  title: "Geometry-based targeting from a single known deposit using windowed principal component analysis: an IOCG case study in Carajás, Brazil"
+  authors:
+    - family-names: "Mantilla Salas"
+      given-names: "Sofia"
+    - family-names: "Mejia-Herrera"
+      given-names: "Pablo"
+    - family-names: "Kloeckner"
+      given-names: "Jonas"
+    - family-names: "Asadi"
+      given-names: "Adel"
+    - family-names: "Yin"
+      given-names: "David Zhen"
+    - family-names: "Caers"
+      given-names: "Jef"
+  journal: "Natural Resources Research"
+  year: 2026
+  notes: "Submitted."

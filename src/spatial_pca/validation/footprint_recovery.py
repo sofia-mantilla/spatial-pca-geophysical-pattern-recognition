@@ -12,6 +12,11 @@ from typing import Any
 os.environ.setdefault("MPLCONFIGDIR", str(Path(tempfile.gettempdir()) / "spatial_pca_matplotlib_cache"))
 
 import geopandas as gpd
+
+from spatial_pca.units import variable_display_label
+
+# Journal artwork rules: no figure-level titles inside single-panel artwork.
+SHOW_FIGURE_TITLES = False
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import patheffects as pe
@@ -248,7 +253,7 @@ def plot_cumulative_recovery(
             f"Orange = any overlap event, Red = first threshold event (>={int(100 * min_cover)}% coverage)"
         )
 
-    fig, ax = plt.subplots(figsize=(7.8, 4.6), dpi=150)
+    fig, ax = plt.subplots(figsize=(7.8, 4.6), dpi=400)
     ax.plot(
         ranks,
         y,
@@ -299,7 +304,7 @@ def plot_cumulative_recovery(
                     textcoords="offset points",
                     ha="center",
                     va="bottom",
-                    fontsize=9,
+                    fontsize=12.2,
                     color="red",
                 )
 
@@ -473,7 +478,7 @@ def plot_top_windows_overlay(
         )
         scalar_mappable.set_array([])
         colorbar = fig.colorbar(scalar_mappable, ax=ax, fraction=0.035, pad=0.02)
-        colorbar.set_label(variable_name, fontsize=annotation_fontsize)
+        colorbar.set_label(variable_display_label(variable_name), fontsize=annotation_fontsize)
         if len(ordered_vars) > 1:
             ax.set_title(variable_name, fontsize=annotation_fontsize, fontweight="bold")
 
@@ -493,12 +498,13 @@ def plot_top_windows_overlay(
     )
     title = title or f"Top {len(ranked_windows)} Prediction Windows"
     if len(ordered_vars) == 1:
-        axes.flat[0].set_title(title, fontsize=annotation_fontsize)
+        if SHOW_FIGURE_TITLES:
+            axes.flat[0].set_title(title, fontsize=annotation_fontsize)
         fig.tight_layout()
     else:
         fig.suptitle(title, fontsize=annotation_fontsize)
         fig.tight_layout(rect=(0, 0, 1, 0.95))
-    fig.savefig(path, dpi=300)
+    fig.savefig(path, dpi=400)
     plt.close(fig)
     return path
 
@@ -636,7 +642,7 @@ def _add_scale_bar(ax: Any, extent: tuple[float, float, float, float]) -> None:
         label,
         ha="center",
         va="bottom",
-        fontsize=11,
+        fontsize=14.9,
         color="black",
         bbox={"facecolor": "white", "alpha": 0.7, "edgecolor": "none", "pad": 1.5},
         zorder=21,

@@ -10,11 +10,18 @@ from typing import Any
 os.environ.setdefault("MPLCONFIGDIR", str(Path(tempfile.gettempdir()) / "spatial_pca_matplotlib_cache"))
 
 import matplotlib.pyplot as plt
+import math
+
 import numpy as np
 from matplotlib import patheffects as pe
 from rasterio.transform import Affine
 from shapely.geometry.base import BaseGeometry
 
+from spatial_pca.units import variable_display_label
+
+# Journal artwork rules (Springer NRR): no figure-level titles inside the
+# artwork; captions carry the information. Panel labels stay.
+SHOW_FIGURE_TITLES = False
 from spatial_pca.colormaps import DEFAULT_PAPER_CMAP, resolve_colormap
 
 DEFAULT_IMAGE_CMAP = DEFAULT_PAPER_CMAP
@@ -106,7 +113,7 @@ def plot_pc_score_map(
     cbar = fig.colorbar(sc, ax=ax, fraction=0.035, pad=0.03)
     cbar.set_label(f"PC{pc_idx + 1} score")
     fig.tight_layout()
-    fig.savefig(path, dpi=200)
+    fig.savefig(path, dpi=400)
     plt.close(fig)
     return path
 
@@ -137,13 +144,13 @@ def plot_rotated_deposit(
         vmin=vmin,
         vmax=vmax,
     )
-    ax.set_title(f"Rotated {rotation_angle:g}\N{DEGREE SIGN} - Deposit {deposit_1based} - {variable_name}", fontsize=26)
-    ax.set_xlabel("Easting (m)", fontsize=20)
-    ax.set_ylabel("Northing (m)", fontsize=20)
+    ax.set_title(f"Rotated {rotation_angle:g}\N{DEGREE SIGN} - Deposit {deposit_1based} - {variable_name}", fontsize=35.1)
+    ax.set_xlabel("Easting (m)", fontsize=27.0)
+    ax.set_ylabel("Northing (m)", fontsize=27.0)
     cbar = fig.colorbar(im, ax=ax, fraction=0.035, pad=0.06)
-    cbar.set_label(f"{variable_name} (nT)" if variable_name.upper() == "MAG" else variable_name, fontsize=18)
+    cbar.set_label(_variable_label(variable_name), fontsize=24.3)
     fig.tight_layout()
-    fig.savefig(path, dpi=200)
+    fig.savefig(path, dpi=400)
     plt.close(fig)
     return path
 
@@ -166,19 +173,19 @@ def plot_multivariate_rotated_deposit(
     path.parent.mkdir(parents=True, exist_ok=True)
 
     fig, axes = plt.subplots(1, len(ordered_vars), figsize=(6 * len(ordered_vars), 6), squeeze=False)
-    fig.suptitle(f"Rotated {rotation_angle:g}\N{DEGREE SIGN} - Deposit {deposit_1based}", fontsize=22)
+    fig.suptitle(f"Rotated {rotation_angle:g}\N{DEGREE SIGN} - Deposit {deposit_1based}", fontsize=22.0, y=1.005)
     for ax, var in zip(axes.flat, ordered_vars):
         arr = np.asarray(deposit_arrays[var], dtype=float)
         vmin = None if vmin_by_var is None else vmin_by_var.get(var)
         vmax = None if vmax_by_var is None else vmax_by_var.get(var)
         im = ax.imshow(arr, origin="upper", cmap=cmap, vmin=vmin, vmax=vmax)
-        ax.set_title(var, fontsize=18)
+        ax.set_title(var, fontsize=24.3)
         ax.set_xticks([])
         ax.set_yticks([])
         cbar = fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
-        cbar.set_label(_variable_label(var), fontsize=12)
+        cbar.set_label(_variable_label(var), fontsize=16.2)
     fig.tight_layout()
-    fig.savefig(path, dpi=200, bbox_inches="tight")
+    fig.savefig(path, dpi=400, bbox_inches="tight")
     plt.close(fig)
     return path
 
@@ -212,7 +219,8 @@ def plot_top_similar_windows(
     path = Path(output_path)
     path.parent.mkdir(parents=True, exist_ok=True)
     fig, axes = plt.subplots(n_rows, n_cols, figsize=(16, 7), squeeze=False)
-    fig.suptitle(f"Top {n_show} most similar sliding windows", fontsize=22)
+    if SHOW_FIGURE_TITLES:
+        fig.suptitle(f"Top {n_show} most similar sliding windows", fontsize=22.0, y=1.005)
     last_im = None
     for i, ax in enumerate(axes.flat):
         if i >= n_show:
@@ -224,13 +232,13 @@ def plot_top_similar_windows(
             feature_mask=feature_mask,
         )
         last_im = ax.imshow(patch, origin="upper", cmap=cmap, vmin=vmin, vmax=vmax)
-        ax.set_title(f"Rank {i + 1} | idx={int(ids[i])} | d={float(dists[i]):.3f}", fontsize=12)
+        ax.set_title(f"Rank {i + 1} | idx={int(ids[i])} | d={float(dists[i]):.3f}", fontsize=16.2)
         ax.set_xticks([])
         ax.set_yticks([])
     if last_im is not None:
         cbar = fig.colorbar(last_im, ax=axes.ravel().tolist(), fraction=0.025, pad=0.04)
-        cbar.set_label(variable_name, fontsize=16)
-    fig.savefig(path, dpi=200, bbox_inches="tight")
+        cbar.set_label(_variable_label(variable_name), fontsize=21.6)
+    fig.savefig(path, dpi=400, bbox_inches="tight")
     plt.close(fig)
     return path
 
@@ -267,7 +275,8 @@ def plot_multivariate_top_similar_windows(
         figsize=(2.8 * max(1, n_show), 2.8 * len(ordered_vars)),
         squeeze=False,
     )
-    fig.suptitle(f"Top {n_show} most similar sliding windows", fontsize=20)
+    if SHOW_FIGURE_TITLES:
+        fig.suptitle(f"Top {n_show} most similar sliding windows", fontsize=22.0, y=1.005)
     for col_idx in range(n_show):
         for row_idx, var in enumerate(ordered_vars):
             ax = axes[row_idx, col_idx]
@@ -280,9 +289,9 @@ def plot_multivariate_top_similar_windows(
             vmax = None if vmax_by_var is None else vmax_by_var.get(var)
             im = ax.imshow(window, origin="upper", cmap=cmap, vmin=vmin, vmax=vmax)
             if row_idx == 0:
-                ax.set_title(f"Rank {col_idx + 1}\nidx={int(ids[col_idx])}\nd={float(dists[col_idx]):.3f}", fontsize=10)
+                ax.set_title(f"Rank {col_idx + 1}\nidx={int(ids[col_idx])}\nd={float(dists[col_idx]):.3f}", fontsize=13.5)
             if col_idx == 0:
-                ax.set_ylabel(var, fontsize=12)
+                ax.set_ylabel(var, fontsize=16.2)
             ax.set_xticks([])
             ax.set_yticks([])
     for row_idx, var in enumerate(ordered_vars):
@@ -292,8 +301,8 @@ def plot_multivariate_top_similar_windows(
         if vmin is not None and vmax is not None:
             sm.set_clim(vmin=vmin, vmax=vmax)
         cbar = fig.colorbar(sm, ax=axes[row_idx, :].tolist(), fraction=0.015, pad=0.02)
-        cbar.set_label(_variable_label(var), fontsize=11)
-    fig.savefig(path, dpi=200, bbox_inches="tight")
+        cbar.set_label(_variable_label(var), fontsize=14.9)
+    fig.savefig(path, dpi=400, bbox_inches="tight")
     plt.close(fig)
     return path
 
@@ -340,11 +349,11 @@ def plot_deposit_scores_and_weights(
     path = Path(output_path)
     path.parent.mkdir(parents=True, exist_ok=True)
     fig, axes = plt.subplots(2, 1, figsize=(11, 11), sharex=True)
-    fig.suptitle(r"Deposit raw PCA scores $z_{dep,m}$", fontsize=18)
 
     ax_top = axes[0]
+    ax_top.set_title(r"Deposit raw PCA scores $z_{d,m}$", fontsize=21.6)
     ax_top.bar(pcs, z_dep, color="#4c8bbe")
-    ax_top.set_ylabel("Raw PCA score", fontsize=14)
+    ax_top.set_ylabel("Raw PCA score", fontsize=18.9)
 
     finite_scores = z_dep[np.isfinite(z_dep)]
     if finite_scores.size:
@@ -372,7 +381,7 @@ def plot_deposit_scores_and_weights(
             label,
             ha="center",
             va=va,
-            fontsize=16,
+            fontsize=15.0,
             rotation=90,
             rotation_mode="anchor",
             clip_on=False,
@@ -382,9 +391,9 @@ def plot_deposit_scores_and_weights(
     ax_bot = axes[1]
     weights_used = w_full[:k]
     ax_bot.bar(pcs, weights_used, color="#2ca02c")
-    ax_bot.set_title(r"Deposit-based weights $w_m$", fontsize=16)
-    ax_bot.set_xlabel("Principal component (m)", fontsize=14)
-    ax_bot.set_ylabel("Weight", fontsize=14)
+    ax_bot.set_title(r"Deposit-based weights $w_m$", fontsize=21.6)
+    ax_bot.set_xlabel("Principal component (m)", fontsize=18.9)
+    ax_bot.set_ylabel("Weight", fontsize=18.9)
     finite_weights = weights_used[np.isfinite(weights_used)]
     max_weight = float(np.nanmax(finite_weights)) if finite_weights.size else 0.0
     if weight_ylim is not None:
@@ -393,7 +402,7 @@ def plot_deposit_scores_and_weights(
         ax_bot.set_ylim(0, max_weight * 1.15 if max_weight > 0 else 1.0)
     ax_bot.set_xticks(pcs)
     fig.tight_layout(rect=(0, 0, 1, 0.96))
-    fig.savefig(path, dpi=200, bbox_inches="tight")
+    fig.savefig(path, dpi=400, bbox_inches="tight")
     plt.close(fig)
     return path
 
@@ -446,10 +455,11 @@ def plot_loading_maps(
     )
 
     fig.suptitle(
-        "Top-weighted Spatial PCA Loading Maps (from ranking)",
-        fontsize=22,
-        y=0.96,
+        "Top-weighted windowed PCA loading maps (from ranking)",
+        fontsize=22.0,
+        y=1.005,
     )
+    fig.subplots_adjust(top=0.80)
 
     selected_loadings = load[order, :]
     vmax = float(np.nanmax(np.abs(selected_loadings)))
@@ -475,9 +485,9 @@ def plot_loading_maps(
 
         ax.set_title(
             f"PC {pc_idx + 1}\n"
-            rf"$z_{{dep}}$ = {Z[int(deposit_index), pc_idx]:.2f}" "\n"
+            rf"$z_{{d}}$ = {Z[int(deposit_index), pc_idx]:.2f}" "\n"
             f"w = {100 * w[pc_idx]:.1f}%",
-            fontsize=17,
+            fontsize=23.0,
         )
 
         ax.set_xticks([])
@@ -495,10 +505,10 @@ def plot_loading_maps(
     if last_im is not None:
         cbar_ax = fig.add_axes([0.91, 0.18, 0.018, 0.58])
         cbar = fig.colorbar(last_im, cax=cbar_ax)
-        cbar.set_label("PCA loading", fontsize=18)
-        cbar.ax.tick_params(labelsize=14)
+        cbar.set_label("PCA loading", fontsize=24.3)
+        cbar.ax.tick_params(labelsize=20)
 
-    fig.savefig(path, dpi=200, bbox_inches="tight", facecolor="white")
+    fig.savefig(path, dpi=400, bbox_inches="tight", facecolor="white")
     plt.close(fig)
 
     return path
@@ -523,7 +533,8 @@ def plot_fused_loading_maps(
     path = Path(output_path)
     path.parent.mkdir(parents=True, exist_ok=True)
     fig, axes = plt.subplots(n_show, 1, figsize=(10, 2.8 * n_show), squeeze=False)
-    fig.suptitle("Fused PCA loading vectors across stage-1 PCs", fontsize=20)
+    if SHOW_FIGURE_TITLES:
+        fig.suptitle("Fused PCA loading vectors across stage-1 PCs", fontsize=22.0, y=1.005)
     vmax = float(np.nanmax(np.abs(components[:n_show, :])))
 
     for idx, ax in enumerate(axes.flat[:n_show]):
@@ -531,11 +542,11 @@ def plot_fused_loading_maps(
         im = ax.imshow(row, aspect="auto", cmap="RdBu_r", vmin=-vmax, vmax=vmax)
         ax.axvline(K_var1 - 0.5, color="black", linewidth=1.0, linestyle="--")
         ax.set_yticks([])
-        ax.set_title(f"Fused PC {idx + 1}", fontsize=14)
-        ax.set_xlabel(f"Stage-1 PCs | first {K_var1} = var1, next {K_var2} = var2", fontsize=11)
+        ax.set_title(f"Fused PC {idx + 1}", fontsize=18.9)
+        ax.set_xlabel(f"Stage-1 PCs | first {K_var1} = var1, next {K_var2} = var2", fontsize=14.9)
     cbar = fig.colorbar(im, ax=axes.ravel().tolist(), fraction=0.025, pad=0.02)
-    cbar.set_label("Fused loading", fontsize=12)
-    fig.savefig(path, dpi=200, bbox_inches="tight")
+    cbar.set_label("Fused loading", fontsize=16.2)
+    fig.savefig(path, dpi=400, bbox_inches="tight")
     plt.close(fig)
     return path
 
@@ -614,11 +625,21 @@ def plot_score_pairs(
 
     path = Path(output_path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    fig, axes = plt.subplots(1, len(pairs), figsize=(7 * len(pairs), 7), squeeze=False)
+    # lay the pairs out on two rows so the panel titles stop colliding
+    n_pair = len(pairs)
+    n_col = 2 if n_pair > 2 else n_pair
+    n_row = int(math.ceil(n_pair / n_col))
+    fig, axes = plt.subplots(n_row, n_col, figsize=(8.4 * n_col, 7.6 * n_row),
+                             squeeze=False)
+    for extra in axes.flat[n_pair:]:
+        extra.axis("off")
     title_prefix = "Selected" if pc_pairs is not None else "Top-weighted"
-    fig.suptitle(f"{title_prefix} PCA score plots colored by distance", fontsize=24)
+    if SHOW_FIGURE_TITLES:
+        fig.suptitle(f"{title_prefix} PCA score plots colored by distance",
+                 fontsize=26.0, y=0.995)
     last_sc = None
     for ax, (pc_x, pc_y) in zip(axes.flat, pairs):
+        ax.tick_params(axis="both", labelsize=18)
         last_sc = ax.scatter(
             Z[mask, pc_x],
             Z[mask, pc_y],
@@ -659,7 +680,7 @@ def plot_score_pairs(
                         xytext=(4, 4),
                         textcoords="offset points",
                         color=highlight_color,
-                        fontsize=10,
+                        fontsize=13.5,
                         fontweight="bold",
                         zorder=7,
                     )
@@ -667,16 +688,16 @@ def plot_score_pairs(
         ax.set_title(
             f"PC {pc_x + 1} (w={100 * w[pc_x]:.1f}%) vs "
             f"PC {pc_y + 1} (w={100 * w[pc_y]:.1f}%)",
-            fontsize=16,
+            fontsize=21.6,
         )
-        ax.set_xlabel(f"PC {pc_x + 1} score", fontsize=14)
-        ax.set_ylabel(f"PC {pc_y + 1} score", fontsize=14)
+        ax.set_xlabel(f"PC {pc_x + 1} score", fontsize=18.9)
+        ax.set_ylabel(f"PC {pc_y + 1} score", fontsize=18.9)
     if last_sc is not None:
         cbar = fig.colorbar(last_sc, ax=axes.ravel().tolist(), fraction=0.035, pad=0.04)
-        cbar.set_label("Distance to deposit", fontsize=16)
+        cbar.set_label("Distance to deposit", fontsize=21.6)
     if highlight_indices.size:
-        axes.flat[0].legend(loc="best", fontsize=11, frameon=True)
-    fig.savefig(path, dpi=200, bbox_inches="tight")
+        axes.flat[0].legend(loc="best", fontsize=14.9, frameon=True)
+    fig.savefig(path, dpi=400, bbox_inches="tight")
     plt.close(fig)
     return path
 
@@ -771,7 +792,8 @@ def plot_reconstruction_progression(
     n_cols = 5
     n_rows = int(np.ceil(n_show / n_cols))
     fig, axes = plt.subplots(n_rows, n_cols, figsize=(18, 3.4 * n_rows), squeeze=False)
-    fig.suptitle(f"Deposit {deposit_1based} reconstruction progression (optimal k={optimal_k})", fontsize=22)
+    if SHOW_FIGURE_TITLES:
+        fig.suptitle(f"Deposit {deposit_1based} reconstruction progression (optimal k={optimal_k})", fontsize=22.0, y=1.005)
     last_im = None
     z_dep = Z[int(deposit_index)]
     for idx, ax in enumerate(axes.flat):
@@ -792,13 +814,13 @@ def plot_reconstruction_progression(
             vmin=vmin,
             vmax=vmax,
         )
-        ax.set_title(f"Recon. using: k={k}", fontsize=15)
+        ax.set_title(f"Recon. using: k={k}", fontsize=20.2)
         ax.set_xticks([])
         ax.set_yticks([])
     if last_im is not None:
         cbar = fig.colorbar(last_im, ax=axes.ravel().tolist(), fraction=0.025, pad=0.03)
-        cbar.set_label(variable_name, fontsize=16)
-    fig.savefig(path, dpi=200, bbox_inches="tight")
+        cbar.set_label(_variable_label(variable_name), fontsize=21.6)
+    fig.savefig(path, dpi=400, bbox_inches="tight")
     plt.close(fig)
     return path
 
@@ -847,7 +869,7 @@ def plot_two_stage_multivariate_reconstruction_progression(
         len(k_list),
         2,
         figsize=(9, 2.6 * len(k_list)),
-        dpi=150,
+        dpi=400,
         squeeze=False,
     )
 
@@ -883,8 +905,8 @@ def plot_two_stage_multivariate_reconstruction_progression(
         ax2 = axes[i, 1]
         im1_last = ax1.imshow(m1, cmap=cmap, vmin=v1min, vmax=v1max)
         im2_last = ax2.imshow(m2, cmap=cmap, vmin=v2min, vmax=v2max)
-        ax1.set_title(f"{variable_names[0]} | fused k={k_fused}", fontsize=11)
-        ax2.set_title(f"{variable_names[1]} | fused k={k_fused}", fontsize=11)
+        ax1.set_title(f"{variable_names[0]} | fused k={k_fused}", fontsize=14.9)
+        ax2.set_title(f"{variable_names[1]} | fused k={k_fused}", fontsize=14.9)
         ax1.set_xticks([])
         ax1.set_yticks([])
         ax2.set_xticks([])
@@ -892,17 +914,17 @@ def plot_two_stage_multivariate_reconstruction_progression(
 
     if title is None:
         title = "Two-stage fused PCA reconstruction progression"
-    fig.suptitle(title, y=0.995, fontsize=16)
+    fig.suptitle(title, y=0.995, fontsize=21.6)
     fig.subplots_adjust(right=0.90, top=0.96, hspace=0.35, wspace=0.15)
     if im1_last is not None:
         cax1 = fig.add_axes([0.92, 0.55, 0.015, 0.35])
         cb1 = fig.colorbar(im1_last, cax=cax1)
-        cb1.set_label(_variable_label(variable_names[0]), fontsize=10)
+        cb1.set_label(_variable_label(variable_names[0]), fontsize=13.5)
     if im2_last is not None:
         cax2 = fig.add_axes([0.92, 0.12, 0.015, 0.35])
         cb2 = fig.colorbar(im2_last, cax=cax2)
-        cb2.set_label(_variable_label(variable_names[1]), fontsize=10)
-    fig.savefig(path, dpi=200, bbox_inches="tight")
+        cb2.set_label(_variable_label(variable_names[1]), fontsize=13.5)
+    fig.savefig(path, dpi=400, bbox_inches="tight")
     plt.close(fig)
     return path
 
@@ -926,7 +948,7 @@ def _window_centers_from_indices(
 
 
 def _variable_label(variable_name: str) -> str:
-    return f"{variable_name} (nT)" if variable_name.upper() == "MAG" else variable_name
+    return variable_display_label(variable_name)
 
 
 def _vector_to_display_patch(

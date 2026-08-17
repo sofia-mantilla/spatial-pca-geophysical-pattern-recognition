@@ -75,3 +75,25 @@ docs/repro_debug_deposit3_multivariate/rotation_recovery_smoke/
 # OS/editor
 .DS_Store
 docs/Spatial_PCA_paper_overleaf/
+
+# Analysis worktree and submission-internal documents (kept local, never published)
+_repro_worktree_*/
+docs/NRR_SUBMISSION_CHECKLIST.md
+docs/cover_letter_NRR.md
+docs/Submission guidelines*
+docs/figures_unused_*/
+docs/appendix_b_k_sensitivity/
+
+# De-published internal docs (kept on disk, removed from the public repo 2026-08-17)
+docs/Changes_v9_to_v10.md
+docs/Introduction.pdf
+docs/Paragraph_stress_test.md
+docs/Revision_plan_v10.md
+docs/Spatial_PCA_paper_v9.docx
+docs/Stress_Test_Report_v11.md
+docs/Worklog_2026-07-12.md
+docs/Writing style (1).md
+docs/references.bib
+docs/paper_era_backups/
+docs/repro_debug_deposit3_multivariate/
+docs/reproducibility_debug_deposit3_multivariate.md

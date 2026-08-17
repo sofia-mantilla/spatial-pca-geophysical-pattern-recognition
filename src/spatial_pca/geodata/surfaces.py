@@ -18,6 +18,7 @@ import numpy as np
 from matplotlib import cm, colors
 
 from spatial_pca.colormaps import DEFAULT_PAPER_CMAP, resolve_colormap
+from spatial_pca.units import variable_display_label
 
 
 DEFAULT_SURFACE_CMAP = DEFAULT_PAPER_CMAP
@@ -25,6 +26,12 @@ TITLE_FONTSIZE = 28
 LABEL_FONTSIZE = 22
 TICK_FONTSIZE = 18
 COLORBAR_LABEL_FONTSIZE = 22
+# x position (axes fraction) of the rotated variable name beside the z axis.
+# Negative keeps it clear of the z tick numbers; bbox_inches="tight" trims the margin.
+VARIABLE_LABEL_X = -0.20
+# Journal artwork rules (Springer NRR): no figure-level titles inside the
+# artwork; the information lives in the LaTeX caption. Panel labels stay.
+SHOW_FIGURE_TITLES = False
 
 
 def plot_deposit_surface(
@@ -105,10 +112,11 @@ def plot_deposit_surfaces(
     path.parent.mkdir(parents=True, exist_ok=True)
 
     fig = plt.figure(figsize=(8.8 * len(ordered_vars), 7.6), dpi=150)
-    fig.suptitle(
-        f"Geometry of Reference Deposit {deposit_1based}",
-        fontsize=TITLE_FONTSIZE,
-    )
+    if SHOW_FIGURE_TITLES:
+        fig.suptitle(
+            f"Geometry of Reference Deposit {deposit_1based}",
+            fontsize=TITLE_FONTSIZE,
+        )
 
     for idx, variable_name in enumerate(ordered_vars, start=1):
         if variable_name not in deposit_extents:
@@ -158,9 +166,9 @@ def plot_deposit_surfaces(
         ax.set_ylabel("Northing", fontsize=LABEL_FONTSIZE, labelpad=16)
         ax.set_zlabel("")
         ax.text2D(
-            0.02,
-            0.37,
-            variable_name,
+            VARIABLE_LABEL_X,
+            0.42,
+            variable_display_label(variable_name),
             transform=ax.transAxes,
             rotation=90,
             fontsize=LABEL_FONTSIZE,
@@ -179,7 +187,7 @@ def plot_deposit_surfaces(
         )
         cbar = fig.colorbar(surface, ax=ax, fraction=0.035, pad=0.08, shrink=0.72)
         _set_min_max_colorbar_ticks(cbar, finite, vmin=vmin, vmax=vmax)
-        cbar.set_label(variable_name, fontsize=COLORBAR_LABEL_FONTSIZE)
+        cbar.set_label(variable_display_label(variable_name), fontsize=COLORBAR_LABEL_FONTSIZE)
         cbar.ax.tick_params(labelsize=TICK_FONTSIZE)
 
     fig.subplots_adjust(left=0.04, right=0.92, top=0.86, bottom=0.08, wspace=0.24)
@@ -212,8 +220,14 @@ def plot_deposit_and_loading_surfaces(
     mesh_linewidth: float = 0.2,
     mesh_alpha: float = 0.3,
     vertical_exaggeration: float = 0.6,
+    tick_fontsize: int = 13,
 ) -> Path:
-    """Plot the training deposit above top-weighted loading maps as 3D surfaces."""
+    """Plot the training deposit above top-weighted loading maps as 3D surfaces.
+
+    ``tick_fontsize`` sets the x/y/z coordinate tick labels of the 3D panels;
+    it defaults below the module TICK_FONTSIZE because this figure's long
+    coordinate numbers crowd each other at the standard size.
+    """
 
     load = np.asarray(loadings, dtype=float)
     Z = np.asarray(scores, dtype=float)
@@ -249,19 +263,20 @@ def plot_deposit_and_loading_surfaces(
 
     n_grid_cols = max(6, 2 * n_show)
     top_margin_cols = max(1, n_grid_cols // 4)
-    fig = plt.figure(figsize=(5.6 * n_show, 12.5), dpi=150)
+    fig = plt.figure(figsize=(5.6 * n_show, 9.6), dpi=150)
     grid = fig.add_gridspec(
         2,
         n_grid_cols,
-        height_ratios=[1.30, 1.0],
+        height_ratios=[1.05, 1.0],
         hspace=0.32,
         wspace=0.20,
     )
-    fig.suptitle(
-        f"Reference Deposit {deposit_1based} and PCA Loading Maps",
-        fontsize=TITLE_FONTSIZE,
-        y=0.98,
-    )
+    if SHOW_FIGURE_TITLES:
+        fig.suptitle(
+            f"Reference Deposit {deposit_1based} and PCA Loading Maps",
+            fontsize=TITLE_FONTSIZE,
+            y=0.98,
+        )
 
     ax_top = fig.add_subplot(
         grid[0, top_margin_cols : n_grid_cols - top_margin_cols],
@@ -274,7 +289,7 @@ def plot_deposit_and_loading_surfaces(
         cmap=deposit_cmap,
         vmin=deposit_vmin,
         vmax=deposit_vmax,
-        label=variable_name,
+        label=variable_display_label(variable_name),
         view_elev=view_elev,
         view_azim=view_azim,
         surface_alpha=surface_alpha,
@@ -282,9 +297,10 @@ def plot_deposit_and_loading_surfaces(
         mesh_alpha=mesh_alpha,
         vertical_exaggeration=vertical_exaggeration,
         show_xy_labels=True,
+        tick_fontsize=tick_fontsize,
     )
-    ax_top.set_position([0.30, 0.53, 0.40, 0.34])
-    cbar_top_ax = fig.add_axes([0.72, 0.58, 0.012, 0.24])
+    ax_top.set_position([0.255, 0.47, 0.49, 0.45])
+    cbar_top_ax = fig.add_axes([0.775, 0.55, 0.013, 0.29])
     cbar_top = fig.colorbar(top_surface, cax=cbar_top_ax)
     _set_min_max_colorbar_ticks(
         cbar_top,
@@ -292,7 +308,7 @@ def plot_deposit_and_loading_surfaces(
         vmin=deposit_vmin,
         vmax=deposit_vmax,
     )
-    cbar_top.set_label(variable_name, fontsize=COLORBAR_LABEL_FONTSIZE)
+    cbar_top.set_label(variable_display_label(variable_name), fontsize=COLORBAR_LABEL_FONTSIZE)
     cbar_top.ax.tick_params(labelsize=TICK_FONTSIZE)
 
     bottom_axes = []
@@ -316,10 +332,11 @@ def plot_deposit_and_loading_surfaces(
             vertical_exaggeration=vertical_exaggeration,
             show_xy_labels=False,
             show_variable_label=False,
+            tick_fontsize=tick_fontsize,
         )
         ax.set_title(
             f"PC {pc_idx + 1}\n"
-            rf"$z_{{dep}}$={Z[int(deposit_index), pc_idx]:.2f} | "
+            rf"$z_{{d}}$={Z[int(deposit_index), pc_idx]:.2f} | "
             f"w={100 * w[pc_idx]:.1f}%",
             fontsize=22,
             pad=8,
@@ -329,7 +346,7 @@ def plot_deposit_and_loading_surfaces(
     norm = colors.Normalize(vmin=-loading_vmax, vmax=loading_vmax)
     sm = cm.ScalarMappable(norm=norm, cmap=load_cmap)
     sm.set_array([])
-    cbar_bottom_ax = fig.add_axes([0.945, 0.13, 0.012, 0.24])
+    cbar_bottom_ax = fig.add_axes([0.945, 0.09, 0.013, 0.29])
     cbar_bottom = fig.colorbar(sm, cax=cbar_bottom_ax)
     _set_min_max_colorbar_ticks(
         cbar_bottom,
@@ -340,10 +357,10 @@ def plot_deposit_and_loading_surfaces(
     cbar_bottom.set_label("PCA loading", fontsize=COLORBAR_LABEL_FONTSIZE)
     cbar_bottom.ax.tick_params(labelsize=TICK_FONTSIZE)
 
-    fig.subplots_adjust(left=0.03, right=0.90, top=0.91, bottom=0.05)
-    ax_top.set_position([0.30, 0.53, 0.40, 0.34])
-    cbar_top_ax.set_position([0.72, 0.58, 0.012, 0.24])
-    cbar_bottom_ax.set_position([0.945, 0.13, 0.012, 0.24])
+    fig.subplots_adjust(left=0.03, right=0.90, top=0.92, bottom=0.02)
+    ax_top.set_position([0.255, 0.47, 0.49, 0.45])
+    cbar_top_ax.set_position([0.775, 0.55, 0.013, 0.29])
+    cbar_bottom_ax.set_position([0.945, 0.09, 0.013, 0.29])
     fig.savefig(path, dpi=200, bbox_inches="tight", facecolor="white")
     plt.close(fig)
     return path
@@ -393,13 +410,15 @@ def plot_top_similar_windows_surfaces(
         )
         for i in range(n_show)
     ]
-    fig = plt.figure(figsize=(5.3 * int(n_cols), 4.6 * int(n_rows) + 1.1), dpi=150)
-    fig.suptitle(
-        f"Top {n_show} Most Similar Windows - 3D",
-        fontsize=TITLE_FONTSIZE,
-        y=0.98,
-    )
-    grid = fig.add_gridspec(int(n_rows), int(n_cols), hspace=0.34, wspace=0.18)
+    fig = plt.figure(figsize=(5.3 * int(n_cols), 4.6 * int(n_rows) + 1.7), dpi=150)
+    if SHOW_FIGURE_TITLES:
+        fig.suptitle(
+            f"Top {n_show} Most Similar Windows - 3D",
+            fontsize=TITLE_FONTSIZE,
+            y=0.995,
+        )
+    grid = fig.add_gridspec(int(n_rows), int(n_cols), hspace=0.34, wspace=0.18,
+                            top=0.86)
     axes = []
     for i, patch in enumerate(patches):
         ax = fig.add_subplot(grid[i // int(n_cols), i % int(n_cols)], projection="3d")
@@ -410,14 +429,18 @@ def plot_top_similar_windows_surfaces(
             cmap=cmap,
             vmin=vmin,
             vmax=vmax,
-            label=variable_name,
+            label=variable_display_label(variable_name),
             view_elev=view_elev,
             view_azim=view_azim,
             surface_alpha=surface_alpha,
             mesh_linewidth=mesh_linewidth,
             mesh_alpha=mesh_alpha,
             vertical_exaggeration=vertical_exaggeration,
-            show_xy_labels=False,
+            show_xy_labels=True,
+            xlabel="Easting (pixels)",
+            ylabel="Northing (pixels)",
+            xy_label_fontsize=13,
+            xy_labelpad=8,
             show_variable_label=i % int(n_cols) == 0,
         )
         ax.set_title(
@@ -427,17 +450,17 @@ def plot_top_similar_windows_surfaces(
         )
         axes.append(ax)
 
-    cbar = fig.colorbar(surface, ax=axes, fraction=0.018, pad=0.03, shrink=0.72)
+    fig.subplots_adjust(left=0.03, right=0.88, top=0.90, bottom=0.05)
+    cbar_ax = fig.add_axes([0.915, 0.16, 0.013, 0.58])
+    cbar = fig.colorbar(surface, cax=cbar_ax)
     _set_min_max_colorbar_ticks(
         cbar,
         np.asarray(patches, dtype=float),
         vmin=vmin,
         vmax=vmax,
     )
-    cbar.set_label(variable_name, fontsize=COLORBAR_LABEL_FONTSIZE)
+    cbar.set_label(variable_display_label(variable_name), fontsize=COLORBAR_LABEL_FONTSIZE)
     cbar.ax.tick_params(labelsize=TICK_FONTSIZE)
-
-    fig.subplots_adjust(left=0.03, right=0.91, top=0.90, bottom=0.05)
     fig.savefig(path, dpi=200, bbox_inches="tight", facecolor="white")
     plt.close(fig)
     return path
@@ -526,7 +549,7 @@ def plot_reconstruction_surface_animation(
                 cmap=cmap,
                 vmin=color_vmin,
                 vmax=color_vmax,
-                label=variable_name,
+                label=variable_display_label(variable_name),
                 view_elev=view_elev,
                 view_azim=view_azim,
                 surface_alpha=surface_alpha,
@@ -550,7 +573,7 @@ def plot_reconstruction_surface_animation(
                 vmin=color_vmin,
                 vmax=color_vmax,
             )
-            cbar.set_label(variable_name, fontsize=COLORBAR_LABEL_FONTSIZE)
+            cbar.set_label(variable_display_label(variable_name), fontsize=COLORBAR_LABEL_FONTSIZE)
             cbar.ax.tick_params(labelsize=TICK_FONTSIZE)
             fig.subplots_adjust(left=0.04, right=0.84, top=0.86, bottom=0.08)
 
@@ -592,6 +615,11 @@ def _plot_surface_on_axis(
     show_xy_labels: bool,
     show_variable_label: bool = True,
     zlim: tuple[float, float] | None = None,
+    tick_fontsize: int = TICK_FONTSIZE,
+    xlabel: str = "Easting",
+    ylabel: str = "Northing",
+    xy_label_fontsize: float = LABEL_FONTSIZE,
+    xy_labelpad: float = 16,
 ) -> Any:
     x_grid, y_grid, z_grid = _surface_grids(
         np.asarray(z_values, dtype=float),
@@ -623,16 +651,16 @@ def _plot_surface_on_axis(
         )
     ax.view_init(elev=float(view_elev), azim=float(view_azim))
     if show_xy_labels:
-        ax.set_xlabel("Easting", fontsize=LABEL_FONTSIZE, labelpad=16)
-        ax.set_ylabel("Northing", fontsize=LABEL_FONTSIZE, labelpad=16)
+        ax.set_xlabel(xlabel, fontsize=xy_label_fontsize, labelpad=xy_labelpad)
+        ax.set_ylabel(ylabel, fontsize=xy_label_fontsize, labelpad=xy_labelpad)
     else:
         ax.set_xlabel("")
         ax.set_ylabel("")
     ax.set_zlabel("")
     if show_variable_label:
         ax.text2D(
-            0.02,
-            0.37,
+            VARIABLE_LABEL_X,
+            0.42,
             label,
             transform=ax.transAxes,
             rotation=90,
@@ -645,8 +673,8 @@ def _plot_surface_on_axis(
         ax.set_zlim(float(zlim[0]), float(zlim[1]))
         ax.set_zticks([float(zlim[0]), float(zlim[1])])
         ax.set_zticklabels([_format_tick(float(zlim[0])), _format_tick(float(zlim[1]))])
-    ax.tick_params(axis="both", which="major", labelsize=TICK_FONTSIZE, pad=6)
-    ax.zaxis.set_tick_params(labelsize=TICK_FONTSIZE, pad=8)
+    ax.tick_params(axis="both", which="major", labelsize=tick_fontsize, pad=6)
+    ax.zaxis.set_tick_params(labelsize=tick_fontsize, pad=8)
     _set_surface_box_aspect(
         ax,
         x_grid,
@@ -655,6 +683,7 @@ def _plot_surface_on_axis(
         vertical_exaggeration=float(vertical_exaggeration),
     )
     return surface
+
 
 
 def _unit_extent(array: Any) -> tuple[float, float, float, float]:
