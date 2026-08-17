@@ -157,6 +157,7 @@ Expected output begins with:
 smoke_test=PASS
 field_shape=(10, 10)
 window_matrix_shape=(82, 4)
+known_windows=[12, 48, 51]
 top_5_window_indices=[40, 12, 52, 31, 48]
 ```
 
@@ -170,9 +171,9 @@ synthetic dataset tracked in Git. After that, you can run:
 - `python scripts/run_project_from_config.py --config configs/carajas_uni_tmi.yaml`:
   Carajás univariate TMI workflow (paper Case 1); requires the Carajás raster
   and polygon data from the public Drive folders below.
-- `python scripts/run_project_from_config.py --config configs/carajas_multi_tmi_u.yaml`:
-  Carajás multivariate TMI + radiometric-U workflow (paper Case 2 pipeline);
-  requires both Carajás data folders.
+- `python scripts/run_project_from_config.py --config configs/carajas_multi_tmi_u_concat_scores_tmi17_u25.yaml --deposit 3`:
+  Carajás multivariate TMI + radiometric-U workflow (score concatenation, the
+  paper's Case-2 method family); requires both Carajás data folders.
 - The scripts in [`paper/`](paper/): reproduce the paper's headline numbers,
   ablations, and figures (see below).
 
@@ -210,8 +211,12 @@ Geological Survey of Brazil (SGB/CPRM).
 python scripts/run_project_from_config.py --config configs/carajas_uni_tmi.yaml
 ```
 
-(This takes about 25 seconds.) You can override the reference deposit, retained
-PC count, output directory, or top-window count from the command line:
+This takes about a minute. **Expected result:** the run ends with
+`Wrote top windows: .../top_windows.gpkg`, and `validation_topk_results.pkl`
+reports **47.0% cumulative footprint recovery** in the top 250 windows with
+**5 test deposits hit** — the paper's Case-1 headline result. You can override
+the reference deposit, retained PC count, output directory, or top-window
+count from the command line:
 
 ```bash
 python scripts/run_project_from_config.py \
@@ -224,15 +229,23 @@ python scripts/run_project_from_config.py \
 ### Run Case 2 (multivariate TMI + radiometric U)
 
 ```bash
-python scripts/run_project_from_config.py --config configs/carajas_multi_tmi_u.yaml
+python scripts/run_project_from_config.py \
+  --config configs/carajas_multi_tmi_u_concat_scores_tmi17_u25.yaml \
+  --deposit 3
 ```
 
-The multivariate ranking concatenates each variable's standardized PC scores
-(TMI k and U k retained per variable) with a balance weight between the
-variables, then ranks windows in the combined score space. The paper's final
-Case-2 numbers (reference Alemão, TMI k=2, U k=8, balance weight set from the
-other deposits' univariate performance) are reproduced by
-`paper/run_corrections.py`.
+This takes about a minute and demonstrates the multivariate workflow: each
+variable's standardized PC scores are concatenated and windows are ranked in
+the combined score space against the reference deposit (Alemão, Deposit 3).
+**Expected result:** ~63% cumulative footprint recovery in the top 250 windows
+with 3 test deposits hit.
+
+The paper's exact Case-2 headline numbers (TMI k=2, U k=8, balance weight set
+from the other deposits' univariate performance: **63.7% recovery, AUC 106.1,
+3 of 4 test deposits**) are reproduced by `paper/run_ablation_checks.py` — see
+the next section. `configs/carajas_multi_tmi_u.yaml` is the full 5-deposit ×
+20-k selection sweep behind Appendix B; it takes much longer and expects the
+univariate sweeps' best-k tables, so it is not the place to start.
 
 ### Output Data
 
@@ -257,7 +270,18 @@ The [`paper/`](paper/) folder contains the analysis and figure scripts behind
 the manuscript — replication gates for both cases, the exact random-selection
 null, the appendix ablations, and every generated figure. See
 [`paper/README.md`](paper/README.md) for the script-by-script map and
-environment caveats. Validation results:
+environment caveats. To verify the paper's headline numbers yourself
+(about two minutes total):
+
+```bash
+cd paper
+python case1_uni_repro.py      # Case 1: end 47.0, AUC 57.9, 5 hits (k=17)
+python run_ablation_checks.py  # Case 2: end 63.7, AUC 106.1, 3 hits (TMI k=2, U k=8)
+                               # + weight ablations, joint-PCA check, classical baselines
+```
+
+Both scripts print the numbers above; `case1_uni_repro.py` also asserts them,
+so a silent finish means the replication gates passed. Validation results:
 
 <p align="center">
   <img src="docs/figures/case1_recovery_comparison.png" alt="Case 1 footprint recovery vs random selection" width="700">

@@ -19,8 +19,9 @@ then run from inside this folder so sibling imports resolve:
 
 ```bash
 cd paper
-python case1_uni_repro.py       # Case-1 gates
-python run_corrections.py       # Case-2 final numbers
+python case1_uni_repro.py       # Case-1 gates (end 47.0, AUC 57.9, 5 hits)
+python run_ablation_checks.py   # Case-2 headline (end 63.7, AUC 106.1, 3 hits)
+                                # + ablations and classical baselines, both cases
 ```
 
 `numpy_repro_concat.py` looks for `data/` beside itself first and falls back
@@ -34,14 +35,14 @@ to the repository's `data/` folder automatically.
 |---|---|
 | `numpy_repro_concat.py` | Shared primitives used by everything below |
 | `case1_uni_repro.py` | Case 1 (univariate TMI, reference Paulo Afonso, k=17): recovery, AUC, hits; assertion gates in `__main__` |
-| `run_corrections.py` | Case 2 final numbers (concat, TMI k=2 / U k=8, balance weight from the other deposits' univariate coverages, reference Alemão) |
+| `run_corrections.py` | Case-2 α/k exploration record (alpha sweep, nested LODO, bootstrap significance, greenfield fixed-α); writes `results/*.csv` |
 | `null_expectation.py` | Exact random-selection expectation and area budget a(t) (Methods §3.5); 5–95% band |
 
 **Appendix ablations and checks**
 
 | Script | Reproduces |
 |---|---|
-| `run_ablation_checks.py` | Weight-variant ablation (both cases), joint concat-PCA disclosure, classical baselines (demeaned match, correlation match, raw) |
+| `run_ablation_checks.py` | **Case-2 headline numbers** (concat, TMI k=2 / U k=8, α=0.503: end 63.7, AUC 106.1, 3 hits) + weight-variant ablation (both cases), joint concat-PCA disclosure, Paulo Afonso check, classical baselines (demeaned match, correlation match, raw) |
 | `run_refswap_case1.py` | Reference-swap: every deposit as reference (Case 1, k=17) |
 | `alpha_from_univariate.py` | Balance weight α set from univariate performance |
 | `concat_alpha_lodo_select.py` | α selection by leave-one-deposit-out CV with a permutation-null gate |
