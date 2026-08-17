@@ -182,7 +182,7 @@ The Carajás geophysical grids and deposit polygons are distributed outside
 GitHub through public Google Drive folders:
 
 - [Carajas data folder 1 — univariate TMI](https://drive.google.com/drive/folders/18hYA0qJFTlSgdd5eHp6skI83oSaN17GG?usp=drive_link)
-- Carajas data folder 2 — multivariate TMI + radiometric U: **[LINK TO ADD]**
+- [Carajas data folder 2 — multivariate TMI + radiometric U] (https://drive.google.com/drive/folders/14FNE3kchMRP-kWrFQ4DcHXXANyEcVMq5?usp=drive_link)
 
 After downloading, arrange the files so the config paths resolve like this:
 
