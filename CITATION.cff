@@ -10,11 +10,11 @@ authors:
     orcid: "https://orcid.org/0009-0002-1423-8370"
 
 repository-code: "https://github.com/sofia-mantilla/spatial-pca-geophysical-pattern-recognition"
-url: "https://zenodo.org/records/20168910"
-doi: "10.5281/zenodo.20168910"
+url: "https://zenodo.org/records/21987182"
+doi: "10.5281/zenodo.21987182"
 
 version: "v2.0.0"
-date-released: "2026-08-17"
+date-released: "2026-08-18"
 
 abstract: "A reproducible windowed PCA (wPCA) workflow for learning deposit-scale geophysical geometry and ranking mineral exploration targets by similarity to known mineralization. Formerly released under the working name Spatial PCA; the method and code are the same."
 

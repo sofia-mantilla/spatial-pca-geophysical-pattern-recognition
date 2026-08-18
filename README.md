@@ -8,7 +8,7 @@
   <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-green">
 </p>
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20168910.svg)](https://doi.org/10.5281/zenodo.20168910)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20164768.svg)](https://doi.org/10.5281/zenodo.20164768)
 
 This repository accompanies the paper:
 
@@ -381,7 +381,7 @@ software release:
 
 > Mantilla Salas, S. (2026). *Windowed PCA (wPCA) for Geophysical Pattern
 > Recognition in Mineral Exploration* (v2.0.0). Zenodo.
-> https://doi.org/10.5281/zenodo.20168910
+> https://doi.org/10.5281/zenodo.21987182
 
 See [`CITATION.cff`](CITATION.cff) for machine-readable metadata; the Zenodo
 badge above always resolves to the latest archived version.
