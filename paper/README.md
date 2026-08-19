@@ -61,6 +61,7 @@ to the repository's `data/` folder automatically.
 | `plot_reconstruction_progression.py` | `case2_reconstruction_progression_tmi`, `case2_reconstruction_progression_u` |
 | `paper_figures_corrected.py` | Case-2 figures for the final configuration |
 | `make_multi_top_windows_3d.py` | Case-2 combined-ranking top-windows 3D figure (companion figure, not in the current manuscript text) |
+| `make_fig_appendixB_k_sensitivity.py` | `appendixB_k_sensitivity` (Appendix B k-sensitivity); reads the committed tables in [`appendix_b/`](appendix_b/), regenerate panel (a) with `run_case1_k_sweep.py` |
 
 The remaining paper figures (deposit surfaces, component weights, score pairs,
 loading maps, top-window maps, reconstruction progression for Case 1, toy
