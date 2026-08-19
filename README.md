@@ -23,6 +23,22 @@ this repository (and the Python package name, `spatial_pca`) used the working
 name "Spatial PCA" — same method, same code. Import paths and config names are
 unchanged so existing links, imports, and the archived releases keep working.
 
+## ▶ Try it in your browser — wPCA Explorer
+
+<p align="center">
+  <a href="https://sofia-mantilla.github.io/spatial-pca-geophysical-pattern-recognition/">
+    <img alt="Launch wPCA Explorer — interactive web app, runs locally in your browser" src="https://img.shields.io/badge/%E2%96%B6%20Launch%20wPCA%20Explorer-interactive%20web%20app-b35a1c?style=for-the-badge">
+  </a>
+</p>
+
+**[wPCA Explorer](https://sofia-mantilla.github.io/spatial-pca-geophysical-pattern-recognition/)**
+runs the full Carajás case study interactively — or your own GeoTIFF grids —
+using the exact implementation that reproduces this repository's replication
+gates (Case 1: 47.0% recovery · AUC 57.9 · 5 of 11 deposits). It is a single
+self-contained page: all computation runs locally in your browser, nothing is
+ever uploaded, and it works offline. See [`webapp/`](webapp/) for details and
+the gate-validation harness.
+
 ## Why
 
 Mineral exploration targeting requires high-stakes decisions under uncertainty:
