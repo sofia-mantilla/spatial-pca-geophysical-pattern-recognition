@@ -13,7 +13,7 @@ repository-code: "https://github.com/sofia-mantilla/spatial-pca-geophysical-patt
 url: "https://doi.org/10.5281/zenodo.20164768"
 doi: "10.5281/zenodo.20164768"  # concept DOI - always resolves to the latest archived version
 
-version: "v2.1.0"
+version: "v2.2.0"
 date-released: "2026-08-19"
 
 abstract: "A reproducible windowed PCA (wPCA) workflow for learning deposit-scale geophysical geometry and ranking mineral exploration targets by similarity to known mineralization. Formerly released under the working name Spatial PCA; the method and code are the same."
