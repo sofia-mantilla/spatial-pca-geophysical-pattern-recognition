@@ -1400,6 +1400,7 @@ function drawOverlay(){
   // deposit outlines + labels
   for(const d of deposits){
     const isRef = !state.customRef && d.id===state.refId;
+    if(!isRef && !state.testIds.has(d.id)) continue;   // show only in-play deposits (reference + selected tests)
     const grp=el("g",{cursor:"pointer"});
     el("path",{d:"M"+d.poly.map(p=>p[0]+" "+p[1]).join("L")+"Z",fill:"transparent",
       stroke:isRef?"#d5006d":"var(--ink)","stroke-width":isRef?2:1.3,
@@ -2119,6 +2120,7 @@ function composeMapCanvas(){
   ctx.font=`600 ${FS}px system-ui,sans-serif`;
   for(const d of deposits){
     const isRef=!state.customRef&&d.id===state.refId;
+    if(!isRef && !state.testIds.has(d.id)) continue;   // show only in-play deposits (reference + selected tests)
     ctx.strokeStyle=isRef?"#d5006d":cssVar("--ink"); ctx.lineWidth=isRef?2:1.4;
     ctx.beginPath();
     d.poly.forEach((p,i)=>i?ctx.lineTo(p[0]*S,p[1]*S):ctx.moveTo(p[0]*S,p[1]*S));
@@ -2257,7 +2259,7 @@ img{max-width:100%;border:1px solid #e1e0d9;border-radius:8px}
 <h2>Prediction map — top ${res.top.length} windows</h2>
 <img src="${mapPng}" alt="Top-ranked wPCA prediction windows">
 ${colorbarHtml}
-<p class="cap">The shaded background was ranked below the top ${res.top.length}; outlined windows are the most similar to the reference window (bold pink). Black outlines are the known deposit footprints. North is up (UTM zone 22S).</p>
+<p class="cap">The shaded background was ranked below the top ${res.top.length}; outlined windows are the most similar to the reference window (bold pink). Black outlines are the test deposit footprints used to validate the ranking (the reference deposit is outlined in pink). North is up (UTM zone 22S).</p>
 <h2>Cumulative footprint recovery</h2>
 ${chartSvg}
 <p class="cap">The blue step curve shows the mean test-deposit footprint fraction recovered as windows are added in rank order. The dashed line and grey band are a simulated random selection of the same window geometry and count (mean and 5–95% range). Yellow dots mark ranks where a window first overlaps a test deposit; red dots mark hit events (≥50% of a footprint covered).</p>
