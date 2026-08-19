@@ -282,6 +282,19 @@
   @keyframes spin { to { transform: rotate(360deg); } }
   button.btn.primary:disabled { opacity: 0.85; cursor: progress; }
 </style>
+<style>
+.startcard{display:flex;align-items:center;gap:22px;justify-content:space-between;flex-wrap:wrap;background:linear-gradient(180deg,#fbf6ef,#f3eadd);border:1px solid #e7d9c6;border-radius:14px;padding:18px 22px;margin:0 0 16px}
+.startcard h2{margin:0 0 7px;font-size:20px;letter-spacing:.2px}
+.startcard p{margin:0;max-width:72ch;line-height:1.55;color:#39332c;font-size:14.5px}
+.startcard .startcopy{flex:1 1 440px}
+.btn.big{font-size:16px;padding:13px 24px;white-space:nowrap}
+.advfold{margin-top:2px}
+.advfold summary{cursor:pointer;font-weight:600;list-style:none;color:#b35a1c;font-size:12.5px;padding:2px 0}
+.advfold summary::-webkit-details-marker{display:none}
+.advfold summary::before{content:"\25B8  "}
+.advfold[open] summary::before{content:"\25BE  "}
+.advfold>*+*{margin-top:8px}
+</style>
 </head>
 <body>
 
@@ -294,7 +307,7 @@
     </svg>
     <div class="brand-text">
       <h1>wPCA Explorer</h1>
-      <div class="tagline"><b style="color:#fff">One known deposit is enough.</b> wPCA learns the deposit's geophysical geometry and ranks all other areas by how closely they reproduce that geometry — open, validated, and running entirely in your browser. Method: Mantilla Salas et&nbsp;al. (2026), <i>Natural Resources Research</i>.</div>
+      <div class="tagline"><b style="color:#fff">One known deposit is enough.</b> Give it one place you know holds a deposit; it learns that deposit's signature in the geophysical maps and ranks every other area by how closely it matches. Like reverse image search for a map. Open, validated, and running entirely in your browser. Method: Mantilla Salas et&nbsp;al. (2026), <i>Natural Resources Research</i>.</div>
     </div>
     <div class="byline">
       <div class="by-name">Sofia Mantilla Salas</div>
@@ -318,6 +331,13 @@
 <main>
 <!-- ======================= DEMO PANEL ======================= -->
 <div id="panel-demo">
+  <div class="startcard">
+    <div class="startcopy">
+      <h2>New here? It takes one click.</h2>
+      <p>Give the tool <b>one</b> deposit you already know. It learns what that place looks like in the geophysical maps, scans the whole region, and highlights the look alikes. As proof, it rediscovers real deposits that were hidden from it. Like reverse image search for a map.</p>
+    </div>
+    <button class="btn primary big" id="runexample" onclick="document.getElementById('runbtn').click();document.querySelector('.mapcard').scrollIntoView({behavior:'smooth',block:'start'});">&#9654; Run the Carajás example</button>
+  </div>
   <div class="toprow">
   <div class="steps">
     <div class="card">
@@ -358,17 +378,20 @@
 
     <div class="card">
       <h2><span class="stepnum">5</span>Parameters</h2>
-      <div id="krows"></div>
-      <label class="row">Stride EW
-        <span><input type="number" id="stridex" class="num sm" value="4" min="1" max="30" step="1"> <span class="unit">cells</span></span>
-      </label>
-      <label class="row">Stride NS
-        <span><input type="number" id="stridey" class="num sm" value="4" min="1" max="30" step="1"> <span class="unit">cells</span></span>
-      </label>
-      <label class="row">Top windows T
-        <span><input type="range" id="topk" min="50" max="500" step="50" value="250" style="width:64px">
-        <output id="topkout">250</output></span>
-      </label>
+      <details class="advfold">
+        <summary>Advanced (defaults reproduce the paper)</summary>
+        <div id="krows"></div>
+        <label class="row">Stride EW
+          <span><input type="number" id="stridex" class="num sm" value="4" min="1" max="30" step="1"> <span class="unit">cells</span></span>
+        </label>
+        <label class="row">Stride NS
+          <span><input type="number" id="stridey" class="num sm" value="4" min="1" max="30" step="1"> <span class="unit">cells</span></span>
+        </label>
+        <label class="row">Top windows T
+          <span><input type="range" id="topk" min="50" max="500" step="50" value="250" style="width:64px">
+          <output id="topkout">250</output></span>
+        </label>
+      </details>
     </div>
 
     <div class="card">
