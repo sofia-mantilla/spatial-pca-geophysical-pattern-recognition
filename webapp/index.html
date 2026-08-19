@@ -1672,9 +1672,14 @@ function renderVarControls(){
       if("tmi" in state.kBy){
         const multiNow=state.varSel.size>1;
         state.kBy.tmi = multiNow ? 2 : 17;   // paper default: TMI k=2 multivariate, k=17 univariate
-        // default reference follows the paper's cases: Alemão (3) multivariate, Paulo Afonso (6) univariate
-        if(multiNow){ if(state.refId===6 && !state.customRef) setReference(3); }
-        else { if(state.refId===3 && !state.customRef) setReference(6); }
+        // reference + test set follow the paper's cases; only when on the default ref (not a custom-drawn one)
+        if(multiNow){
+          if(state.refId===6 && !state.customRef) setReference(3);   // Alemão
+          if(state.refId===3 && !state.customRef){ state.testIds=new Set([1,2,4,5]); renderTestList(); }   // Case 2 tests: Tucumã, Pedra Branca, Furnas, Salobo
+        } else {
+          if(state.refId===3 && !state.customRef) setReference(6);   // Paulo Afonso
+          if(state.refId===6 && !state.customRef){ state.testIds=new Set(CARAJAS.deposits.filter(d=>d.id!==6).map(d=>d.id)); renderTestList(); }   // Case 1 tests: all others
+        }
       }
       renderVarControls(); renderKRows(); invalidate();
     });
