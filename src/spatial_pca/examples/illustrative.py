@@ -103,12 +103,12 @@ def plot_grid_matrix_schematic(
         1,
         2,
         figsize=(10, 5),
-        dpi=150,
+        dpi=400,
         gridspec_kw={"width_ratios": [1.3, 0.35]},
     )
 
     ax_grid.imshow(field, origin="lower", interpolation="nearest", cmap=cmap, vmin=gp_min, vmax=gp_max)
-    ax_grid.set_title(r"Geophysical grid ($r = 1$)", fontsize=14)
+    ax_grid.set_title(r"Geophysical grid ($r = 1$)", fontsize=18.9)
     ax_grid.set_xticks(np.arange(-0.5, n, 1), minor=True)
     ax_grid.set_yticks(np.arange(-0.5, n, 1), minor=True)
     ax_grid.grid(which="minor", linestyle="-", linewidth=0.6, alpha=0.7)
@@ -132,7 +132,7 @@ def plot_grid_matrix_schematic(
             row + 1.0,
             str(window_id),
             color="white",
-            fontsize=12,
+            fontsize=16.2,
             fontweight="bold",
         )
 
@@ -151,13 +151,13 @@ def plot_grid_matrix_schematic(
         context.train_row + 0.1,
         "Known\nDeposit",
         color="black",
-        fontsize=12,
+        fontsize=16.2,
         fontweight="bold",
     )
-    ax_grid.text(0.9, -0.9, r"$\rightarrow$", color="black", fontsize=30, va="center", ha="center")
-    ax_grid.text(-1.1, 1.0, r"$\uparrow$", color="black", fontsize=30, va="center", ha="center")
-    ax_grid.text(1.0, -1.3, r"$s_x$", fontsize=16, color="black", va="center", ha="center")
-    ax_grid.text(-1.5, 1.1, r"$s_y$", fontsize=16, color="black", va="center", ha="center", rotation=90)
+    ax_grid.text(0.9, -0.9, r"$\rightarrow$", color="black", fontsize=40.5, va="center", ha="center")
+    ax_grid.text(-1.1, 1.0, r"$\uparrow$", color="black", fontsize=40.5, va="center", ha="center")
+    ax_grid.text(1.0, -1.3, r"$s_x$", fontsize=21.6, color="black", va="center", ha="center")
+    ax_grid.text(-1.5, 1.1, r"$s_y$", fontsize=21.6, color="black", va="center", ha="center", rotation=90)
     ax_grid.annotate(
         "",
         xy=(context.train_col - 0.9, context.train_row + 0.5),
@@ -168,7 +168,7 @@ def plot_grid_matrix_schematic(
         context.train_col - 1.5,
         context.train_row + 0.5,
         r"$w_y$",
-        fontsize=14,
+        fontsize=18.9,
         color="black",
         va="center",
         ha="center",
@@ -184,7 +184,7 @@ def plot_grid_matrix_schematic(
         context.train_col + 0.5,
         context.train_row - 1.6,
         r"$w_x$",
-        fontsize=14,
+        fontsize=18.9,
         color="black",
         va="center",
         ha="center",
@@ -192,17 +192,17 @@ def plot_grid_matrix_schematic(
 
     ax_matrix.imshow(x_matrix, aspect="auto", cmap=cmap, vmin=gp_min, vmax=gp_max)
     ax_matrix.set_xticks(np.arange(x_matrix.shape[1]))
-    ax_matrix.set_xticklabels(np.arange(1, x_matrix.shape[1] + 1), fontsize=14)
+    ax_matrix.set_xticklabels(np.arange(1, x_matrix.shape[1] + 1), fontsize=18.9)
     y_tick_positions = [0, 20, 40, 60, 80]
     y_tick_labels = ["0", "20", "40", "60", "80"]
     y_ticks = [y for y in y_tick_positions if y < x_matrix.shape[0]]
     ax_matrix.set_yticks(y_ticks)
-    ax_matrix.set_yticklabels(y_tick_labels[: len(y_ticks)], fontsize=14)
-    ax_matrix.set_xlabel(r"Feature index $j \in [1, p]$", fontsize=14)
-    ax_matrix.set_ylabel("Sliding window ID", fontsize=14)
+    ax_matrix.set_yticklabels(y_tick_labels[: len(y_ticks)], fontsize=18.9)
+    ax_matrix.set_xlabel(r"Feature index $j \in [1, p]$", fontsize=18.9)
+    ax_matrix.set_ylabel("Sliding window ID", fontsize=18.9)
     ax_matrix.set_title(
         rf"$X \in \mathbb{{R}}^{{n \times p}}$  ($n={x_matrix.shape[0]}$, $p={x_matrix.shape[1]}$)",
-        fontsize=14,
+        fontsize=18.9,
     )
     ax_matrix.annotate(
         "Known" "\n" "Deposit" "\n" f"Window ID {training_window_index}" "\n" r"$\mathbf{x}_d^{\top} \subset X$",
@@ -213,7 +213,7 @@ def plot_grid_matrix_schematic(
         va="center",
         ha="left",
         color="black",
-        fontsize=14,
+        fontsize=18.9,
         fontweight="bold",
     )
 
@@ -228,7 +228,7 @@ def plot_grid_matrix_schematic(
     )
 
     fig.tight_layout(w_pad=2.5)
-    fig.savefig(path, dpi=300, bbox_inches="tight", facecolor="white")
+    fig.savefig(path, dpi=400, bbox_inches="tight", facecolor="white")
     plt.close(fig)
     return path
 
@@ -253,7 +253,7 @@ def plot_known_deposit_windows(
     win_h, win_w = int(window_shape[0]), int(window_shape[1])
     n = int(field.shape[0])
 
-    fig = plt.figure(figsize=(10, 4.3), dpi=150)
+    fig = plt.figure(figsize=(10, 4.3), dpi=400)
     gs = fig.add_gridspec(1, 2, width_ratios=[1.0, 1.25], wspace=0.28)
 
     ax_deposits = fig.add_subplot(gs[0, 0])
@@ -292,7 +292,7 @@ def plot_known_deposit_windows(
             Line2D([0], [0], color="black", linewidth=2.2, label="Testing known deposits"),
         ],
         loc="upper left",
-        fontsize=8,
+        fontsize=11.0,
         frameon=True,
     )
     fig.colorbar(im, ax=ax_deposits, fraction=0.046, pad=0.03, label=variable_name)
@@ -305,14 +305,14 @@ def plot_known_deposit_windows(
         ax_chip = fig.add_subplot(chip_grid[0, chip_idx])
         chip_im = ax_chip.imshow(chip, origin="lower", interpolation="nearest", cmap=cmap, vmin=gp_min, vmax=gp_max)
         ax_chip.add_patch(Rectangle((-0.5, -0.5), win_w, win_h, fill=False, edgecolor="black", linewidth=2.0))
-        ax_chip.set_title(f"Test ID {window_id}", fontsize=9)
+        ax_chip.set_title(f"Test ID {window_id}", fontsize=12.2)
         ax_chip.set_xticks([])
         ax_chip.set_yticks([])
         chip_cbar = fig.colorbar(chip_im, ax=ax_chip, fraction=0.05, pad=0.03)
         chip_cbar.ax.tick_params(labelsize=7)
-        chip_cbar.set_label(variable_name, fontsize=7)
+        chip_cbar.set_label(variable_name, fontsize=11.0)
 
-    fig.savefig(path, dpi=300, bbox_inches="tight", facecolor="white")
+    fig.savefig(path, dpi=400, bbox_inches="tight", facecolor="white")
     plt.close(fig)
     return path
 
@@ -406,12 +406,12 @@ def plot_image_pair(
     left_image = plt.imread(str(left_path))
     right_image = plt.imread(str(right_path))
 
-    fig, axes = plt.subplots(1, 2, figsize=figsize, dpi=150)
+    fig, axes = plt.subplots(1, 2, figsize=figsize, dpi=400)
     for ax, image in zip(axes, [left_image, right_image]):
         ax.imshow(image)
         ax.axis("off")
     fig.tight_layout(w_pad=0.6)
-    fig.savefig(path, dpi=300, bbox_inches="tight", facecolor="white")
+    fig.savefig(path, dpi=400, bbox_inches="tight", facecolor="white")
     plt.close(fig)
     return path
 
@@ -443,7 +443,7 @@ def _add_window_outline_with_label(
         row + 0.5,
         str(window_id),
         color=text_color,
-        fontsize=10,
+        fontsize=13.5,
         fontweight="bold",
         ha="center",
         va="center",

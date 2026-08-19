@@ -7,7 +7,6 @@ Writes refswap_results.json.
 import json, math, sys
 import numpy as np
 
-sys.path.insert(0, '/home/claude/b3')
 import numpy_repro_concat as R
 import case1_uni_repro as C1
 import null_expectation as NE
@@ -84,5 +83,5 @@ for ref in range(1, 13):
           % (m['end'], m['hits'], 100 * ua[-1] / VALID, 100 * rc[249],
              100 * e_matched, m['end'] / 100 / e_matched), flush=True)
 
-json.dump(out, open('/home/claude/b3/refswap_results.json', 'w'), indent=1)
+json.dump(out, open('refswap_results.json', 'w'), indent=1)
 print('DONE')

@@ -19,7 +19,6 @@ from functools import lru_cache
 
 import numpy as np
 
-sys.path.insert(0, '/home/claude/b3')
 import numpy_repro_concat as R
 
 CASE1_SHP = R.DATA / "Carajas_Brazil_Univariate_TMI/Prospect_in Carajas_v2.shp"
