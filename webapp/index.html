@@ -98,6 +98,12 @@
   .steps { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 12px; align-items: stretch; }
   @media (max-width: 1100px) { .steps { grid-template-columns: repeat(3, 1fr); } }
   @media (max-width: 700px) { .steps { grid-template-columns: 1fr 1fr; } }
+  /* wide 16:9 layout: 2x3 card sidebar + map to the right; results scroll below */
+  @media (min-width: 1500px) {
+    main, header.app, footer { max-width: 1720px; }
+    .toprow { display: grid; grid-template-columns: 500px minmax(0, 1fr); gap: 16px; align-items: start; }
+    .toprow .steps { grid-template-columns: 1fr 1fr; margin-bottom: 0; }
+  }
   label.row { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 6px 0; color: var(--ink-2); font-size: 12.5px; }
   label.row output { color: var(--ink); font-weight: 600; }
   input[type="range"], input[type="checkbox"] { accent-color: var(--accent); }
@@ -275,7 +281,7 @@
     </div>
   </div>
   <div class="mockup-banner"><b>Reproducible by construction.</b> The implementation on this page passes the paper's replication gates. Switch the map to <b>Paper 200&nbsp;m (exact)</b> and the default run reproduces Case&nbsp;1 to the digit — 47.0% recovery · AUC 57.9 · 5 of 11 deposits — in about a minute; the 400&nbsp;m preview answers in seconds.</div>
-  <div class="lockline">🔒 <span><b>Your data never leaves your computer.</b> This is one HTML file — no server, no uploads, no telemetry. Grids are read and analysed locally by your browser; it works with the network unplugged.</span></div>
+  <div class="lockline">🔒 <span><b>Your data never leaves your computer.</b> This is a single static page — no backend, no uploads, no analytics, and no network requests after it loads. Grids are read and analysed by your own browser (verify in the Network tab); save the file and it runs fully offline.</span></div>
   <div class="tabs" role="tablist">
     <button class="tab" role="tab" id="tab-demo" aria-selected="true">Demo — Carajás, Brazil</button>
     <button class="tab" role="tab" id="tab-upload" aria-selected="false">Upload your own data</button>
@@ -285,6 +291,7 @@
 <main>
 <!-- ======================= DEMO PANEL ======================= -->
 <div id="panel-demo">
+  <div class="toprow">
   <div class="steps">
     <div class="card">
       <h2><span class="stepnum">1</span>Variables</h2>
@@ -394,6 +401,7 @@
       <span class="key" style="margin-left:auto" id="crslabel"></span>
     </div>
   </div>
+  </div><!-- /toprow -->
 
   <div class="how">
     <div class="card"><h3>1 · Window</h3><p>A deposit-sized window slides across the grid. Every position becomes one observation.</p></div>
@@ -458,7 +466,7 @@
       <button class="btn" id="trydemo">Or explore the Carajás demo →</button>
     </div>
     <div class="status" id="upstatus"></div>
-    <div class="privacy">🔒 <span><b>Verifiably offline.</b> Save this page, disconnect from the internet, and everything still works — the strongest data-security guarantee a tool can make.</span></div>
+    <div class="privacy">🔒 <span><b>Verifiably private.</b> After the page loads, the app makes zero network requests — open your browser's Network tab and watch, or save the page and run it with the internet disconnected. The hosting server only ever delivers the page; it never sees your data.</span></div>
   </div>
 </div>
 </main>
@@ -2026,8 +2034,16 @@ document.getElementById("csvbtn").addEventListener("click",()=>{
   });
   const a=document.createElement("a");
   a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
-  a.download="wpca_top_windows_carajas.csv"; a.click();
+  a.download=runSlug()+"_ranking.csv"; a.click();
 });
+function runSlug(){
+  const clean=s=>String(s).normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^\w]+/g,"");
+  const ds=DATASET==="carajas"?"carajas":(USERDATA?clean(USERDATA.title).slice(0,24)||"user":"user");
+  const ref=state.customRef?"customref":clean((deposits.find(d=>d.id===state.refId)||{}).name||"ref");
+  const vars=activeVars().map(v=>clean(VARLABEL[v]||v)).join("-");
+  const T=state.result?state.result.top.length:state.topK;
+  return `wpca_${ds}_${ref}_${vars}_${Math.round(CELL_M)}m_top${T}`;
+}
 function downloadBlob(name,blob){
   const a=document.createElement("a");
   a.href=URL.createObjectURL(blob); a.download=name; a.click();
@@ -2043,7 +2059,7 @@ document.getElementById("geojsonbtn").addEventListener("click",()=>{
   });
   const gj={type:"FeatureCollection",
     crs:{type:"name",properties:{name:"urn:ogc:def:crs:EPSG::32722"}},features:feats};
-  downloadBlob("wpca_top_windows_carajas.geojson",new Blob([JSON.stringify(gj)],{type:"application/geo+json"}));
+  downloadBlob(runSlug()+"_prediction_windows.geojson",new Blob([JSON.stringify(gj)],{type:"application/geo+json"}));
 });
 function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim()||"#000"; }
 function composeMapCanvas(){
@@ -2112,7 +2128,7 @@ function composeMapCanvas(){
 }
 document.getElementById("pngbtn").addEventListener("click",()=>{
   if(!state.result){ toast("Run the analysis first."); return; }
-  composeMapCanvas().toBlob(b=>downloadBlob("wpca_map_carajas.png",b),"image/png");
+  composeMapCanvas().toBlob(b=>downloadBlob(runSlug()+"_map.png",b),"image/png");
 });
 function svgWithResolvedStyle(svg){
   const clone=svg.cloneNode(true);
@@ -2140,6 +2156,7 @@ document.getElementById("reportbtn").addEventListener("click",()=>{
   const varsTxt=avars.length===1?VARLABEL[avars[0]]
     :avars.map((v,i)=>`${VARLABEL[v]} (w=${anw[i].toFixed(2)})`).join(" + ");
   const now=new Date();
+  const fname=runSlug()+"_report.html";
   const settings=[
     ["Variables",varsTxt],
     ["Reference",refName],
@@ -2190,8 +2207,17 @@ th{color:#52514e;font-weight:600}
 img{max-width:100%;border:1px solid #e1e0d9;border-radius:8px}
 .note{color:#898781;font-size:12px;margin-top:22px;border-top:1px solid #e1e0d9;padding-top:10px}
 .cap{color:#52514e;font-size:12.5px;margin:8px 0 0;max-width:78ch}
-@media print{body{margin:8mm}}
+.toolbar{position:sticky;top:0;background:#fff;padding:10px 0 9px;border-bottom:1px solid #e1e0d9;display:flex;gap:10px;align-items:center;z-index:5}
+.toolbar button{font:inherit;padding:6px 14px;border:1px solid #c3c2b7;border-radius:7px;background:#fff;cursor:pointer}
+.toolbar button.pdf{background:#b35a1c;border-color:#b35a1c;color:#fff;font-weight:600}
+.toolbar span{color:#898781;font-size:12px}
+@media print{body{margin:8mm}.toolbar{display:none}}
 </style></head><body>
+<div class="toolbar">
+  <button class="pdf" onclick="window.print()">Save as PDF</button>
+  <button onclick="dlReport()">Download HTML</button>
+  <span>"Save as PDF" opens your browser's print dialog — the recovery chart stays vector.</span>
+</div>
 <h1>wPCA targeting report — ${DATASET==="carajas"?"Carajás, Brazil":esc(USERDATA?USERDATA.title:"uploaded dataset")}</h1>
 <div class="sub">Generated ${now.toLocaleString()} · wPCA Explorer · windowed PCA (wPCA) after Mantilla Salas, Mejia-Herrera, Kloeckner, Asadi, Yin &amp; Caers (2026), <i>Natural Resources Research</i>${DATASET==="carajas"?" · geophysical data: Geological Survey of Brazil (SGB/CPRM)":""}</div>
 <p class="cap" style="font-size:13.5px;color:#0b0b0b">Windowed PCA (wPCA) learns the geophysical geometry of one known deposit — the <b>reference</b> — and ranks every other map window by how closely it reproduces that geometry. A deposit-sized window slides across the grid; each window is represented by its principal-component scores, the components most characteristic of the reference get the weight, and all windows are ranked by weighted distance to the reference in PCA space. The top-${res.top.length} windows below are the proposed follow-up targets, validated against the footprints of the ${res.nTest} independent test deposits.</p>
@@ -2212,8 +2238,18 @@ ${chartSvg}
 <h2>Top 25 prediction windows (window centres, UTM 22S)</h2>
 <table><thead><tr><th>Rank</th><th>Easting (km)</th><th>Northing (km)</th><th>PCA distance</th></tr></thead><tbody>${rows}</tbody></table>
 <div class="note">Produced entirely in the browser by wPCA Explorer; no data left this computer. Method and validation: Mantilla Salas et&nbsp;al. (2026), Natural Resources Research; software DOI 10.5281/zenodo.20164768. Rankings are a targeting aid, not a resource estimate — field validation required.</div>
+<script>
+const FILENAME=${JSON.stringify(fname)};
+function dlReport(){
+  const b=new Blob(["<!DOCTYPE html>"+document.documentElement.outerHTML],{type:"text/html"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(b); a.download=FILENAME; a.click();
+}
+<\/script>
 </body></html>`;
-  downloadBlob(`wpca_report_${CELL_M}m_${now.toISOString().slice(0,10)}.html`,new Blob([html],{type:"text/html"}));
+  const blob=new Blob([html],{type:"text/html"});
+  const wnd=window.open(URL.createObjectURL(blob),"_blank");
+  if(!wnd){ downloadBlob(fname,blob); toast("Pop-up blocked — the report was downloaded instead."); }
 });
 
 /* ============ tabs & upload ============ */

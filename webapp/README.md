@@ -45,9 +45,13 @@ Run with the default settings reproduces Case 1 to the digit.
 
 ## Data security
 
-The app is one HTML file with no server, no uploads, and no telemetry. All
-files are parsed and analysed locally by the browser; it works offline.
-Confidential exploration data never leaves the user's computer.
+The app is a single static page with no backend. The hosting server (GitHub
+Pages) only delivers the file; it never receives any data. After the page
+loads, the app makes **zero network requests** — no uploads, no analytics, no
+telemetry — which anyone can verify in the browser's Network tab or by saving
+the page and running it with the internet disconnected. All grids and outlines
+are parsed and analysed locally by the user's browser, so confidential
+exploration data never leaves their computer.
 
 ## Local development
 
