@@ -1843,22 +1843,7 @@ async function computeRanking(setStatus){
     top.push({x:gx,y:gy,dist:dist[o]});
     rects.push(gridRectToMap(gx,gy,wm.ww,wm.wh));
   }
-  await say("Validating footprint recovery (exact geometry)…");
-  const testDeps={};
-  for(const dpp of deposits) if(state.testIds.has(dpp.id)) testDeps[dpp.id]=dpp.ringsW;
-  for(const ct of state.customTests){
-    if(!state.testIds.has(ct.id)) continue;
-    const [xm,xM,ym,yM]=gridRectToMap(ct.x,ct.y,ct.w,ct.h);
-    testDeps[ct.id]=[[[xm,yM],[xM,yM],[xM,ym],[xm,ym],[xm,yM]]];  // clockwise outer ring
-  }
-  const nTest=Object.keys(testDeps).length;
-  if(!nTest) throw new Error("Select at least one test deposit.");
-  const res=WPCA.footprintRecovery(rects,testDeps,0.5);
-  const m=WPCA.metricsOf(res,T);
-  const hitsAt=new Array(T).fill(0);
-  { const byRank={}; for(const r in res.hitByRank) byRank[+r]=res.hitByRank[r].length;
-    let hc=0; for(let t=0;t<T;t++){ hc+=byRank[t+1]||0; hitsAt[t]=hc; } }
-  // covered-area curve on the grid (area tile + matched-area lift)
+  // covered-area curve on the grid (prediction windows only — needs no test deposits)
   let studyCells=0;
   { const f=fields[vars[0]];
     for(let r=ay0;r<ay1;r++) for(let c=ax0;c<ax1;c++) if(!Number.isNaN(f[r*W+c])) studyCells++;
@@ -1871,6 +1856,27 @@ async function computeRanking(setStatus){
       for(let i=0;i<wm.ww;i++){ if(!cover[base+i]){ cover[base+i]=1; covered++; } } }
     areaFrac[t]=covered/studyCells;
   }
+  // test-deposit footprints (optional — used only for the recovery/validation curve)
+  const testDeps={};
+  for(const dpp of deposits) if(state.testIds.has(dpp.id)) testDeps[dpp.id]=dpp.ringsW;
+  for(const ct of state.customTests){
+    if(!state.testIds.has(ct.id)) continue;
+    const [xm,xM,ym,yM]=gridRectToMap(ct.x,ct.y,ct.w,ct.h);
+    testDeps[ct.id]=[[[xm,yM],[xM,yM],[xM,ym],[xm,ym],[xm,yM]]];  // clockwise outer ring
+  }
+  const nTest=Object.keys(testDeps).length;
+  if(!nTest){
+    // no test deposits selected: return the prediction windows only, no recovery/validation curve
+    return {top,winW:wm.ww,winH:wm.wh,areaFrac,areaKm2:covered*CELL_KM*CELL_KM,nWindows:nWin,nTest:0,
+            rec:null,randMean:null,randLo:null,randHi:null,hitsAt:null,
+            hits:null,auc:null,lift:null,overlapRanks:[],hitRankList:[],overlapBy:{},hitBy:{}};
+  }
+  await say("Validating footprint recovery (exact geometry)…");
+  const res=WPCA.footprintRecovery(rects,testDeps,0.5);
+  const m=WPCA.metricsOf(res,T);
+  const hitsAt=new Array(T).fill(0);
+  { const byRank={}; for(const r in res.hitByRank) byRank[+r]=res.hitByRank[r].length;
+    let hc=0; for(let t=0;t<T;t++){ hc+=byRank[t+1]||0; hitsAt[t]=hc; } }
   await say("Simulating the random-selection reference…");
   // rasterized footprints for the simulated band (headline metrics above are exact-geometry)
   const ids=Object.keys(testDeps);
@@ -1921,7 +1927,6 @@ async function computeRanking(setStatus){
 document.getElementById("runbtn").addEventListener("click",async ()=>{
   const status=document.getElementById("runstatus");
   const btn=document.getElementById("runbtn");
-  if(state.testIds.size===0){ status.textContent="Select at least one test deposit."; return; }
   btn.disabled=true;
   btn.innerHTML='<span class="spin"></span>Running…';
   try{
@@ -1936,12 +1941,12 @@ document.getElementById("runbtn").addEventListener("click",async ()=>{
 function gridToUTM(x,y){ return [(E0 + x*CELL_M)/1000, (N0g - y*CELL_M)/1000]; }
 function renderResults(res){
   document.getElementById("results").classList.add("show");
-  const rec=(res.rec.at(-1)||0)*100;
-  document.getElementById("t-rec").innerHTML=rec.toFixed(1)+"<small>%</small>";
-  document.getElementById("t-hits").innerHTML=res.hits+"<small> of "+res.nTest+"</small>";
-  document.getElementById("t-auc").textContent=res.auc.toFixed(1);
+  const hasVal = res.nTest>0 && res.rec;
+  document.getElementById("t-rec").innerHTML = hasVal ? (res.rec.at(-1)*100).toFixed(1)+"<small>%</small>" : "<small>—</small>";
+  document.getElementById("t-hits").innerHTML = hasVal ? res.hits+"<small> of "+res.nTest+"</small>" : "<small>no test deposits</small>";
+  document.getElementById("t-auc").textContent = hasVal ? res.auc.toFixed(1) : "—";
   document.getElementById("t-area").innerHTML=Math.round(res.areaKm2).toLocaleString()+"<small> km²</small>";
-  document.getElementById("t-lift").innerHTML=res.lift.toFixed(2)+"<small>×</small>";
+  document.getElementById("t-lift").innerHTML = hasVal ? res.lift.toFixed(2)+"<small>×</small>" : "<small>—</small>";
   const tb=document.querySelector("#topwins tbody"); tb.textContent="";
   res.top.slice(0,10).forEach((w,i)=>{
     const [e,n]=gridToUTM(w.x+res.winW/2, w.y+res.winH/2);
@@ -1950,8 +1955,20 @@ function renderResults(res){
       .forEach(v=>{const td=document.createElement("td");td.textContent=v;tr.appendChild(td);});
     tb.appendChild(tr);
   });
-  drawRecoveryChart(res);
-  renderRecTable(res);
+  if(hasVal){
+    drawRecoveryChart(res);
+    renderRecTable(res);
+  } else {
+    chart.textContent=""; document.getElementById("rectable").textContent="";
+    const note=document.createElementNS(SVGNS,"text");
+    note.setAttribute("x","20"); note.setAttribute("y","46"); note.setAttribute("font-size","13.5"); note.setAttribute("fill","var(--ink-2)");
+    note.textContent="No test deposits selected — recovery curve unavailable.";
+    chart.appendChild(note);
+    const note2=document.createElementNS(SVGNS,"text");
+    note2.setAttribute("x","20"); note2.setAttribute("y","70"); note2.setAttribute("font-size","12"); note2.setAttribute("fill","var(--muted)");
+    note2.textContent="The prediction windows and map are the targeting output; add a test deposit to validate.";
+    chart.appendChild(note2);
+  }
   document.getElementById("results").scrollIntoView({behavior:"smooth",block:"nearest"});
 }
 
@@ -2228,10 +2245,14 @@ document.getElementById("reportbtn").addEventListener("click",()=>{
     ["Top windows T",String(res.top.length)],
     ["Test deposits",String(res.nTest)+" (hit = ≥50% of footprint covered)"],
   ];
-  const tiles=[["Footprint recovered",(res.rec[res.rec.length-1]*100).toFixed(1)+"%"],
+  const _hasVal=res.nTest>0 && res.rec;
+  const tiles=_hasVal?[["Footprint recovered",(res.rec[res.rec.length-1]*100).toFixed(1)+"%"],
     ["Test deposits hit",`${res.hits} of ${res.nTest}`],["Recovery AUC",res.auc.toFixed(1)],
     ["Area selected",Math.round(res.areaKm2).toLocaleString()+" km²"],
-    ["vs random of matched area",res.lift.toFixed(2)+"×"]];
+    ["vs random of matched area",res.lift.toFixed(2)+"×"]]
+    :[["Prediction windows",String(res.top.length)],
+    ["Area selected",Math.round(res.areaKm2).toLocaleString()+" km²"],
+    ["Test deposits","none selected"]];
   const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
   const cbFmt=v=>Math.abs(v)>=100?Math.round(v).toLocaleString():(Math.round(v*10)/10);
   // per-variable prediction maps: a multivariate report shows the ranking over every variable used
@@ -2289,18 +2310,18 @@ img{max-width:100%;border:1px solid #e1e0d9;border-radius:8px}
 </div>
 <h1>wPCA targeting report — ${DATASET==="carajas"?"Carajás, Brazil":esc(USERDATA?USERDATA.title:"uploaded dataset")}</h1>
 <div class="sub">Generated ${now.toLocaleString()} · wPCA Explorer · windowed PCA (wPCA) after Mantilla Salas, Mejia-Herrera, Kloeckner, Asadi, Yin &amp; Caers (2026), <i>Natural Resources Research</i>${DATASET==="carajas"?" · geophysical data: Geological Survey of Brazil (SGB/CPRM)":""}</div>
-<p class="cap" style="font-size:13.5px;color:#0b0b0b">Windowed PCA (wPCA) learns the geophysical geometry of one known deposit — the <b>reference</b> — and ranks every other map window by how closely it reproduces that geometry. A deposit-sized window slides across the grid; each window is represented by its principal-component scores, the components most characteristic of the reference get the weight, and all windows are ranked by weighted distance to the reference in PCA space. The top-${res.top.length} windows below are the proposed follow-up targets, validated against the footprints of the ${res.nTest} independent test deposits.</p>
+<p class="cap" style="font-size:13.5px;color:#0b0b0b">Windowed PCA (wPCA) learns the geophysical geometry of one known deposit — the <b>reference</b> — and ranks every other map window by how closely it reproduces that geometry. A deposit-sized window slides across the grid; each window is represented by its principal-component scores, the components most characteristic of the reference get the weight, and all windows are ranked by weighted distance to the reference in PCA space. The top-${res.top.length} windows below are the proposed follow-up targets${_hasVal?`, validated against the footprints of the ${res.nTest} independent test deposits`:``}.</p>
 <h2>Run configuration</h2>
 <table>${settings.map(([k,v])=>`<tr><th style="width:190px">${esc(k)}</th><td>${esc(v)}</td></tr>`).join("")}</table>
 <h2>Headline results</h2>
 <div class="tiles">${tiles.map(([l,v])=>`<div class="tile"><div class="l">${esc(l)}</div><div class="v">${esc(v)}</div></div>`).join("")}</div>
-<p class="cap"><b>How to read these numbers.</b> "Footprint recovered" is the mean fraction of the test-deposit footprints covered by the selected windows; a deposit counts as <b>hit</b> when at least 50% of its footprint is covered. "vs random of matched area" compares the recovery with a random selection covering the same total area — values well above 1× mean the ranking finds deposits far better than chance.</p>
+${_hasVal?`<p class="cap"><b>How to read these numbers.</b> "Footprint recovered" is the mean fraction of the test-deposit footprints covered by the selected windows; a deposit counts as <b>hit</b> when at least 50% of its footprint is covered. "vs random of matched area" compares the recovery with a random selection covering the same total area — values well above 1× mean the ranking finds deposits far better than chance.</p>`:`<p class="cap">No test deposits were selected, so the ranking is shown without a recovery curve. The maps and window list below are the targeting output; add one or more test deposits to validate the ranking.</p>`}
 ${mapsHtml}
-<h2>Cumulative footprint recovery</h2>
+${_hasVal?`<h2>Cumulative footprint recovery</h2>
 ${chartSvg}
 <p class="cap">The blue step curve shows the mean test-deposit footprint fraction recovered as windows are added in rank order. The dashed line and grey band are a simulated random selection of the same window geometry and count (mean and 5–95% range). Yellow dots mark ranks where a window first overlaps a test deposit; red dots mark hit events (≥50% of a footprint covered).</p>
 <h2>Deposit hits (≥50% of footprint covered)</h2>
-<table><thead><tr><th>Rank</th><th>Deposit</th></tr></thead><tbody>${hitsRows||'<tr><td colspan="2">None</td></tr>'}</tbody></table>
+<table><thead><tr><th>Rank</th><th>Deposit</th></tr></thead><tbody>${hitsRows||'<tr><td colspan="2">None</td></tr>'}</tbody></table>`:``}
 <h2>Top 25 prediction windows (window centres, UTM 22S)</h2>
 <table><thead><tr><th>Rank</th><th>Easting (km)</th><th>Northing (km)</th><th>PCA distance</th></tr></thead><tbody>${rows}</tbody></table>
 <div class="note">Produced entirely in the browser by wPCA Explorer; no data left this computer. Method and validation: Mantilla Salas et&nbsp;al. (2026), Natural Resources Research; software DOI 10.5281/zenodo.20164768. Rankings are a targeting aid, not a resource estimate — field validation required.</div>
