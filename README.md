@@ -75,7 +75,7 @@ scores, weights the components most characteristic of the reference deposit,
 and validates the top-ranked windows against independent deposit footprints.
 
 <p align="center">
-  <img src="docs/figures/workflow_steps_schematic.png" alt="wPCA workflow from input rasters and deposit polygons to ranked windows and validation" width="900">
+  <img src="docs/figures/workflow_steps_schematic.png" alt="wPCA workflow from input rasters and deposit polygons to ranked windows and validation" width="500">
 </p>
 
 **Module core functionality**
