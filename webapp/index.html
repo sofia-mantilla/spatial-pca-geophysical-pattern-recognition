@@ -55,36 +55,39 @@
   .brand {
     display: flex; align-items: center; gap: 16px;
     background: #14293a url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='280' height='150'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='0.055' stroke-width='1.4'%3E%3Cpath d='M0 28 Q 70 8 140 30 T 280 24'/%3E%3Cpath d='M0 62 Q 60 42 130 64 T 280 58'/%3E%3Cpath d='M0 98 Q 80 76 150 100 T 280 92'/%3E%3Cpath d='M0 132 Q 65 114 135 134 T 280 128'/%3E%3C/g%3E%3C/svg%3E") repeat;
-    border-radius: 14px; padding: 18px 24px;
+    border-radius: 14px; padding: 12px 22px;
   }
-  .brand h1 { font-size: 24px; margin: 0; font-weight: 700; letter-spacing: -0.01em; color: #ffffff; }
-  .brand .tagline { color: #a9bdca; font-size: 13px; margin-top: 3px; max-width: 66ch; line-height: 1.4; }
+  .brand h1 { font-size: 22px; margin: 0; font-weight: 700; letter-spacing: -0.01em; color: #ffffff; }
+  .brand .tagline { color: #a9bdca; font-size: 12.5px; margin-top: 2px; line-height: 1.4; }
+  .brand .brand-text { flex: 1; min-width: 0; }
   .brand .logo { flex: none; }
   .byline { margin-left: auto; text-align: right; flex: none; }
   .by-name { color: #ffffff; font-weight: 650; font-size: 13.5px; }
   .by-org { color: #a9bdca; font-size: 12px; margin-top: 1px; }
   .by-links { margin-top: 6px; }
   .by-links a { color: #e2a06c; font-size: 12px; margin-left: 12px; text-decoration: none; border-bottom: 1px solid rgba(226,160,108,0.45); }
+  .strips { display: grid; gap: 8px; margin-top: 10px; }
+  @media (min-width: 1280px) { .strips { grid-template-columns: 1fr 1fr; align-items: stretch; } }
   .mockup-banner {
-    margin: 14px 0 0; padding: 8px 14px; border: 1px solid var(--border); border-left: 3px solid var(--accent);
-    background: var(--surface); border-radius: 8px; font-size: 12.5px; color: var(--ink-2);
-    line-height: 1.5;
+    padding: 7px 13px; border: 1px solid var(--border); border-left: 3px solid var(--accent);
+    background: var(--surface); border-radius: 8px; font-size: 12px; color: var(--ink-2);
+    line-height: 1.45;
   }
   .mockup-banner b { color: var(--ink); font-weight: 600; }
   .lockline {
-    margin: 8px 0 0; padding: 8px 14px; border: 1px solid var(--border);
-    background: var(--accent-wash); border-radius: 8px; font-size: 12.5px; color: var(--ink-2);
-    display: flex; gap: 9px; align-items: baseline; line-height: 1.5;
+    padding: 7px 13px; border: 1px solid var(--border);
+    background: var(--accent-wash); border-radius: 8px; font-size: 12px; color: var(--ink-2);
+    display: flex; gap: 9px; align-items: baseline; line-height: 1.45;
   }
   .lockline b { color: var(--ink); font-weight: 650; }
-  .tabs { display: flex; gap: 4px; margin: 18px 0 0; border-bottom: 1px solid var(--grid); }
+  .tabs { display: flex; gap: 4px; margin: 10px 0 0; border-bottom: 1px solid var(--grid); }
   .tab {
     appearance: none; border: 0; background: none; color: var(--ink-2);
     font: inherit; font-weight: 550; padding: 8px 14px; cursor: pointer;
     border-bottom: 2px solid transparent; margin-bottom: -1px;
   }
   .tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
-  main { max-width: 1280px; margin: 0 auto; padding: 18px 28px 60px; }
+  main { max-width: 1280px; margin: 0 auto; padding: 12px 28px 60px; }
   .card {
     background: var(--surface); border: 1px solid var(--border);
     border-radius: 10px; padding: 13px 15px;
@@ -98,11 +101,33 @@
   .steps { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 12px; align-items: stretch; }
   @media (max-width: 1100px) { .steps { grid-template-columns: repeat(3, 1fr); } }
   @media (max-width: 700px) { .steps { grid-template-columns: 1fr 1fr; } }
-  /* wide 16:9 layout: 2x3 card sidebar + map to the right; results scroll below */
-  @media (min-width: 1500px) {
-    main, header.app, footer { max-width: 1720px; }
-    .toprow { display: grid; grid-template-columns: 500px minmax(0, 1fr); gap: 16px; align-items: start; }
+  /* wide 16:9 layout: 2x3 card sidebar + map to the right; results scroll below.
+     The map caps its own height so the whole setup fits above the fold. */
+  @media (min-width: 1280px) {
+    main, header.app, footer { max-width: 1760px; }
+    .toprow { display: grid; grid-template-columns: clamp(400px, 29vw, 500px) minmax(0, 1fr); gap: 14px; align-items: start; }
     .toprow .steps { grid-template-columns: 1fr 1fr; margin-bottom: 0; }
+    .mapwrap { margin: 0 auto; max-width: min(100%, calc((100vh - 395px) * var(--maprat, 1.87))); }
+  }
+  /* short screens: collapse card hints so the six cards fit beside the map */
+  @media (min-width: 1280px) and (max-height: 960px) {
+    .toprow .steps .hint, .toprow .steps .privacy { display: none; }
+    .toprow .card { padding: 10px 13px; }
+    .toprow .steps { gap: 8px; }
+    .toprow .card h2 { margin-bottom: 6px; }
+  }
+  @media (min-width: 1280px) and (max-height: 850px) {
+    .toprow .card { padding: 8px 12px; }
+    .toprow label.row { margin: 3px 0; }
+    .toprow .checks { gap: 1px 8px; }
+    .toprow .steps button.btn { padding: 4px 8px; }
+    .brand { padding: 9px 20px; }
+  }
+  @media (min-width: 1280px) and (max-height: 805px) {
+    .toprow .steps { gap: 6px; }
+    .toprow .card h2 { font-size: 10px; margin-bottom: 4px; }
+    .toprow .minilinks { margin-top: 2px; }
+    .toprow button.btn.primary { padding: 6px 10px; }
   }
   label.row { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 6px 0; color: var(--ink-2); font-size: 12.5px; }
   label.row output { color: var(--ink); font-weight: 600; }
@@ -143,8 +168,8 @@
     margin-top: 9px; padding-top: 8px; border-top: 1px solid var(--grid);
   }
   /* Map */
-  .mapcard { padding: 14px 16px 12px; }
-  .maphead { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+  .mapcard { padding: 10px 14px 9px; }
+  .maphead { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
   .maphead h2 { margin: 0; }
   .mapopts { display: flex; gap: 12px; align-items: center; }
   .mapopts .lab { font-size: 12px; color: var(--ink-2); }
@@ -280,8 +305,10 @@
       </div>
     </div>
   </div>
-  <div class="mockup-banner"><b>Reproducible by construction.</b> The implementation on this page passes the paper's replication gates. Switch the map to <b>Paper 200&nbsp;m (exact)</b> and the default run reproduces Case&nbsp;1 to the digit — 47.0% recovery · AUC 57.9 · 5 of 11 deposits — in about a minute; the 400&nbsp;m preview answers in seconds.</div>
-  <div class="lockline">🔒 <span><b>Your data never leaves your computer.</b> This is a single static page — no backend, no uploads, no analytics, and no network requests after it loads. Grids are read and analysed by your own browser (verify in the Network tab); save the file and it runs fully offline.</span></div>
+  <div class="strips">
+    <div class="mockup-banner"><b>Reproducible by construction.</b> This implementation passes the paper's replication gates — at <b>Paper 200&nbsp;m (exact)</b> the default run reproduces Case&nbsp;1 to the digit: 47.0% recovery · AUC 57.9 · 5 of 11 deposits. The 400&nbsp;m preview answers in seconds.</div>
+    <div class="lockline">🔒 <span><b>Your data never leaves your computer.</b> A single static page — no backend, no uploads, no analytics; zero network requests after load (verify in the Network tab). Save the file and it runs fully offline.</span></div>
+  </div>
   <div class="tabs" role="tablist">
     <button class="tab" role="tab" id="tab-demo" aria-selected="true">Demo — Carajás, Brazil</button>
     <button class="tab" role="tab" id="tab-upload" aria-selected="false">Upload your own data</button>
@@ -1211,6 +1238,7 @@ function setResolution(cell){
   if (se) { se.value = sdef; sn.value = sdef; }
   rasterCanvas.width = W * 2; rasterCanvas.height = H * 2;
   mapwrap.style.aspectRatio = W + " / " + H;
+  mapwrap.style.setProperty("--maprat", (W / H).toFixed(4));
   overlay.setAttribute("viewBox", `0 0 ${W} ${H}`);
   resetView();
   drawRaster();
@@ -2401,6 +2429,7 @@ function setUserDataset(){
   }
   rasterCanvas.width=W*2; rasterCanvas.height=H*2;
   mapwrap.style.aspectRatio=W+" / "+H;
+  mapwrap.style.setProperty("--maprat",(W/H).toFixed(4));
   overlay.setAttribute("viewBox",`0 0 ${W} ${H}`);
   resetView();
   drawRaster();
