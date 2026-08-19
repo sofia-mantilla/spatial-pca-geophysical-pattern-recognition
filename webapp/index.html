@@ -2210,7 +2210,6 @@ function svgWithResolvedStyle(svg){
 document.getElementById("reportbtn").addEventListener("click",()=>{
   if(!state.result){ toast("Run the analysis first."); return; }
   const res=state.result;
-  const mapPng=composeMapCanvas().toDataURL("image/png");
   const chartSvg=svgWithResolvedStyle(chart);
   const refName=refsel.selectedOptions[0].textContent;
   const avars=activeVars(), anw=normWeights(avars);
@@ -2234,13 +2233,22 @@ document.getElementById("reportbtn").addEventListener("click",()=>{
     ["Area selected",Math.round(res.areaKm2).toLocaleString()+" km²"],
     ["vs random of matched area",res.lift.toFixed(2)+"×"]];
   const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
-  const [cbLo,cbHi]=getRange(state.variable);
   const cbFmt=v=>Math.abs(v)>=100?Math.round(v).toLocaleString():(Math.round(v*10)/10);
-  const colorbarHtml=`<div style="max-width:420px;margin-top:10px">
-    <div style="height:12px;border-radius:3px;background:linear-gradient(90deg,${CMAPS[state.cmap].join(",")})"></div>
-    <div style="display:flex;justify-content:space-between;font-size:11.5px;color:#52514e;margin-top:2px">
-      <span>${cbFmt(cbLo)}</span><span>${esc(UNITS[state.variable])}</span><span>${cbFmt(cbHi)}</span>
-    </div></div>`;
+  // per-variable prediction maps: a multivariate report shows the ranking over every variable used
+  const _prevVar=state.variable;
+  const mapsHtml=activeVars().map(v=>{
+    state.variable=v; drawRaster();
+    const png=composeMapCanvas().toDataURL("image/png");
+    const [lo,hi]=getRange(v);
+    const cb=`<div style="max-width:420px;margin-top:10px">`
+      +`<div style="height:12px;border-radius:3px;background:linear-gradient(90deg,${CMAPS[state.cmap].join(",")})"></div>`
+      +`<div style="display:flex;justify-content:space-between;font-size:11.5px;color:#52514e;margin-top:2px">`
+      +`<span>${cbFmt(lo)}</span><span>${esc(UNITS[v])}</span><span>${cbFmt(hi)}</span></div></div>`;
+    const title=activeVars().length>1?`Prediction map over ${esc(VARLABEL[v])} — top ${res.top.length} windows`:`Prediction map — top ${res.top.length} windows`;
+    return `<h2>${title}</h2>\n<img src="${png}" alt="wPCA prediction windows over ${esc(VARLABEL[v])}">\n${cb}\n`
+      +`<p class="cap">Background shows the ${esc(VARLABEL[v])} grid, shaded where ranked below the top ${res.top.length}; outlined windows are the most similar to the reference window (bold pink). Black outlines are the test deposit footprints used to validate the ranking (the reference deposit is outlined in pink). North is up (UTM zone 22S).</p>`;
+  }).join("\n");
+  state.variable=_prevVar; drawRaster();
   const rows=res.top.slice(0,25).map((w,i)=>{
     const [e,n]=gridToUTM(w.x+res.winW/2,w.y+res.winH/2);
     return `<tr><td>${i+1}</td><td>${e.toFixed(1)}</td><td>${n.toFixed(1)}</td><td>${w.dist.toFixed(3)}</td></tr>`;
@@ -2287,10 +2295,7 @@ img{max-width:100%;border:1px solid #e1e0d9;border-radius:8px}
 <h2>Headline results</h2>
 <div class="tiles">${tiles.map(([l,v])=>`<div class="tile"><div class="l">${esc(l)}</div><div class="v">${esc(v)}</div></div>`).join("")}</div>
 <p class="cap"><b>How to read these numbers.</b> "Footprint recovered" is the mean fraction of the test-deposit footprints covered by the selected windows; a deposit counts as <b>hit</b> when at least 50% of its footprint is covered. "vs random of matched area" compares the recovery with a random selection covering the same total area — values well above 1× mean the ranking finds deposits far better than chance.</p>
-<h2>Prediction map — top ${res.top.length} windows</h2>
-<img src="${mapPng}" alt="Top-ranked wPCA prediction windows">
-${colorbarHtml}
-<p class="cap">The shaded background was ranked below the top ${res.top.length}; outlined windows are the most similar to the reference window (bold pink). Black outlines are the test deposit footprints used to validate the ranking (the reference deposit is outlined in pink). North is up (UTM zone 22S).</p>
+${mapsHtml}
 <h2>Cumulative footprint recovery</h2>
 ${chartSvg}
 <p class="cap">The blue step curve shows the mean test-deposit footprint fraction recovered as windows are added in rank order. The dashed line and grey band are a simulated random selection of the same window geometry and count (mean and 5–95% range). Yellow dots mark ranks where a window first overlaps a test deposit; red dots mark hit events (≥50% of a footprint covered).</p>
