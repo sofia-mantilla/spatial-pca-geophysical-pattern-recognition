@@ -378,10 +378,10 @@
         <summary>Advanced (defaults reproduce the paper)</summary>
         <div id="krows"></div>
         <label class="row">Stride EW
-          <span><input type="number" id="stridex" class="num sm" value="4" min="1" max="30" step="1"> <span class="unit">cells</span></span>
+          <span><input type="number" id="stridex" class="num sm" value="8" min="1" max="30" step="1"> <span class="unit">cells</span></span>
         </label>
         <label class="row">Stride NS
-          <span><input type="number" id="stridey" class="num sm" value="4" min="1" max="30" step="1"> <span class="unit">cells</span></span>
+          <span><input type="number" id="stridey" class="num sm" value="8" min="1" max="30" step="1"> <span class="unit">cells</span></span>
         </label>
         <label class="row">Top windows T
           <span><input type="range" id="topk" min="50" max="500" step="50" value="250" style="width:64px">
@@ -1251,7 +1251,7 @@ function setResolution(cell){
       return { ...ct, x, y, w, h, fp };
     });
   }
-  const sdef = cell === 200 ? 8 : 4;
+  const sdef = 8;   // default stride 8 EW/NS for both the 400 m preview and the 200 m exact run
   state.strideX = sdef; state.strideY = sdef;
   const se = document.getElementById("stridex"), sn = document.getElementById("stridey");
   if (se) { se.value = sdef; sn.value = sdef; }
@@ -1669,6 +1669,13 @@ function renderVarControls(){
     cb.addEventListener("change",()=>{
       if(cb.checked) state.varSel.add(k);
       else { if(state.varSel.size<=1){ cb.checked=true; return; } state.varSel.delete(k); }
+      if("tmi" in state.kBy){
+        const multiNow=state.varSel.size>1;
+        state.kBy.tmi = multiNow ? 2 : 17;   // paper default: TMI k=2 multivariate, k=17 univariate
+        // default reference follows the paper's cases: Alemão (3) multivariate, Paulo Afonso (6) univariate
+        if(multiNow){ if(state.refId===6 && !state.customRef) setReference(3); }
+        else { if(state.refId===3 && !state.customRef) setReference(6); }
+      }
       renderVarControls(); renderKRows(); invalidate();
     });
     lab.appendChild(cb);
