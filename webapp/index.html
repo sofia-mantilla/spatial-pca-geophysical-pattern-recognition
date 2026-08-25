@@ -4,101 +4,150 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>wPCA Explorer — geophysical pattern recognition for mineral targeting</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect x='2' y='2' width='36' height='36' rx='7' fill='%2314293a'/%3E%3Cpath d='M14 4v32 M26 4v32 M4 14h32 M4 26h32' stroke='%23e2b58a' stroke-width='1.4' opacity='0.6'/%3E%3Crect x='15.4' y='15.4' width='9.2' height='9.2' rx='1.5' fill='%23e08a4a'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%232e6b4f'/%3E%3Crect x='4' y='18' width='10' height='10' fill='%236ea882'/%3E%3C/svg%3E">
 <style>
   :root {
     color-scheme: light;
-    --page: #f9f9f7;
-    --surface: #fcfcfb;
-    --ink: #0b0b0b;
-    --ink-2: #52514e;
-    --muted: #898781;
-    --grid: #e1e0d9;
-    --baseline: #c3c2b7;
-    --border: rgba(11,11,11,0.10);
-    --blue: #2a78d6;
-    --orange: #eb6834;
-    --magenta: #e87ba4;
-    --blue-wash: rgba(42,120,214,0.10);
-    --orange-wash: rgba(235,104,52,0.10);
-    --accent: #b35a1c;
-    --accent-wash: rgba(179,90,28,0.10);
+    /* Ground and surfaces. Cards read as objects because they are lighter than
+       the page, not because they are outlined — the border is a seam, not the edge. */
+    --page: #eef0ec;
+    --surface: #ffffff;
+    --sunken: #e2e7df;
+    --ink: #101210;
+    --ink-2: #4c514b;
+    --muted: #616660;
+    --grid: #dcdfd8;
+    --baseline: #bcc1b8;
+    --border: rgba(16,18,16,0.10);
+    /* One chromatic family for chrome: pine green. */
+    --accent: #2e6b4f;
+    --accent-hover: #255a42;
+    --on-accent: #ffffff;
+    --accent-wash: rgba(46,107,79,0.09);
+    --accent-line: rgba(46,107,79,0.35);
+    /* Map-overlay colour. Sits on top of arbitrary geophysical colourmaps, so it
+       is deliberately outside the neutral system and identical in both themes. */
+    --ref: #d5006d;
+    /* Type scale — six steps, no half pixels. */
+    --t-micro: 11px;
+    --t-small: 12px;
+    --t-body: 13px;
+    --t-lead: 15px;
+    --t-title: 22px;
+    --t-metric: 26px;
+    /* Radius — three steps. Controls nest inside cards; cards inside the hero. */
+    --r-chip: 1px;
+    --r-ctl: 3px;
+    --r-card: 4px;
+    --r-hero: 0px;
     --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
       color-scheme: dark;
-      --page: #0d0d0d;
-      --surface: #1a1a19;
-      --ink: #ffffff;
-      --ink-2: #c3c2b7;
-      --muted: #898781;
-      --grid: #2c2c2a;
-      --baseline: #383835;
-      --border: rgba(255,255,255,0.10);
-      --blue: #3987e5;
-      --orange: #d95926;
-      --magenta: #d55181;
-      --blue-wash: rgba(57,135,229,0.14);
-      --orange-wash: rgba(217,89,38,0.14);
-      --accent: #dd8a48;
-      --accent-wash: rgba(221,138,72,0.14);
+      --page: #0e100e;
+      --surface: #191c19;
+      --sunken: #0a0c0a;
+      --ink: #f2f4f1;
+      --ink-2: #bcc1b8;
+      --muted: #8a908a;
+      --grid: #2b2f2b;
+      --baseline: #3c423c;
+      --border: rgba(242,244,241,0.11);
+      --accent: #6ea882;
+      --accent-hover: #86bd98;
+      --on-accent: #0e1a12;
+      --accent-wash: rgba(110,168,130,0.14);
+      --accent-line: rgba(110,168,130,0.40);
     }
   }
   * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
   body {
     margin: 0; background: var(--page); color: var(--ink);
     font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-    font-size: 14px; line-height: 1.45;
+    font-size: var(--t-body); line-height: 1.5;
   }
-  header.app { padding: 20px 28px 0; max-width: 1280px; margin: 0 auto; }
+  /* One focus treatment for every control on the page. */
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important; animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important; scroll-behavior: auto !important;
+    }
+  }
+  .ico { width: 1em; height: 1em; flex: none; vertical-align: -0.13em; }
+  header.app { padding: 0 28px; max-width: 1280px; margin: 0 auto; }
   .brand {
     display: flex; align-items: center; gap: 16px;
-    background: #14293a url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='280' height='150'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='0.055' stroke-width='1.4'%3E%3Cpath d='M0 28 Q 70 8 140 30 T 280 24'/%3E%3Cpath d='M0 62 Q 60 42 130 64 T 280 58'/%3E%3Cpath d='M0 98 Q 80 76 150 100 T 280 92'/%3E%3Cpath d='M0 132 Q 65 114 135 134 T 280 128'/%3E%3C/g%3E%3C/svg%3E") repeat;
-    border-radius: 14px; padding: 12px 22px;
+    background: #16241c url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='280' height='150'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='0.055' stroke-width='1.4'%3E%3Cpath d='M0 28 Q 70 8 140 30 T 280 24'/%3E%3Cpath d='M0 62 Q 60 42 130 64 T 280 58'/%3E%3Cpath d='M0 98 Q 80 76 150 100 T 280 92'/%3E%3Cpath d='M0 132 Q 65 114 135 134 T 280 128'/%3E%3C/g%3E%3C/svg%3E") repeat;
+    border-radius: 0;
+    /* full-bleed band whose text still aligns with the page container */
+    margin-inline: calc(50% - 50vw); padding-inline: calc(50vw - 50%);
+    padding-block: 16px; margin-bottom: 14px;
   }
-  .brand h1 { font-size: 22px; margin: 0; font-weight: 700; letter-spacing: -0.01em; color: #ffffff; }
-  .brand .tagline { color: #a9bdca; font-size: 12.5px; margin-top: 2px; line-height: 1.4; }
+  .brand h1 { font-size: var(--t-title); margin: 0; font-weight: 600; letter-spacing: -0.015em; color: #ffffff; }
+  .brand .tagline { color: #a8bfae; font-size: var(--t-small); margin-top: 3px; line-height: 1.5; }
+  .brand .tagline b { color: #ffffff; font-weight: 600; }
   .brand .brand-text { flex: 1; min-width: 0; }
-  .brand .logo { flex: none; }
   .byline { margin-left: auto; text-align: right; flex: none; }
-  .by-name { color: #ffffff; font-weight: 650; font-size: 13.5px; }
-  .by-org { color: #a9bdca; font-size: 12px; margin-top: 1px; }
+  .by-name { color: #ffffff; font-weight: 600; font-size: var(--t-body); }
+  .by-org { color: #a8bfae; font-size: var(--t-small); margin-top: 1px; }
   .by-links { margin-top: 6px; }
-  .by-links a { color: #e2a06c; font-size: 12px; margin-left: 12px; text-decoration: none; border-bottom: 1px solid rgba(226,160,108,0.45); }
+  .by-links a { color: #9ecdae; font-size: var(--t-small); margin-left: 12px; text-decoration: none; border-bottom: 1px solid rgba(158,205,174,0.4); }
+  .by-links a:hover { border-bottom-color: #9ecdae; }
   .strips { display: grid; gap: 8px; margin-top: 10px; }
   @media (min-width: 1280px) { .strips { grid-template-columns: 1fr 1fr; align-items: stretch; } }
   .mockup-banner {
-    padding: 7px 13px; border: 1px solid var(--border); border-left: 3px solid var(--accent);
-    background: var(--surface); border-radius: 8px; font-size: 12px; color: var(--ink-2);
-    line-height: 1.45;
+    padding: 8px 13px; border: 1px solid var(--border); border-left: 3px solid var(--accent);
+    background: var(--surface); border-radius: var(--r-card); font-size: var(--t-small); color: var(--ink-2);
+    line-height: 1.5;
   }
   .mockup-banner b { color: var(--ink); font-weight: 600; }
   .lockline {
-    padding: 7px 13px; border: 1px solid var(--border);
-    background: var(--accent-wash); border-radius: 8px; font-size: 12px; color: var(--ink-2);
-    display: flex; gap: 9px; align-items: baseline; line-height: 1.45;
+    padding: 8px 13px; border: 1px solid var(--border);
+    background: var(--accent-wash); border-radius: var(--r-card); font-size: var(--t-small); color: var(--ink-2);
+    display: flex; gap: 8px; align-items: baseline; line-height: 1.5;
   }
-  .lockline b { color: var(--ink); font-weight: 650; }
-  .tabs { display: flex; gap: 4px; margin: 10px 0 0; border-bottom: 1px solid var(--grid); }
+  .lockline b { color: var(--ink); font-weight: 600; }
+  .lockline .ico { align-self: center; color: var(--accent); }
+  .tabs { display: flex; gap: 4px; margin: 12px 0 0; border-bottom: 1px solid var(--baseline); align-items: flex-end; }
   .tab {
     appearance: none; border: 0; background: none; color: var(--ink-2);
-    font: inherit; font-weight: 550; padding: 8px 14px; cursor: pointer;
+    font: inherit; font-weight: 500; padding: 8px 14px; cursor: pointer;
     border-bottom: 2px solid transparent; margin-bottom: -1px;
   }
-  .tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--accent); }
+  .tab:hover { color: var(--ink); }
+  .tab[aria-selected="true"] { color: var(--ink); font-weight: 600; border-bottom-color: var(--accent); }
+  /* The upload path is the whole point for anyone with their own grids, so it
+     reads as an action at the end of the row rather than a second-choice tab. */
+  #tab-upload {
+    margin-left: auto; margin-bottom: 6px; padding: 6px 13px; gap: 7px;
+    display: flex; align-items: center;
+    border: 1px solid var(--accent); border-radius: var(--r-ctl);
+    color: var(--accent); background: var(--accent-wash); font-weight: 600;
+  }
+  #tab-upload:hover,
+  #tab-upload[aria-selected="true"] {
+    background: var(--accent); border-color: var(--accent); color: var(--on-accent);
+  }
   main { max-width: 1280px; margin: 0 auto; padding: 12px 28px 60px; }
   .card {
     background: var(--surface); border: 1px solid var(--border);
-    border-radius: 10px; padding: 13px 15px;
+    border-radius: var(--r-card); padding: 13px 15px;
   }
-  .card h2 { font-size: 11px; margin: 0 0 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); }
+  .card h2 { font-size: var(--t-micro); margin: 0 0 9px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); }
   .stepnum {
     display: inline-flex; width: 18px; height: 18px; border-radius: 50%;
-    background: var(--accent); color: #fff; font-size: 11px; font-weight: 700;
+    background: var(--accent); color: var(--on-accent); font-size: var(--t-micro); font-weight: 600;
     align-items: center; justify-content: center; margin-right: 7px; vertical-align: -4px;
+    letter-spacing: 0;
   }
   .steps { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 12px; align-items: stretch; }
+  /* Controls are chrome, the map is content: the step cards sit into the page,
+     the map and result cards sit on top of it. */
+  .steps .card { background: var(--sunken); border-color: var(--grid); }
+  .steps .card select, .steps .card button.btn:not(.primary), .steps .card input.num { background: var(--surface); }
   @media (max-width: 1100px) { .steps { grid-template-columns: repeat(3, 1fr); } }
   @media (max-width: 700px) { .steps { grid-template-columns: 1fr 1fr; } }
   /* wide 16:9 layout: 2x3 card sidebar + map to the right; results scroll below.
@@ -111,92 +160,148 @@
   }
   /* short screens: collapse card hints so the six cards fit beside the map */
   @media (min-width: 1280px) and (max-height: 960px) {
-    .toprow .steps .hint, .toprow .steps .privacy { display: none; }
+    .toprow .steps .privacy { display: none; }
     .toprow .card { padding: 10px 13px; }
     .toprow .steps { gap: 8px; }
     .toprow .card h2 { margin-bottom: 6px; }
   }
   @media (min-width: 1280px) and (max-height: 850px) {
     .toprow .card { padding: 8px 12px; }
-    .toprow label.row { margin: 3px 0; }
+    .toprow .row { margin: 3px 0; }
     .toprow .checks { gap: 1px 8px; }
     .toprow .steps button.btn { padding: 4px 8px; }
-    .brand { padding: 9px 20px; }
+    .brand { padding-block: 11px; }
   }
   @media (min-width: 1280px) and (max-height: 805px) {
     .toprow .steps { gap: 6px; }
-    .toprow .card h2 { font-size: 10px; margin-bottom: 4px; }
+    .toprow .card h2 { font-size: var(--t-micro); margin-bottom: 4px; }
     .toprow .minilinks { margin-top: 2px; }
     .toprow button.btn.primary { padding: 6px 10px; }
   }
-  label.row { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 6px 0; color: var(--ink-2); font-size: 12.5px; }
-  label.row output { color: var(--ink); font-weight: 600; }
+  .row { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 6px 0; color: var(--ink-2); font-size: var(--t-small); }
+  .row output { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
   input[type="range"], input[type="checkbox"] { accent-color: var(--accent); }
   input[type="range"] { width: 88px; }
   select, button.btn {
     font: inherit; color: var(--ink); background: var(--surface);
-    border: 1px solid var(--baseline); border-radius: 7px; padding: 5px 9px; font-size: 12.5px;
+    border: 1px solid var(--baseline); border-radius: var(--r-ctl); padding: 5px 9px; font-size: var(--t-small);
   }
   select { width: 100%; }
-  button.btn { cursor: pointer; }
+  button.btn { cursor: pointer; display: inline-flex; align-items: center; gap: 6px; justify-content: center; }
   button.btn:hover { border-color: var(--ink-2); }
+  button.btn:disabled { opacity: 0.45; cursor: default; }
+  button.btn:disabled:hover { border-color: var(--baseline); }
+  .clearrow { display: grid; gap: 6px; margin-top: 8px; }
+  .clearitem { display: flex; align-items: center; gap: 6px; }
+  .clearitem button.btn { flex: 1; min-width: 0; }
   button.btn.primary {
-    background: var(--accent); border-color: var(--accent); color: #fff;
-    font-weight: 650; width: 100%; padding: 8px 10px; font-size: 14px;
+    background: var(--accent); border-color: var(--accent); color: var(--on-accent);
+    font-weight: 600; width: 100%; padding: 8px 10px; font-size: var(--t-body);
   }
-  button.btn[aria-pressed="true"] { border-color: var(--magenta); color: var(--magenta); font-weight: 600; }
-  button.btn#drawbtn[aria-pressed="true"] { border-color: var(--blue); color: var(--blue); }
+  button.btn.primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+  /* A toggle that is on reads in the app's own colour... */
+  button.btn[aria-pressed="true"] {
+    border-color: var(--accent); color: var(--accent);
+    background: var(--accent-wash); font-weight: 600;
+  }
+  /* ...except the tool that places the reference window, which takes the colour
+     of the thing it is about to draw on the map. */
+  button.btn#drawrefbtn[aria-pressed="true"] {
+    border-color: var(--ref); color: var(--ref); background: transparent;
+  }
   .radio-pills { display: flex; gap: 6px; }
   .radio-pills label {
-    flex: 1; border: 1px solid var(--baseline); border-radius: 7px; padding: 5px 7px;
-    text-align: center; cursor: pointer; font-size: 12px; color: var(--ink-2);
+    flex: 1; border: 1px solid var(--baseline); border-radius: var(--r-ctl); padding: 5px 7px;
+    text-align: center; cursor: pointer; font-size: var(--t-small); color: var(--ink-2);
   }
-  .radio-pills input { display: none; }
-  .radio-pills input:checked + span { color: var(--blue); font-weight: 650; }
-  .radio-pills label:has(input:checked) { border-color: var(--blue); background: var(--blue-wash); }
-  .hint { font-size: 11.5px; color: var(--muted); margin-top: 6px; }
-  .checks { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 8px; font-size: 12px; }
-  .checks label { display: flex; gap: 5px; align-items: center; color: var(--ink-2); cursor: pointer; white-space: nowrap; }
-  .checks input { accent-color: var(--blue); margin: 0; }
+  /* Kept in the tab order — display:none would drop these radios for keyboard users. */
+  .radio-pills input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .radio-pills input:checked + span { color: var(--accent); font-weight: 600; }
+  .radio-pills label:has(input:checked) { border-color: var(--accent); background: var(--accent-wash); }
+  .radio-pills label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .meta { font-size: var(--t-micro); color: var(--muted); margin-top: 6px; line-height: 1.5; }
+  /* Per-step help lives in the card header, not as a paragraph under the controls:
+     the cards stay the same height whether or not you need the explanation. */
+  .steps .card h2 { display: flex; align-items: center; gap: 0; }
+  .info { position: relative; display: inline-flex; vertical-align: middle; }
+  .info-end { margin-left: auto; }
+  /* label + its info travel together on the left of a control row */
+  .rl { display: flex; align-items: center; gap: 5px; white-space: nowrap; }
+  .rl label { cursor: pointer; }
+  .tile .lab, .resgrid .card > h2, .charthead h2 { display: flex; align-items: center; gap: 6px; }
+  .info > button {
+    appearance: none; border: 0; background: none;
+    /* 14px glyph in a 24px target; negative margins keep the header height */
+    padding: 5px; margin: -5px -5px -5px 0;
+    color: var(--muted); cursor: help; display: flex; line-height: 0;
+    font-size: 14px; border-radius: 50%;
+  }
+  .info > button:hover { color: var(--accent); }
+  .tip {
+    position: absolute; top: calc(100% + 8px); left: -5px; z-index: 15;
+    width: max-content; max-width: 250px;
+    background: var(--surface); color: var(--ink-2);
+    border: 1px solid var(--border); border-radius: var(--r-card);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.16);
+    padding: 9px 11px;
+    font-size: var(--t-small); font-weight: 400; line-height: 1.5;
+    text-transform: none; letter-spacing: 0;
+    opacity: 0; visibility: hidden; transition: opacity 0.12s ease;
+    pointer-events: none;
+  }
+  .info-end .tip { left: auto; right: -5px; }
+  .info.up .tip { top: auto; bottom: calc(100% + 8px); }
+  .tip b { color: var(--ink); font-weight: 600; }
+  .info:hover .tip, .info:focus-within .tip { opacity: 1; visibility: visible; }
+  .checks { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 8px; font-size: var(--t-small); }
+  .checks label { display: flex; gap: 5px; align-items: center; color: var(--ink-2); cursor: pointer; min-width: 0; }
+  .checks label span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .checks input { accent-color: var(--accent); margin: 0; flex: none; }
   .checks label.dis { opacity: 0.5; cursor: default; }
-  .minilinks { font-size: 11.5px; margin-top: 6px; }
+  .minilinks { font-size: var(--t-micro); margin-top: 6px; }
   .minilinks a { color: var(--accent); cursor: pointer; text-decoration: none; margin-right: 10px; font-weight: 600; }
-  label.chk { display: flex; gap: 6px; align-items: center; color: var(--ink-2); font-size: 12.5px; margin: 6px 0; cursor: pointer; }
-  label.chk input { accent-color: var(--blue); margin: 0; }
+  .minilinks a:hover { text-decoration: underline; }
+  label.chk { display: flex; gap: 6px; align-items: center; color: var(--ink-2); font-size: var(--t-small); margin: 6px 0; cursor: pointer; }
+  label.chk input { accent-color: var(--accent); margin: 0; }
   .privacy {
-    display: flex; gap: 8px; align-items: baseline; font-size: 11.5px; color: var(--ink-2);
+    display: flex; gap: 7px; align-items: center; font-size: var(--t-micro); color: var(--muted);
     margin-top: 9px; padding-top: 8px; border-top: 1px solid var(--grid);
   }
+  .privacy .ico { color: var(--accent); }
   /* Map */
   .mapcard { padding: 10px 14px 9px; }
-  .maphead { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+  .maphead { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
   .maphead h2 { margin: 0; }
   .mapopts { display: flex; gap: 12px; align-items: center; }
-  .mapopts .lab { font-size: 12px; color: var(--ink-2); }
+  .mapopts .lab { font-size: var(--t-micro); color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
   .mapopts select { width: auto; }
+  select.wauto { width: auto; }
+  input[type="range"].rsm { width: 48px; }
+  .maplegend .key.crs { margin-left: auto; }
   input.num {
-    width: 72px; font: inherit; font-size: 12.5px; color: var(--ink);
-    background: var(--surface); border: 1px solid var(--baseline); border-radius: 7px; padding: 5px 7px;
+    width: 72px; font: inherit; font-size: var(--t-small); color: var(--ink);
+    background: var(--surface); border: 1px solid var(--baseline); border-radius: var(--r-ctl); padding: 5px 7px;
+    font-variant-numeric: tabular-nums;
   }
   input.num.sm { width: 54px; padding: 3px 6px; }
-  .row .unit { font-size: 11px; color: var(--muted); }
+  .row .unit { font-size: var(--t-micro); color: var(--muted); }
   .mapopts label.chk { margin: 0; white-space: nowrap; }
   .varswitch { display: flex; gap: 4px; }
-  .mapwrap { position: relative; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); background: var(--page); touch-action: none; }
+  .mapwrap { position: relative; border-radius: var(--r-ctl); overflow: hidden; border: 1px solid var(--border); background: var(--sunken); touch-action: none; }
   #mapinner { position: relative; width: 100%; height: 100%; transform-origin: 0 0; }
   .zoomctl { position: absolute; top: 8px; right: 8px; display: flex; flex-direction: column; gap: 4px; z-index: 5; }
-  .zoomctl .btn { width: 30px; height: 30px; padding: 0; font-size: 15px; line-height: 1; background: var(--surface); opacity: 0.92; }
+  .zoomctl .btn { width: 30px; height: 30px; padding: 0; font-size: var(--t-lead); line-height: 1; background: var(--surface); opacity: 0.94; }
   .northarrow {
     position: absolute; top: 8px; left: 8px; z-index: 5; pointer-events: none;
     display: flex; flex-direction: column; align-items: center; gap: 0;
-    color: var(--ink); background: color-mix(in srgb, var(--surface) 80%, transparent);
-    border: 1px solid var(--border); border-radius: 7px; padding: 4px 6px 2px;
-    font-size: 11px; font-weight: 700; line-height: 1;
+    color: var(--ink); background: color-mix(in srgb, var(--surface) 82%, transparent);
+    border: 1px solid var(--border); border-radius: var(--r-ctl); padding: 4px 6px 2px;
+    font-size: var(--t-micro); font-weight: 600; line-height: 1;
   }
   .scalebar {
     position: absolute; left: 10px; bottom: 10px; z-index: 5; pointer-events: none;
     display: flex; flex-direction: column; gap: 2px; align-items: flex-start;
-    color: var(--ink); font-size: 11.5px; font-weight: 600;
+    color: var(--ink); font-size: var(--t-micro); font-weight: 600; font-variant-numeric: tabular-nums;
     text-shadow: 0 0 3px var(--surface), 0 0 3px var(--surface), 0 0 3px var(--surface);
   }
   .scalebar .sbline {
@@ -208,105 +313,133 @@
   .scalebar .sbline::before { left: 0; } .scalebar .sbline::after { right: 0; }
   canvas#raster { display: block; width: 100%; height: 100%; }
   svg#overlay { position: absolute; inset: 0; width: 100%; height: 100%; }
-  .maplegend { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin-top: 9px; font-size: 12px; color: var(--ink-2); }
+  .maplegend { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin-top: 9px; font-size: var(--t-small); color: var(--ink-2); }
   .maplegend .key { display: inline-flex; align-items: center; gap: 6px; }
-  .swatch { width: 14px; height: 10px; border-radius: 2px; display: inline-block; }
-  .swatch.outline { background: none; border: 2px solid #111; box-shadow: 0 0 0 1.5px #fff inset; }
-  .swatch.refsw { background: none; border: 2px solid #d5006d; box-shadow: 0 0 0 1.5px #fff inset; }
-  .polykey { width: 14px; height: 10px; border: 1.5px solid var(--ink); border-radius: 2px; display: inline-block; }
-  .ramp { width: 110px; height: 10px; border-radius: 2px; display: inline-block; }
+  .swatch { width: 14px; height: 10px; border-radius: var(--r-chip); display: inline-block; }
+  .swatch.outline { background: none; border: 2px solid var(--ink); box-shadow: 0 0 0 1.5px var(--surface) inset; }
+  .swatch.refsw { background: none; border: 2px solid var(--ref); box-shadow: 0 0 0 1.5px var(--surface) inset; }
+  .polykey { width: 14px; height: 10px; border: 1.5px solid var(--ink); border-radius: var(--r-chip); display: inline-block; }
+  .ramp { width: 110px; height: 10px; border-radius: var(--r-chip); display: inline-block; }
   /* How it works */
   .how { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 14px; }
   @media (max-width: 900px) { .how { grid-template-columns: 1fr 1fr; } }
   .how .card { padding: 12px 14px; }
-  .how h3 { font-size: 12.5px; margin: 0 0 4px; color: var(--accent); font-weight: 700; }
-  .how p { margin: 0; font-size: 12.5px; color: var(--ink-2); }
+  .how h3 {
+    font-size: var(--t-micro); margin: 0 0 5px; color: var(--muted); font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.07em;
+  }
+  .how h3 .n { color: var(--accent); }
+  .how p { margin: 0; font-size: var(--t-small); color: var(--ink-2); line-height: 1.5; }
   /* Results */
   #results { display: none; margin-top: 14px; }
   #results.show { display: block; }
   .tiles { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
   @media (max-width: 900px) { .tiles { grid-template-columns: repeat(2, 1fr); } }
-  .tile { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
-  .tile .lab { font-size: 12px; color: var(--ink-2); }
-  .tile .val { font-size: 26px; font-weight: 650; letter-spacing: -0.01em; margin-top: 2px; }
-  .tile .val small { font-size: 14px; color: var(--ink-2); font-weight: 500; }
+  .tile { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-card); padding: 12px 14px; }
+  .tile .lab { font-size: var(--t-micro); color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+  .tile .val { font-size: var(--t-metric); font-weight: 600; letter-spacing: -0.02em; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .tile .val small { font-size: var(--t-body); color: var(--muted); font-weight: 500; letter-spacing: 0; }
   .resgrid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 14px; margin-top: 14px; align-items: start; }
   @media (max-width: 900px) { .resgrid { grid-template-columns: 1fr; } }
-  .charthead { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+  .charthead { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
   svg.chart { width: 100%; height: auto; display: block; }
-  table.data { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-  table.data th { text-align: left; color: var(--ink-2); font-weight: 600; border-bottom: 1px solid var(--grid); padding: 5px 6px; }
-  table.data td { border-bottom: 1px solid var(--grid); padding: 5px 6px; font-family: var(--mono); font-size: 12px; }
+  table.data { width: 100%; border-collapse: collapse; font-size: var(--t-small); }
+  table.data th {
+    text-align: left; color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--baseline);
+    padding: 5px 6px; font-size: var(--t-micro); text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  table.data td { border-bottom: 1px solid var(--grid); padding: 5px 6px; font-family: var(--mono); font-size: var(--t-small); font-variant-numeric: tabular-nums; }
   table.data tr:last-child td { border-bottom: 0; }
   #rectable { display: none; max-height: 300px; overflow: auto; }
   .dlrow { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; align-items: center; }
-  .dlrow .note { font-size: 12px; color: var(--muted); }
+  .dlrow button.btn.primary { width: auto; padding: 8px 22px; }
+  .dlrow .note { font-size: var(--t-micro); color: var(--muted); }
   /* Tooltip */
   .tt {
     position: fixed; pointer-events: none; z-index: 20; display: none;
-    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.14); padding: 8px 10px; font-size: 12.5px; min-width: 175px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-card);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.14); padding: 8px 10px; font-size: var(--t-small); min-width: 175px;
   }
-  .tt .t { color: var(--ink-2); margin-bottom: 4px; }
+  .tt .t { color: var(--muted); margin-bottom: 4px; font-size: var(--t-micro); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
   .tt .r { display: flex; align-items: center; gap: 7px; margin: 2px 0; }
-  .tt .k { width: 14px; height: 0; border-top: 2.5px solid var(--blue); border-radius: 2px; }
+  .tt .k { width: 14px; height: 0; border-top: 2.5px solid var(--accent); border-radius: var(--r-chip); }
   .tt .k.rand { border-top-style: dashed; border-top-color: var(--muted); }
-  .tt .v { font-weight: 650; margin-left: auto; }
+  .tt .v { font-weight: 600; margin-left: auto; font-variant-numeric: tabular-nums; }
   .tt .n { color: var(--ink-2); }
   /* Upload panel */
   #panel-upload { display: none; }
-  .fmt { font-size: 13px; color: var(--ink-2); margin: 10px 0; }
-  .fmt b { color: var(--ink); }
+  .uploadcard { max-width: 720px; margin: 0 auto; }
+  .uploadcard .lead { color: var(--ink-2); font-size: var(--t-lead); line-height: 1.5; margin: 2px 0 12px; }
+  .uploadcard .lead b { color: var(--ink); font-weight: 600; }
+  .fmt { font-size: var(--t-small); color: var(--ink-2); margin: 10px 0; line-height: 1.55; }
+  .fmt b { color: var(--ink); font-weight: 600; }
   .fmt code {
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px;
-    background: var(--page); border: 1px solid var(--grid); border-radius: 5px; padding: 1px 5px;
+    font-family: var(--mono); font-size: var(--t-micro);
+    background: var(--sunken); border: 1px solid var(--grid); border-radius: var(--r-ctl); padding: 1px 5px;
   }
   .fmt .dim { color: var(--muted); }
   .uprow { display: flex; align-items: center; gap: 10px; margin: 8px 0; }
-  .uprow .uplab { width: 130px; font-size: 12.5px; color: var(--ink-2); flex: none; }
-  .uprow input[type="file"] { font-size: 12.5px; color: var(--ink-2); }
+  .uprow .uplab { width: 130px; font-size: var(--t-small); color: var(--ink-2); flex: none; }
+  .uprow input[type="file"] { font-size: var(--t-small); color: var(--ink-2); }
   .toast {
     position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%);
-    background: var(--ink); color: var(--page); padding: 10px 16px; border-radius: 9px;
-    font-size: 13px; display: none; z-index: 30; max-width: 460px; text-align: center;
+    background: var(--ink); color: var(--page); padding: 10px 16px; border-radius: var(--r-card);
+    font-size: var(--t-body); display: none; z-index: 30; max-width: 460px; text-align: center;
   }
-  footer { max-width: 1280px; margin: 0 auto; padding: 6px 28px 44px; color: var(--muted); font-size: 12px; text-align: center; line-height: 1.6; }
-  footer a { color: var(--accent); text-decoration: none; }
-  #crslabel, #areainfo { font-family: var(--mono); font-size: 11px; }
-  .status { font-size: 12px; color: var(--ink-2); margin-top: 8px; min-height: 17px; }
+  footer { max-width: 1280px; margin: 0 auto; padding: 6px 28px 44px; color: var(--muted); font-size: var(--t-small); text-align: center; line-height: 1.6; }
+  footer a { color: var(--accent); text-decoration: none; font-weight: 600; }
+  footer a:hover { text-decoration: underline; }
+  #crslabel, #areainfo { font-family: var(--mono); font-size: var(--t-micro); }
+  #areainfo:empty { display: none; }
+  .status { font-size: var(--t-small); color: var(--ink-2); margin-top: 8px; min-height: 17px; }
   .spin {
     display: inline-block; width: 13px; height: 13px; flex: none;
-    border: 2px solid var(--baseline); border-top-color: #fff; border-radius: 50%;
+    border: 2px solid color-mix(in srgb, var(--on-accent) 35%, transparent);
+    border-top-color: var(--on-accent); border-radius: 50%;
     animation: spin 0.8s linear infinite; vertical-align: -2px; margin-right: 7px;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
-  button.btn.primary:disabled { opacity: 0.85; cursor: progress; }
-</style>
-<style>
-.startbar{display:flex;align-items:center;gap:18px;justify-content:space-between;flex-wrap:wrap;background:linear-gradient(180deg,#fbf6ef,#f3eadd);border:1px solid #e7d9c6;border-radius:12px;padding:11px 18px;margin:0 0 14px}
-.startbar p{margin:0;flex:1 1 auto;line-height:1.4;color:#39332c;font-size:13.5px}
-.startbar button.btn.primary{white-space:nowrap;width:auto;display:inline-flex;align-items:center;flex:0 0 auto}
-.startbar p{min-width:0}
-.advfold{margin-top:2px}
-.advfold summary{cursor:pointer;font-weight:600;list-style:none;color:#b35a1c;font-size:12.5px;padding:2px 0}
-.advfold summary::-webkit-details-marker{display:none}
-.advfold summary::before{content:"\25B8  "}
-.advfold[open] summary::before{content:"\25BE  "}
-.advfold>*+*{margin-top:8px}
+  button.btn.primary:disabled { opacity: 0.9; cursor: progress; }
+  /* Start bar */
+  .startbar {
+    display: flex; align-items: center; gap: 18px; justify-content: space-between; flex-wrap: wrap;
+    background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--accent);
+    border-radius: var(--r-card); padding: 14px 18px; margin: 0 0 14px;
+  }
+  .startbar p { margin: 0; flex: 1 1 auto; min-width: 0; line-height: 1.45; color: var(--ink); font-size: var(--t-lead); }
+  .startbar p b { color: var(--accent); font-weight: 600; }
+  .startbar button.btn.primary { white-space: nowrap; width: auto; flex: 0 0 auto; padding: 8px 16px; }
+  /* Advanced disclosure */
+  .advfold { margin-top: 2px; }
+  .advfold summary {
+    cursor: pointer; font-weight: 600; list-style: none; color: var(--accent);
+    font-size: var(--t-small); padding: 2px 0; display: flex; align-items: center; gap: 6px;
+  }
+  .advfold summary::-webkit-details-marker { display: none; }
+  .advfold summary .chev { transition: transform 0.15s ease; }
+  .advfold[open] summary .chev { transform: rotate(90deg); }
+  .advfold > * + * { margin-top: 8px; }
 </style>
 </head>
 <body>
 
+<svg width="0" height="0" aria-hidden="true" style="position:absolute"><defs>
+<symbol id="i-lock" viewBox="0 0 16 16"><path d="M4.6 7.2V5.1a3.4 3.4 0 0 1 6.8 0v2.1" fill="none" stroke="currentColor" stroke-width="1.4"/><rect x="3" y="7.2" width="10" height="6.6" rx="1.6" fill="none" stroke="currentColor" stroke-width="1.4"/></symbol>
+<symbol id="i-play" viewBox="0 0 16 16"><path d="M5.2 3.4v9.2L13 8z" fill="currentColor"/></symbol>
+<symbol id="i-plus" viewBox="0 0 16 16"><path d="M8 3.6v8.8M3.6 8h8.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/></symbol>
+<symbol id="i-minus" viewBox="0 0 16 16"><path d="M3.6 8h8.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/></symbol>
+<symbol id="i-fit" viewBox="0 0 16 16"><path d="M2.6 6V2.6H6M10 2.6h3.4V6M13.4 10v3.4H10M6 13.4H2.6V10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></symbol>
+<symbol id="i-left" viewBox="0 0 16 16"><path d="M9.6 3.5 5.1 8l4.5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></symbol>
+<symbol id="i-info" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.6" fill="none" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="4.9" r="0.95" fill="currentColor"/><path d="M8 7.3v4.1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></symbol>
+<symbol id="i-upload" viewBox="0 0 16 16"><path d="M8 11.4V3.2m0 0L4.9 6.3M8 3.2l3.1 3.1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M2.9 10.8v1.4a1.4 1.4 0 0 0 1.4 1.4h7.4a1.4 1.4 0 0 0 1.4-1.4v-1.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></symbol>
+<symbol id="i-right" viewBox="0 0 16 16"><path d="M6.4 3.5 10.9 8l-4.5 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></symbol>
+</defs></svg>
+
 <header class="app">
   <div class="brand">
-    <svg class="logo" viewBox="0 0 40 40" width="42" height="42" aria-hidden="true">
-      <rect x="2" y="2" width="36" height="36" rx="7" fill="none" stroke="#e2b58a" stroke-width="2"/>
-      <path d="M14 3v34 M26 3v34 M3 14h34 M3 26h34" stroke="#e2b58a" stroke-width="1.1" opacity="0.5"/>
-      <rect x="15.3" y="15.3" width="9.4" height="9.4" rx="1.5" fill="#e08a4a"/>
-    </svg>
     <div class="brand-text">
       <h1>wPCA Explorer</h1>
-      <div class="tagline"><b style="color:#fff">One known deposit is enough.</b> Give it one area you know holds a deposit; it learns that deposit's geometry in the geophysical maps and ranks every other area by how closely it matches. Like reverse image search for a map. Open, validated, and running entirely in your browser. Method: Mantilla Salas et&nbsp;al. (2026), <i>Natural Resources Research</i>.</div>
+      <div class="tagline"><b>One known deposit is enough.</b> Give it one area you know holds a deposit; it learns that deposit's geometry in the geophysical maps and ranks every other area by how closely it matches. Like reverse image search for a map. Open, validated, and running entirely in your browser. Method: Mantilla Salas et&nbsp;al. (2026), <i>Natural Resources Research</i>.</div>
     </div>
     <div class="byline">
       <div class="by-name">Sofia Mantilla Salas</div>
@@ -318,12 +451,12 @@
     </div>
   </div>
   <div class="strips">
-    <div class="mockup-banner"><b>Reproducible by construction.</b> This implementation passes the paper's replication gates — at <b>Paper 200&nbsp;m (exact)</b> the default run reproduces Case&nbsp;1 to the digit: 47.0% recovery · AUC 57.9 · 5 of 11 deposits. The 400&nbsp;m preview answers in seconds.</div>
-    <div class="lockline">🔒 <span><b>Your data never leaves your computer.</b> A single static page — no backend, no uploads, no analytics; zero network requests after load (verify in the Network tab). Save the file and it runs fully offline.</span></div>
+    <div class="mockup-banner"><b>Reproducible by construction.</b> At Paper 200&nbsp;m (exact) the default run reproduces Case&nbsp;1 to the digit: 47.0% recovery · AUC 57.9 · 5 of 11 deposits. The 400&nbsp;m preview answers in seconds.</div>
+    <div class="lockline"><svg class="ico"><use href="#i-lock"/></svg> <span><b>Your data never leaves your computer.</b> A single static page — no backend, no uploads, no analytics; zero network requests after load (verify in the Network tab). Save the file and it runs fully offline.</span></div>
   </div>
   <div class="tabs" role="tablist">
     <button class="tab" role="tab" id="tab-demo" aria-selected="true">Demo — Carajás, Brazil</button>
-    <button class="tab" role="tab" id="tab-upload" aria-selected="false">Upload your own data</button>
+    <button class="tab" role="tab" id="tab-upload" aria-selected="false"><svg class="ico"><use href="#i-upload"/></svg>Upload your own data</button>
   </div>
 </header>
 
@@ -332,69 +465,78 @@
 <div id="panel-demo">
   <div class="startbar">
     <p><b>New here?</b> Give it one area you know holds a deposit; it finds the look alikes and rediscovers ones hidden from it.</p>
-    <button class="btn primary" id="runexample" onclick="document.getElementById('runbtn').click();document.querySelector('.mapcard').scrollIntoView({behavior:'smooth',block:'start'});">&#9654; Run the Carajás example</button>
+    <button class="btn primary" id="runexample"><svg class="ico"><use href="#i-play"/></svg> Run the Carajás example</button>
   </div>
   <div class="toprow">
   <div class="steps">
     <div class="card">
-      <h2><span class="stepnum">1</span>Variables</h2>
+      <h2><span class="stepnum">1</span>Variables<span class="info info-end"><button type="button" aria-label="About variables" aria-describedby="tip-vars"><svg class="ico"><use href="#i-info"/></svg></button><span class="tip" role="tooltip" id="tip-vars">Tick the variables to combine — up to 5. With several, the sliders set the balance weights (normalised at run time).</span></span></h2>
       <div id="varctl"></div>
-      <div class="hint">Tick the variables to combine — up to 5. With several, the sliders set the balance weights (normalised at run time).</div>
     </div>
 
     <div class="card">
       <h2><span class="stepnum">2</span>Study area</h2>
       <button class="btn" id="drawbtn" aria-pressed="false">Draw rectangle</button>
       <button class="btn" id="fullbtn">Full extent</button>
-      <div class="hint" id="areainfo"></div>
+      <div class="meta" id="areainfo"></div>
     </div>
 
     <div class="card">
-      <h2><span class="stepnum">3</span>Reference deposit</h2>
+      <h2><span class="stepnum">3</span>Reference deposit<span class="info info-end"><button type="button" aria-label="About the reference deposit" aria-describedby="refhint"><svg class="ico"><use href="#i-info"/></svg></button><span class="tip" role="tooltip" id="refhint">The deposit whose geophysical geometry the method learns. Pick from the list, or <b>click</b> the map to place the window, <b>drag</b> to draw it exactly.</span></span></h2>
       <select id="refsel"></select>
       <label class="chk"><input type="checkbox" id="autowin" checked> Fit window to footprint</label>
       <label class="row" id="winrow" style="display:none">Window size
-        <span><input type="range" id="winsize" min="2" max="12" step="0.5" value="6" style="width:64px">
+        <span><input type="range" id="winsize" min="2" max="12" step="0.5" value="6" class="rsm">
         <output id="winout">6.0 km</output></span>
       </label>
       <button class="btn" id="drawrefbtn" aria-pressed="false">Add window on map</button>
-      <div class="hint" id="refhint">The deposit whose geophysical geometry the method learns. Pick from the list, or <b>click</b> the map to place the window, <b>drag</b> to draw it exactly.</div>
+      
     </div>
 
     <div class="card">
-      <h2><span class="stepnum">4</span>Test deposits</h2>
+      <h2><span class="stepnum">4</span>Test deposits<span class="info info-end"><button type="button" aria-label="About test deposits" aria-describedby="tip-tests"><svg class="ico"><use href="#i-info"/></svg></button><span class="tip" role="tooltip" id="tip-tests">Recovery is scored against these footprints; a deposit is <b>hit</b> once ≥50% is covered. <b>Click</b> the map to place one, <b>drag</b> to draw its outline.</span></span></h2>
       <div class="checks" id="testlist"></div>
       <div class="minilinks"><a id="testall">All</a><a id="testnone">None</a></div>
       <label class="row">≈ Footprint size
         <span><input type="number" id="testsize" class="num sm" value="4" min="1" max="30" step="0.5"> <span class="unit">km</span></span>
       </label>
       <button class="btn" id="drawtestbtn" aria-pressed="false">Add test deposit on map</button>
-      <div class="hint">Recovery is scored against these footprints; a deposit is <b>hit</b> once ≥50% is covered. <b>Click</b> the map to place one, <b>drag</b> to draw its outline.</div>
+      
     </div>
 
     <div class="card">
       <h2><span class="stepnum">5</span>Parameters</h2>
       <details class="advfold">
-        <summary>Advanced (defaults reproduce the paper)</summary>
+        <summary><svg class="ico chev"><use href="#i-right"/></svg>Advanced (defaults reproduce the paper)</summary>
         <div id="krows"></div>
-        <label class="row">Stride EW
+        <div class="row"><span class="rl"><label for="stridex">Stride EW</label><span class="info"><button type="button" aria-label="About stride EW" aria-describedby="tip-strx"><svg class="ico"><use href="#i-info"/></svg></button><span class="tip" role="tooltip" id="tip-strx">Step between window positions across the grid, east–west, in cells. A smaller stride samples more densely and takes longer to run.</span></span></span>
           <span><input type="number" id="stridex" class="num sm" value="8" min="1" max="30" step="1"> <span class="unit">cells</span></span>
-        </label>
-        <label class="row">Stride NS
+        </div>
+        <div class="row"><span class="rl"><label for="stridey">Stride NS</label><span class="info"><button type="button" aria-label="About stride NS" aria-describedby="tip-stry"><svg class="ico"><use href="#i-info"/></svg></button><span class="tip" role="tooltip" id="tip-stry">Step between window positions down the grid, north–south, in cells. A smaller stride samples more densely and takes longer to run.</span></span></span>
           <span><input type="number" id="stridey" class="num sm" value="8" min="1" max="30" step="1"> <span class="unit">cells</span></span>
-        </label>
-        <label class="row">Top windows T
-          <span><input type="range" id="topk" min="50" max="500" step="50" value="250" style="width:64px">
+        </div>
+        <div class="row"><span class="rl"><label for="topk">Top windows T</label><span class="info"><button type="button" aria-label="About top windows T" aria-describedby="tip-topk"><svg class="ico"><use href="#i-info"/></svg></button><span class="tip" role="tooltip" id="tip-topk">How many of the highest-ranked windows are kept as the proposed target set. Recovery, AUC and area are all scored over these T windows.</span></span></span>
+          <span><input type="range" id="topk" min="50" max="500" step="50" value="250" class="rsm">
           <output id="topkout">250</output></span>
-        </label>
+        </div>
       </details>
     </div>
 
     <div class="card">
       <h2><span class="stepnum">6</span>Run</h2>
       <button class="btn primary" id="runbtn">Run analysis</button>
+      <div class="clearrow">
+        <div class="clearitem">
+          <button class="btn" id="clearpred" disabled>Clear predictions</button>
+          <span class="info"><button type="button" aria-label="About clearing predictions" aria-describedby="tip-clearpred"><svg class="ico"><use href="#i-info"/></svg></button><span class="tip" role="tooltip" id="tip-clearpred">Removes the ranked prediction windows from the map and the results below. Variables, reference and test deposits are left as they are — press <b>Run analysis</b> to recompute.</span></span>
+        </div>
+        <div class="clearitem">
+          <button class="btn" id="cleardeps">Clear deposits</button>
+          <span class="info"><button type="button" aria-label="About clearing deposits" aria-describedby="tip-cleardeps"><svg class="ico"><use href="#i-info"/></svg></button><span class="tip" role="tooltip" id="tip-cleardeps">Removes any reference window or test deposits you drew on the map, and unchecks every test deposit. The reference falls back to the one picked in step 3 — a run always needs one.</span></span>
+        </div>
+      </div>
       <div class="status" id="runstatus"></div>
-      <div class="privacy">🔒 <span><b>Local computation only.</b> Nothing ever leaves this page.</span></div>
+      <div class="privacy"><svg class="ico"><use href="#i-lock"/></svg> <span><b>Local computation only.</b> Nothing ever leaves this page.</span></div>
     </div>
   </div>
 
@@ -403,14 +545,14 @@
       <h2>Carajás Mineral Province, Brazil — public SGB/CPRM grids</h2>
       <div class="mapopts">
         <div class="varswitch" id="varswitch" style="display:none"></div>
-        <button class="btn" id="backdemo" style="display:none">← Carajás demo</button>
+        <button class="btn" id="backdemo" hidden><svg class="ico"><use href="#i-left"/></svg> Carajás demo</button>
         <span class="lab">Resolution</span>
-        <select id="ressel" style="width:auto">
+        <select id="ressel" class="wauto">
           <option value="400" selected>Preview 400 m (fast)</option>
           <option value="200">Paper 200 m (exact)</option>
         </select>
         <span class="lab">Colours</span>
-        <select id="cmapsel" style="width:auto">
+        <select id="cmapsel" class="wauto">
           <option value="paper" selected>Paper (wPCA)</option>
           <option value="viridis">Viridis</option>
           <option value="gray">Grayscale</option>
@@ -429,9 +571,9 @@
         <svg id="overlay"></svg>
       </div>
       <div class="zoomctl">
-        <button class="btn" id="zoomin" title="Zoom in">＋</button>
-        <button class="btn" id="zoomout" title="Zoom out">−</button>
-        <button class="btn" id="zoomreset" title="Reset view">⌂</button>
+        <button class="btn" id="zoomin" title="Zoom in" aria-label="Zoom in"><svg class="ico"><use href="#i-plus"/></svg></button>
+        <button class="btn" id="zoomout" title="Zoom out" aria-label="Zoom out"><svg class="ico"><use href="#i-minus"/></svg></button>
+        <button class="btn" id="zoomreset" title="Reset view" aria-label="Reset view"><svg class="ico"><use href="#i-fit"/></svg></button>
       </div>
       <div class="northarrow" title="Grid north (UTM 22S)">
         <svg viewBox="0 0 20 26" width="16" height="21"><path d="M10 1 L15 15 L10 11.5 L5 15 Z" fill="currentColor"/></svg>
@@ -444,39 +586,39 @@
       <span class="key"><span class="polykey"></span> Deposit outlines</span>
       <span class="key"><span class="swatch refsw"></span> Reference window</span>
       <span class="key" id="topwinkey" style="display:none"><span class="swatch outline"></span> Prediction windows</span>
-      <span class="key" style="margin-left:auto" id="crslabel"></span>
+      <span class="key crs" id="crslabel"></span>
     </div>
   </div>
   </div><!-- /toprow -->
 
   <div class="how">
-    <div class="card"><h3>1 · Window</h3><p>A deposit-sized window slides across the grid. Every position becomes one observation.</p></div>
-    <div class="card"><h3>2 · Learn</h3><p>PCA distils each window to a few components; those most characteristic of the reference deposit carry the weight.</p></div>
-    <div class="card"><h3>3 · Rank</h3><p>Every window is scored by how closely it reproduces the reference deposit's geophysical geometry — closest first.</p></div>
-    <div class="card"><h3>4 · Validate</h3><p>The ranking is tested against independent test-deposit footprints, versus a random selection of equal area.</p></div>
+    <div class="card"><h3><span class="n">1</span> Window</h3><p>A deposit-sized window slides across the grid. Every position becomes one observation.</p></div>
+    <div class="card"><h3><span class="n">2</span> Learn</h3><p>PCA distils each window to a few components; those most characteristic of the reference deposit carry the weight.</p></div>
+    <div class="card"><h3><span class="n">3</span> Rank</h3><p>Every window is scored by how closely it reproduces the reference deposit's geophysical geometry — closest first.</p></div>
+    <div class="card"><h3><span class="n">4</span> Validate</h3><p>The ranking is tested against independent test-deposit footprints, versus a random selection of equal area.</p></div>
   </div>
 
   <!-- Results -->
   <div id="results">
     <div class="tiles">
-      <div class="tile"><div class="lab">Footprint recovered</div><div class="val" id="t-rec">–</div></div>
-      <div class="tile"><div class="lab">Test deposits hit</div><div class="val" id="t-hits">–</div></div>
-      <div class="tile"><div class="lab">Recovery AUC</div><div class="val" id="t-auc">–</div></div>
-      <div class="tile"><div class="lab">Area selected</div><div class="val" id="t-area">–</div></div>
-      <div class="tile"><div class="lab">vs random of matched area</div><div class="val" id="t-lift">–</div></div>
+      <div class="tile"><div class="lab">Footprint recovered<span class="info info-end"><button type="button" aria-label="About footprint recovered" aria-describedby="tip-rec"><svg class="ico"><use href="#i-info"/></svg></button><span class="tip" role="tooltip" id="tip-rec">For each test deposit, the share of its footprint covered by the selected windows — averaged over the deposits.</span></span></div><div class="val" id="t-rec">–</div></div>
+      <div class="tile"><div class="lab">Test deposits hit<span class="info info-end"><button type="button" aria-label="About test deposits hit" aria-describedby="tip-hits"><svg class="ico"><use href="#i-info"/></svg></button><span class="tip" role="tooltip" id="tip-hits">A test deposit counts as <b>hit</b> once the selected windows cover at least 50% of its footprint.</span></span></div><div class="val" id="t-hits">–</div></div>
+      <div class="tile"><div class="lab">Recovery AUC<span class="info info-end"><button type="button" aria-label="About recovery AUC" aria-describedby="tip-auc"><svg class="ico"><use href="#i-info"/></svg></button><span class="tip" role="tooltip" id="tip-auc">Area under the cumulative recovery curve. It rewards recovering footprint <b>early</b> in the ranking, not only by the final window.</span></span></div><div class="val" id="t-auc">–</div></div>
+      <div class="tile"><div class="lab">Area selected<span class="info info-end"><button type="button" aria-label="About area selected" aria-describedby="tip-area"><svg class="ico"><use href="#i-info"/></svg></button><span class="tip" role="tooltip" id="tip-area">Total ground area of the selected windows, with overlaps merged so shared ground is counted once.</span></span></div><div class="val" id="t-area">–</div></div>
+      <div class="tile"><div class="lab">vs random of matched area<span class="info info-end"><button type="button" aria-label="About the random comparison" aria-describedby="tip-lift"><svg class="ico"><use href="#i-info"/></svg></button><span class="tip" role="tooltip" id="tip-lift">Footprint recovered divided by the share of the study area selected. 1× is chance; 2× means twice what a random selection of the same area would recover.</span></span></div><div class="val" id="t-lift">–</div></div>
     </div>
 
     <div class="resgrid">
       <div class="card">
         <div class="charthead">
-          <h2>Cumulative footprint recovery</h2>
+          <h2>Cumulative footprint recovery<span class="info"><button type="button" aria-label="About this chart" aria-describedby="tip-chart"><svg class="ico"><use href="#i-info"/></svg></button><span class="tip" role="tooltip" id="tip-chart">How much test-deposit footprint is recovered as you accept more windows in rank order. The dashed line and grey band show a random selection of equal area (mean, 5–95%).</span></span></h2>
           <button class="btn" id="tablebtn" aria-pressed="false">Table</button>
         </div>
         <svg class="chart" id="recchart" viewBox="0 0 640 320"></svg>
         <div id="rectable"></div>
       </div>
       <div class="card">
-        <h2>Top 10 prediction windows</h2>
+        <h2>Top 10 prediction windows<span class="info"><button type="button" aria-label="About the prediction windows" aria-describedby="tip-top10"><svg class="ico"><use href="#i-info"/></svg></button><span class="tip" role="tooltip" id="tip-top10">The ten highest-ranked windows by weighted PCA distance to the reference deposit. Distance is unitless — smaller means a closer match.</span></span></h2>
         <table class="data" id="topwins"><thead>
           <tr><th>Rank</th><th>Easting (km)</th><th>Northing (km)</th><th>Distance</th></tr>
         </thead><tbody></tbody></table>
@@ -484,7 +626,7 @@
           <button class="btn" id="csvbtn">Ranking (CSV)</button>
           <button class="btn" id="geojsonbtn">Windows (GeoJSON)</button>
           <button class="btn" id="pngbtn">Map (PNG)</button>
-          <button class="btn" id="reportbtn"><b>Export report</b></button>
+          <button class="btn" id="reportbtn">Export report</button>
           <span class="note">GeoJSON/CSV open in QGIS &amp; ArcGIS (EPSG:32722).</span>
         </div>
       </div>
@@ -494,9 +636,9 @@
 
 <!-- ======================= UPLOAD PANEL ======================= -->
 <div id="panel-upload">
-  <div class="card" style="max-width:720px;margin:0 auto">
+  <div class="card uploadcard">
     <h2>Bring your own grids</h2>
-    <p style="color:var(--ink-2);font-size:13.5px;margin:2px 0 10px">The same six steps, on your data. Every file is parsed and analysed by your own browser — <b style="color:var(--ink)">nothing is transmitted, stored, or logged anywhere</b>. Confidential exploration data stays exactly where it is.</p>
+    <p class="lead">The same six steps, on your data. Every file is parsed and analysed by your own browser — <b>nothing is transmitted, stored, or logged anywhere</b>. Confidential exploration data stays exactly where it is.</p>
     <div class="fmt"><b>1 · Grids (required)</b><br>
       GeoTIFF, one file per variable, <b>up to 5</b> — e.g. <code>TMI.tif</code>, <code>U.tif</code>, <code>gravity.tif</code>. Same size, cell and origin; projected CRS in metres. Single band, stripped (untiled), uncompressed or DEFLATE. <span class="dim">(Geosoft grid and XYZ/CSV planned.)</span></div>
     <div class="fmt"><b>2 · Deposit outlines (optional)</b><br>
@@ -507,12 +649,12 @@
     <div class="uprow"><span class="uplab">Variable 4</span><input type="file" id="up4" accept=".tif,.tiff"></div>
     <div class="uprow"><span class="uplab">Variable 5</span><input type="file" id="up5" accept=".tif,.tiff"></div>
     <div class="uprow"><span class="uplab">Deposit outlines</span><input type="file" id="updep" accept=".geojson,.json"></div>
-    <div class="dlrow" style="margin-top:10px">
-      <button class="btn primary" id="loadbtn" style="width:auto;padding:8px 22px">Load dataset</button>
-      <button class="btn" id="trydemo">Or explore the Carajás demo →</button>
+    <div class="dlrow">
+      <button class="btn primary" id="loadbtn">Load dataset</button>
+      <button class="btn" id="trydemo">Explore the Carajás demo <svg class="ico"><use href="#i-right"/></svg></button>
     </div>
     <div class="status" id="upstatus"></div>
-    <div class="privacy">🔒 <span><b>Verifiably private.</b> After the page loads, the app makes zero network requests — open your browser's Network tab and watch, or save the page and run it with the internet disconnected. The hosting server only ever delivers the page; it never sees your data.</span></div>
+    <div class="privacy"><svg class="ico"><use href="#i-lock"/></svg> <span><b>Verifiably private.</b> After the page loads, the app makes zero network requests — open your browser's Network tab and watch, or save the page and run it with the internet disconnected. The hosting server only ever delivers the page; it never sees your data.</span></div>
   </div>
 </div>
 </main>
@@ -1268,7 +1410,7 @@ function syncDatasetUI(){
   const user = DATASET === "user";
   document.getElementById("ressel").style.display = user ? "none" : "";
   const backB = document.getElementById("backdemo");
-  if (backB) backB.style.display = user ? "" : "none";
+  if (backB) backB.hidden = !user;
   const h2 = document.querySelector(".mapcard .maphead h2");
   if (h2) h2.textContent = user
     ? "Your dataset — " + (USERDATA ? USERDATA.title : "uploaded grids")
@@ -1385,6 +1527,7 @@ function refWindowRect(){
   return {x:Math.max(0,Math.min(W-s,Math.round(d.cx-s/2))), y:Math.max(0,Math.min(H-s,Math.round(d.cy-s/2))), w:s, h:s};
 }
 function drawOverlay(){
+  syncClearButtons();
   overlay.textContent="";
   const FS=Math.max(8,W/72)/(view.s||1);   // label size: constant on screen across res + zoom
   // invisible full-size hit target so drawing works on empty map areas
@@ -1448,7 +1591,7 @@ function drawOverlay(){
   if(state.dragStart&&state.dragCur){
     const s=state.dragStart,c=state.dragCur, refMode=state.drawMode==="ref";
     el("rect",{x:Math.min(s.x,c.x),y:Math.min(s.y,c.y),width:Math.abs(c.x-s.x),height:Math.abs(c.y-s.y),
-      fill:refMode?"none":"var(--blue-wash)",stroke:refMode?"var(--magenta)":"var(--blue)",
+      fill:refMode?"none":"var(--accent-wash)",stroke:refMode?"var(--ref)":"var(--accent)",
       "stroke-width":1.6,"vector-effect":"non-scaling-stroke"});
   }
   updateScaleBar();   // screen-space widget — never transformed with the map
@@ -1597,7 +1740,12 @@ function syncCustomRefOption(){
     if(!o){ o=document.createElement("option"); o.value="custom"; refsel.appendChild(o); }
     o.textContent=`Reference (${(state.customRef.w*CELL_KM).toFixed(1)} × ${(state.customRef.h*CELL_KM).toFixed(1)} km)`;
     refsel.value="custom";
-  } else if(o) o.remove();
+  } else if(o){
+    /* dropping the custom option leaves the select on its first entry, which no
+       longer matches state.refId — put it back on the real reference */
+    o.remove();
+    refsel.value=String(state.refId ?? "none");
+  }
 }
 function renderTestList(){
   const div=document.getElementById("testlist"); div.textContent="";
@@ -1635,6 +1783,34 @@ document.getElementById("testall").addEventListener("click",()=>{
 });
 document.getElementById("testnone").addEventListener("click",()=>{
   state.testIds.clear(); renderTestList(); invalidate();
+});
+
+/* ---- clear actions ---------------------------------------------------- */
+/* Enable each only when it has something to remove. */
+function syncClearButtons(){
+  const cp=document.getElementById("clearpred"), cd=document.getElementById("cleardeps");
+  if(cp) cp.disabled = !state.result;
+  if(cd) cd.disabled = !(state.customRef || state.customTests.length || state.testIds.size);
+}
+document.getElementById("clearpred").addEventListener("click",()=>{
+  if(!state.result) return;
+  state.result=null;
+  document.getElementById("results").classList.remove("show");
+  document.getElementById("topwinkey").style.display="none";
+  drawOverlay();
+  document.getElementById("runstatus").textContent="Predictions cleared.";
+  syncClearButtons();
+});
+document.getElementById("cleardeps").addEventListener("click",()=>{
+  /* drawn geometry and every test selection; refWindowRect() always yields a
+     window, so the reference reverts to the step-3 pick rather than vanishing */
+  state.customRef=null;
+  state.customTests=[]; state.customCount=0;
+  state.testIds.clear();
+  setDrawMode(null);
+  syncCustomRefOption(); renderTestList(); invalidate(); drawOverlay();
+  document.getElementById("runstatus").textContent="Drawn shapes and test deposits cleared.";
+  syncClearButtons();
 });
 document.getElementById("autowin").addEventListener("change",ev=>{
   state.autoWin=ev.target.checked;
@@ -1712,15 +1888,57 @@ function buildVarSwitch(){
     div.appendChild(b);
   }
 }
+function infoHTML(label,id,text){
+  return `<span class="info"><button type="button" aria-label="${label}" aria-describedby="${id}">`
+       + `<svg class="ico"><use href="#i-info"/></svg></button>`
+       + `<span class="tip" role="tooltip" id="${id}">${text}</span></span>`;
+}
+/* Tooltips open downward; flip up when the viewport would clip them. A hidden tip
+   still has layout, so it can be measured before it is shown. */
+function placeTip(host){
+  const tip=host.querySelector(".tip"); if(!tip) return;
+  host.classList.remove("up"); tip.style.transform="";
+  let t=tip.getBoundingClientRect();
+  const h=host.getBoundingClientRect();
+  // flip above the trigger when there is no room below but there is above
+  if(t.bottom > innerHeight - 8 && h.top > t.height + 16){
+    host.classList.add("up");
+    t=tip.getBoundingClientRect();
+  }
+  // then slide it back inside the viewport horizontally
+  let dx=0;
+  if(t.left < 8) dx = 8 - t.left;
+  else if(t.right > innerWidth - 8) dx = innerWidth - 8 - t.right;
+  if(dx) tip.style.transform=`translateX(${Math.round(dx)}px)`;
+}
+for(const evt of ["pointerover","focusin"]){
+  document.addEventListener(evt,ev=>{
+    const h=ev.target.closest&&ev.target.closest(".info");
+    if(h) placeTip(h);
+  },true);
+}
+/* An info button sits next to a <label class="row"> control; without this, a click
+   could still activate the associated input. */
+document.addEventListener("click",ev=>{
+  const b=ev.target.closest&&ev.target.closest(".info > button");
+  if(b){ ev.preventDefault(); ev.stopPropagation(); }
+},true);
 function renderKRows(){
   const div=document.getElementById("krows"); div.textContent="";
   const vs=activeVars();
   for(const v of vs){
-    const lab=document.createElement("label"); lab.className="row";
-    const s1=document.createElement("span"); s1.textContent=vs.length>1?`k · ${VARLABEL[v]||v}`:"Components k"; lab.appendChild(s1);
+    const lab=document.createElement("div"); lab.className="row";
+    const s1=document.createElement("span"); s1.className="rl";
+    const lbl=document.createElement("label"); lbl.setAttribute("for","k-"+v);
+    lbl.textContent = vs.length>1?`k · ${VARLABEL[v]||v}`:"Components k";
+    s1.appendChild(lbl);
+    s1.insertAdjacentHTML("beforeend", infoHTML("About components k","tip-k-"+v,
+      "How many principal components represent each window for this variable. Fewer keep only the broadest geometry; more retain finer detail. The defaults reproduce the paper."));
+    lab.appendChild(s1);
     const s2=document.createElement("span");
     const inp=document.createElement("input"); inp.type="range"; inp.min="1"; inp.max="25";
-    inp.value=state.kBy[v]??8; inp.style.width="64px";
+    inp.id="k-"+v; inp.className="rsm";
+    inp.value=state.kBy[v]??8;
     const out=document.createElement("output"); out.textContent=String(state.kBy[v]??8);
     inp.addEventListener("input",()=>{ state.kBy[v]=Number(inp.value); out.textContent=inp.value; invalidate(); });
     s2.appendChild(inp); s2.appendChild(out); lab.appendChild(s2);
@@ -1843,7 +2061,22 @@ async function computeRanking(setStatus){
     top.push({x:gx,y:gy,dist:dist[o]});
     rects.push(gridRectToMap(gx,gy,wm.ww,wm.wh));
   }
-  // covered-area curve on the grid (prediction windows only — needs no test deposits)
+  await say("Validating footprint recovery (exact geometry)…");
+  const testDeps={};
+  for(const dpp of deposits) if(state.testIds.has(dpp.id)) testDeps[dpp.id]=dpp.ringsW;
+  for(const ct of state.customTests){
+    if(!state.testIds.has(ct.id)) continue;
+    const [xm,xM,ym,yM]=gridRectToMap(ct.x,ct.y,ct.w,ct.h);
+    testDeps[ct.id]=[[[xm,yM],[xM,yM],[xM,ym],[xm,ym],[xm,yM]]];  // clockwise outer ring
+  }
+  const nTest=Object.keys(testDeps).length;
+  if(!nTest) throw new Error("Select at least one test deposit.");
+  const res=WPCA.footprintRecovery(rects,testDeps,0.5);
+  const m=WPCA.metricsOf(res,T);
+  const hitsAt=new Array(T).fill(0);
+  { const byRank={}; for(const r in res.hitByRank) byRank[+r]=res.hitByRank[r].length;
+    let hc=0; for(let t=0;t<T;t++){ hc+=byRank[t+1]||0; hitsAt[t]=hc; } }
+  // covered-area curve on the grid (area tile + matched-area lift)
   let studyCells=0;
   { const f=fields[vars[0]];
     for(let r=ay0;r<ay1;r++) for(let c=ax0;c<ax1;c++) if(!Number.isNaN(f[r*W+c])) studyCells++;
@@ -1856,27 +2089,6 @@ async function computeRanking(setStatus){
       for(let i=0;i<wm.ww;i++){ if(!cover[base+i]){ cover[base+i]=1; covered++; } } }
     areaFrac[t]=covered/studyCells;
   }
-  // test-deposit footprints (optional — used only for the recovery/validation curve)
-  const testDeps={};
-  for(const dpp of deposits) if(state.testIds.has(dpp.id)) testDeps[dpp.id]=dpp.ringsW;
-  for(const ct of state.customTests){
-    if(!state.testIds.has(ct.id)) continue;
-    const [xm,xM,ym,yM]=gridRectToMap(ct.x,ct.y,ct.w,ct.h);
-    testDeps[ct.id]=[[[xm,yM],[xM,yM],[xM,ym],[xm,ym],[xm,yM]]];  // clockwise outer ring
-  }
-  const nTest=Object.keys(testDeps).length;
-  if(!nTest){
-    // no test deposits selected: return the prediction windows only, no recovery/validation curve
-    return {top,winW:wm.ww,winH:wm.wh,areaFrac,areaKm2:covered*CELL_KM*CELL_KM,nWindows:nWin,nTest:0,
-            rec:null,randMean:null,randLo:null,randHi:null,hitsAt:null,
-            hits:null,auc:null,lift:null,overlapRanks:[],hitRankList:[],overlapBy:{},hitBy:{}};
-  }
-  await say("Validating footprint recovery (exact geometry)…");
-  const res=WPCA.footprintRecovery(rects,testDeps,0.5);
-  const m=WPCA.metricsOf(res,T);
-  const hitsAt=new Array(T).fill(0);
-  { const byRank={}; for(const r in res.hitByRank) byRank[+r]=res.hitByRank[r].length;
-    let hc=0; for(let t=0;t<T;t++){ hc+=byRank[t+1]||0; hitsAt[t]=hc; } }
   await say("Simulating the random-selection reference…");
   // rasterized footprints for the simulated band (headline metrics above are exact-geometry)
   const ids=Object.keys(testDeps);
@@ -1927,6 +2139,7 @@ async function computeRanking(setStatus){
 document.getElementById("runbtn").addEventListener("click",async ()=>{
   const status=document.getElementById("runstatus");
   const btn=document.getElementById("runbtn");
+  if(state.testIds.size===0){ status.textContent="Select at least one test deposit."; return; }
   btn.disabled=true;
   btn.innerHTML='<span class="spin"></span>Running…';
   try{
@@ -1941,12 +2154,12 @@ document.getElementById("runbtn").addEventListener("click",async ()=>{
 function gridToUTM(x,y){ return [(E0 + x*CELL_M)/1000, (N0g - y*CELL_M)/1000]; }
 function renderResults(res){
   document.getElementById("results").classList.add("show");
-  const hasVal = res.nTest>0 && res.rec;
-  document.getElementById("t-rec").innerHTML = hasVal ? (res.rec.at(-1)*100).toFixed(1)+"<small>%</small>" : "<small>—</small>";
-  document.getElementById("t-hits").innerHTML = hasVal ? res.hits+"<small> of "+res.nTest+"</small>" : "<small>no test deposits</small>";
-  document.getElementById("t-auc").textContent = hasVal ? res.auc.toFixed(1) : "—";
+  const rec=(res.rec.at(-1)||0)*100;
+  document.getElementById("t-rec").innerHTML=rec.toFixed(1)+"<small>%</small>";
+  document.getElementById("t-hits").innerHTML=res.hits+"<small> of "+res.nTest+"</small>";
+  document.getElementById("t-auc").textContent=res.auc.toFixed(1);
   document.getElementById("t-area").innerHTML=Math.round(res.areaKm2).toLocaleString()+"<small> km²</small>";
-  document.getElementById("t-lift").innerHTML = hasVal ? res.lift.toFixed(2)+"<small>×</small>" : "<small>—</small>";
+  document.getElementById("t-lift").innerHTML=res.lift.toFixed(2)+"<small>×</small>";
   const tb=document.querySelector("#topwins tbody"); tb.textContent="";
   res.top.slice(0,10).forEach((w,i)=>{
     const [e,n]=gridToUTM(w.x+res.winW/2, w.y+res.winH/2);
@@ -1955,20 +2168,8 @@ function renderResults(res){
       .forEach(v=>{const td=document.createElement("td");td.textContent=v;tr.appendChild(td);});
     tb.appendChild(tr);
   });
-  if(hasVal){
-    drawRecoveryChart(res);
-    renderRecTable(res);
-  } else {
-    chart.textContent=""; document.getElementById("rectable").textContent="";
-    const note=document.createElementNS(SVGNS,"text");
-    note.setAttribute("x","20"); note.setAttribute("y","46"); note.setAttribute("font-size","13.5"); note.setAttribute("fill","var(--ink-2)");
-    note.textContent="No test deposits selected — recovery curve unavailable.";
-    chart.appendChild(note);
-    const note2=document.createElementNS(SVGNS,"text");
-    note2.setAttribute("x","20"); note2.setAttribute("y","70"); note2.setAttribute("font-size","12"); note2.setAttribute("fill","var(--muted)");
-    note2.textContent="The prediction windows and map are the targeting output; add a test deposit to validate.";
-    chart.appendChild(note2);
-  }
+  drawRecoveryChart(res);
+  renderRecTable(res);
   document.getElementById("results").scrollIntoView({behavior:"smooth",block:"nearest"});
 }
 
@@ -2007,7 +2208,7 @@ function drawRecoveryChart(res){
   // step curve (where="post"), matching the paper's recovery figures
   let dstr="M"+X(0)+" "+Y(res.rec[0]);
   for(let t=1;t<n;t++) dstr+="L"+X(t)+" "+Y(res.rec[t-1])+"L"+X(t)+" "+Y(res.rec[t]);
-  mk("path",{d:dstr,fill:"none",stroke:"var(--blue)","stroke-width":2,"stroke-linejoin":"round","stroke-linecap":"round"});
+  mk("path",{d:dstr,fill:"none",stroke:"var(--accent)","stroke-width":2,"stroke-linejoin":"round","stroke-linecap":"round"});
   // overlap events (yellow) + hit events (red), paper colours
   for(const r of res.overlapRanks||[]){
     if(r>n) continue;
@@ -2017,11 +2218,11 @@ function drawRecoveryChart(res){
     if(r>n) continue;
     mk("circle",{cx:X(r-1),cy:Y(res.rec[r-1]),r:4.6,fill:"#e03131",stroke:"#111","stroke-width":0.8});
   }
-  mk("circle",{cx:X(n-1),cy:Y(res.rec.at(-1)),r:4.5,fill:"var(--blue)",stroke:"var(--surface)","stroke-width":2});
+  mk("circle",{cx:X(n-1),cy:Y(res.rec.at(-1)),r:4.5,fill:"var(--accent)",stroke:"var(--surface)","stroke-width":2});
   const endLab=mk("text",{x:X(n-1)-6,y:Y(res.rec.at(-1))-10,"text-anchor":"end","font-size":12,fill:"var(--ink)","font-weight":650});
   endLab.textContent=((res.rec.at(-1)||0)*100).toFixed(1)+"%";
   const lg=mk("g",{transform:`translate(${M.l+8},${M.t-2})`});
-  mk("line",{x1:0,x2:20,y1:5,y2:5,stroke:"var(--blue)","stroke-width":2.5},lg);
+  mk("line",{x1:0,x2:20,y1:5,y2:5,stroke:"var(--accent)","stroke-width":2.5},lg);
   let t1=mk("text",{x:26,y:9,"font-size":11.5,fill:"var(--ink-2)"},lg); t1.textContent="wPCA ranking";
   mk("line",{x1:112,x2:132,y1:5,y2:5,stroke:"var(--muted)","stroke-width":2,"stroke-dasharray":"5 4"},lg);
   let t2=mk("text",{x:138,y:9,"font-size":11.5,fill:"var(--ink-2)"},lg); t2.textContent="Random (5–95% band)";
@@ -2245,14 +2446,10 @@ document.getElementById("reportbtn").addEventListener("click",()=>{
     ["Top windows T",String(res.top.length)],
     ["Test deposits",String(res.nTest)+" (hit = ≥50% of footprint covered)"],
   ];
-  const _hasVal=res.nTest>0 && res.rec;
-  const tiles=_hasVal?[["Footprint recovered",(res.rec[res.rec.length-1]*100).toFixed(1)+"%"],
+  const tiles=[["Footprint recovered",(res.rec[res.rec.length-1]*100).toFixed(1)+"%"],
     ["Test deposits hit",`${res.hits} of ${res.nTest}`],["Recovery AUC",res.auc.toFixed(1)],
     ["Area selected",Math.round(res.areaKm2).toLocaleString()+" km²"],
-    ["vs random of matched area",res.lift.toFixed(2)+"×"]]
-    :[["Prediction windows",String(res.top.length)],
-    ["Area selected",Math.round(res.areaKm2).toLocaleString()+" km²"],
-    ["Test deposits","none selected"]];
+    ["vs random of matched area",res.lift.toFixed(2)+"×"]];
   const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");
   const cbFmt=v=>Math.abs(v)>=100?Math.round(v).toLocaleString():(Math.round(v*10)/10);
   // per-variable prediction maps: a multivariate report shows the ranking over every variable used
@@ -2285,22 +2482,26 @@ document.getElementById("reportbtn").addEventListener("click",()=>{
   const html=`<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
 <title>wPCA targeting report — ${esc(refName)}</title>
 <style>
-body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#0b0b0b;background:#fff;max-width:900px;margin:24px auto;padding:0 20px;font-size:14px;line-height:1.45}
-h1{font-size:22px;margin:0 0 2px}h2{font-size:15px;margin:26px 0 8px}
-.sub{color:#52514e;font-size:13px;margin-bottom:18px}
-table{border-collapse:collapse;width:100%;font-size:13px}
-td,th{border-bottom:1px solid #e1e0d9;padding:5px 8px;text-align:left;font-variant-numeric:tabular-nums}
-th{color:#52514e;font-weight:600}
+body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#101210;background:#fff;max-width:900px;margin:24px auto;padding:0 20px;font-size:13px;line-height:1.5}
+h1{font-size:22px;margin:0 0 2px;font-weight:600;letter-spacing:-0.015em}
+h2{font-size:11px;margin:26px 0 8px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:#696e68}
+.sub{color:#4c514b;font-size:12px;margin-bottom:18px}
+table{border-collapse:collapse;width:100%;font-size:12px}
+td,th{border-bottom:1px solid #dcdfd8;padding:5px 8px;text-align:left;font-variant-numeric:tabular-nums}
+th{color:#696e68;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:0.06em}
 .tiles{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
-.tile{border:1px solid #e1e0d9;border-radius:9px;padding:10px 14px;min-width:140px}
-.tile .l{font-size:11.5px;color:#52514e}.tile .v{font-size:21px;font-weight:650}
-img{max-width:100%;border:1px solid #e1e0d9;border-radius:8px}
-.note{color:#898781;font-size:12px;margin-top:22px;border-top:1px solid #e1e0d9;padding-top:10px}
-.cap{color:#52514e;font-size:12.5px;margin:8px 0 0;max-width:78ch}
-.toolbar{position:sticky;top:0;background:#fff;padding:10px 0 9px;border-bottom:1px solid #e1e0d9;display:flex;gap:10px;align-items:center;z-index:5}
-.toolbar button{font:inherit;padding:6px 14px;border:1px solid #c3c2b7;border-radius:7px;background:#fff;cursor:pointer}
-.toolbar button.pdf{background:#b35a1c;border-color:#b35a1c;color:#fff;font-weight:600}
-.toolbar span{color:#898781;font-size:12px}
+.tile{border:1px solid #dcdfd8;border-radius:10px;padding:10px 14px;min-width:140px}
+.tile .l{font-size:11px;color:#696e68;text-transform:uppercase;letter-spacing:0.06em;font-weight:600}
+.tile .v{font-size:26px;font-weight:600;letter-spacing:-0.02em;margin-top:4px;font-variant-numeric:tabular-nums}
+img{max-width:100%;border:1px solid #dcdfd8;border-radius:10px}
+.note{color:#696e68;font-size:11px;margin-top:22px;border-top:1px solid #dcdfd8;padding-top:10px}
+.cap{color:#4c514b;font-size:12px;margin:8px 0 0;max-width:78ch;line-height:1.55}
+.cap.lead{font-size:13px;color:#101210}
+.toolbar{position:sticky;top:0;background:#fff;padding:10px 0 9px;border-bottom:1px solid #dcdfd8;display:flex;gap:10px;align-items:center;z-index:5}
+.toolbar button{font:inherit;font-size:12px;padding:6px 14px;border:1px solid #bcc1b8;border-radius:4px;background:#fff;cursor:pointer}
+.toolbar button.pdf{background:#2e6b4f;border-color:#2e6b4f;color:#fff;font-weight:600}
+.toolbar button:focus-visible{outline:2px solid #2e6b4f;outline-offset:2px}
+.toolbar span{color:#696e68;font-size:11px}
 @media print{body{margin:8mm}.toolbar{display:none}}
 </style></head><body>
 <div class="toolbar">
@@ -2310,18 +2511,18 @@ img{max-width:100%;border:1px solid #e1e0d9;border-radius:8px}
 </div>
 <h1>wPCA targeting report — ${DATASET==="carajas"?"Carajás, Brazil":esc(USERDATA?USERDATA.title:"uploaded dataset")}</h1>
 <div class="sub">Generated ${now.toLocaleString()} · wPCA Explorer · windowed PCA (wPCA) after Mantilla Salas, Mejia-Herrera, Kloeckner, Asadi, Yin &amp; Caers (2026), <i>Natural Resources Research</i>${DATASET==="carajas"?" · geophysical data: Geological Survey of Brazil (SGB/CPRM)":""}</div>
-<p class="cap" style="font-size:13.5px;color:#0b0b0b">Windowed PCA (wPCA) learns the geophysical geometry of one known deposit — the <b>reference</b> — and ranks every other map window by how closely it reproduces that geometry. A deposit-sized window slides across the grid; each window is represented by its principal-component scores, the components most characteristic of the reference get the weight, and all windows are ranked by weighted distance to the reference in PCA space. The top-${res.top.length} windows below are the proposed follow-up targets${_hasVal?`, validated against the footprints of the ${res.nTest} independent test deposits`:``}.</p>
+<p class="cap lead">Windowed PCA (wPCA) learns the geophysical geometry of one known deposit — the <b>reference</b> — and ranks every other map window by how closely it reproduces that geometry. A deposit-sized window slides across the grid; each window is represented by its principal-component scores, the components most characteristic of the reference get the weight, and all windows are ranked by weighted distance to the reference in PCA space. The top-${res.top.length} windows below are the proposed follow-up targets, validated against the footprints of the ${res.nTest} independent test deposits.</p>
 <h2>Run configuration</h2>
 <table>${settings.map(([k,v])=>`<tr><th style="width:190px">${esc(k)}</th><td>${esc(v)}</td></tr>`).join("")}</table>
 <h2>Headline results</h2>
 <div class="tiles">${tiles.map(([l,v])=>`<div class="tile"><div class="l">${esc(l)}</div><div class="v">${esc(v)}</div></div>`).join("")}</div>
-${_hasVal?`<p class="cap"><b>How to read these numbers.</b> "Footprint recovered" is the mean fraction of the test-deposit footprints covered by the selected windows; a deposit counts as <b>hit</b> when at least 50% of its footprint is covered. "vs random of matched area" compares the recovery with a random selection covering the same total area — values well above 1× mean the ranking finds deposits far better than chance.</p>`:`<p class="cap">No test deposits were selected, so the ranking is shown without a recovery curve. The maps and window list below are the targeting output; add one or more test deposits to validate the ranking.</p>`}
+<p class="cap"><b>How to read these numbers.</b> "Footprint recovered" is the mean fraction of the test-deposit footprints covered by the selected windows; a deposit counts as <b>hit</b> when at least 50% of its footprint is covered. "vs random of matched area" compares the recovery with a random selection covering the same total area — values well above 1× mean the ranking finds deposits far better than chance.</p>
 ${mapsHtml}
-${_hasVal?`<h2>Cumulative footprint recovery</h2>
+<h2>Cumulative footprint recovery</h2>
 ${chartSvg}
 <p class="cap">The blue step curve shows the mean test-deposit footprint fraction recovered as windows are added in rank order. The dashed line and grey band are a simulated random selection of the same window geometry and count (mean and 5–95% range). Yellow dots mark ranks where a window first overlaps a test deposit; red dots mark hit events (≥50% of a footprint covered).</p>
 <h2>Deposit hits (≥50% of footprint covered)</h2>
-<table><thead><tr><th>Rank</th><th>Deposit</th></tr></thead><tbody>${hitsRows||'<tr><td colspan="2">None</td></tr>'}</tbody></table>`:``}
+<table><thead><tr><th>Rank</th><th>Deposit</th></tr></thead><tbody>${hitsRows||'<tr><td colspan="2">None</td></tr>'}</tbody></table>
 <h2>Top 25 prediction windows (window centres, UTM 22S)</h2>
 <table><thead><tr><th>Rank</th><th>Easting (km)</th><th>Northing (km)</th><th>PCA distance</th></tr></thead><tbody>${rows}</tbody></table>
 <div class="note">Produced entirely in the browser by wPCA Explorer; no data left this computer. Method and validation: Mantilla Salas et&nbsp;al. (2026), Natural Resources Research; software DOI 10.5281/zenodo.20164768. Rankings are a targeting aid, not a resource estimate — field validation required.</div>
@@ -2499,6 +2700,10 @@ function setUserDataset(){
   drawOverlay();
 }
 document.getElementById("backdemo").addEventListener("click",()=>{ setResolution(400); drawOverlay(); });
+document.getElementById("runexample").addEventListener("click",()=>{
+  document.getElementById("runbtn").click();
+  document.querySelector(".mapcard").scrollIntoView({behavior:"smooth",block:"start"});
+});
 document.getElementById("loadbtn").addEventListener("click",async ()=>{
   const st=document.getElementById("upstatus");
   const files=[];
