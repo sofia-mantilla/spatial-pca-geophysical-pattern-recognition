@@ -1748,6 +1748,7 @@ function syncCustomRefOption(){
   }
 }
 function renderTestList(){
+  syncClearButtons();
   const div=document.getElementById("testlist"); div.textContent="";
   for(const d of deposits){
     const isRef = !state.customRef && d.id===state.refId;
@@ -1788,6 +1789,7 @@ document.getElementById("testnone").addEventListener("click",()=>{
 /* ---- clear actions ---------------------------------------------------- */
 /* Enable each only when it has something to remove. */
 function syncClearButtons(){
+  if(typeof state==="undefined") return;
   const cp=document.getElementById("clearpred"), cd=document.getElementById("cleardeps");
   if(cp) cp.disabled = !state.result;
   if(cd) cd.disabled = !(state.customRef || state.customTests.length || state.testIds.size);
@@ -1964,6 +1966,7 @@ function bindStride(id,key){
 }
 bindStride("stridex","strideX"); bindStride("stridey","strideY");
 function invalidate(){
+  syncClearButtons();
   if(state.result){ state.result=null; document.getElementById("results").classList.remove("show");
     document.getElementById("topwinkey").style.display="none";
     document.getElementById("runstatus").textContent="Settings changed — run again."; drawOverlay(); }
