@@ -380,7 +380,8 @@
   .fmt .dim { color: var(--muted); }
   .uprow { display: flex; align-items: center; gap: 10px; margin: 8px 0; }
   .uprow .uplab { width: 130px; font-size: var(--t-small); color: var(--ink-2); flex: none; }
-  .uprow input[type="file"] { font-size: var(--t-small); color: var(--ink-2); }
+  .uprow input[type="file"] { font-size: var(--t-small); color: var(--ink-2); min-width: 0; }
+  .uprow .bandsel { width: auto; max-width: 260px; flex: 0 1 auto; }
   .toast {
     position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%);
     background: var(--ink); color: var(--page); padding: 10px 16px; border-radius: var(--r-card);
@@ -640,14 +641,14 @@
     <h2>Bring your own grids</h2>
     <p class="lead">The same six steps, on your data. Every file is parsed and analysed by your own browser — <b>nothing is transmitted, stored, or logged anywhere</b>. Confidential exploration data stays exactly where it is.</p>
     <div class="fmt"><b>1 · Grids (required)</b><br>
-      GeoTIFF, one file per variable, <b>up to 5</b> — e.g. <code>TMI.tif</code>, <code>U.tif</code>, <code>gravity.tif</code>. Same size, cell and origin; projected CRS in metres. Single band, stripped (untiled), uncompressed or DEFLATE. <span class="dim">(Geosoft grid and XYZ/CSV planned.)</span></div>
+      GeoTIFF, one file per variable, <b>up to 5</b> — e.g. <code>TMI.tif</code>, <code>U.tif</code>, <code>gravity.tif</code>. Same size, cell and origin; projected CRS in metres. Stripped (untiled), uncompressed or DEFLATE. <b>Multi-band files are supported</b> — pick which band a variable uses, and reuse the same file in several rows to combine its bands. <span class="dim">(Geosoft grid and XYZ/CSV planned.)</span></div>
     <div class="fmt"><b>2 · Deposit outlines (optional)</b><br>
       <code>deposits.geojson</code> — polygons with a <code>name</code> property, same CRS as the grids. <span class="dim">(Zipped shapefile planned.)</span> No outline files? Add deposits on the map instead: <b>click</b> a point + size, or <b>drag</b> to draw — for the reference window and the test deposits alike.</div>
-    <div class="uprow"><span class="uplab">Variable 1 *</span><input type="file" id="up1" accept=".tif,.tiff"></div>
-    <div class="uprow"><span class="uplab">Variable 2</span><input type="file" id="up2" accept=".tif,.tiff"></div>
-    <div class="uprow"><span class="uplab">Variable 3</span><input type="file" id="up3" accept=".tif,.tiff"></div>
-    <div class="uprow"><span class="uplab">Variable 4</span><input type="file" id="up4" accept=".tif,.tiff"></div>
-    <div class="uprow"><span class="uplab">Variable 5</span><input type="file" id="up5" accept=".tif,.tiff"></div>
+    <div class="uprow"><span class="uplab">Variable 1 *</span><input type="file" id="up1" accept=".tif,.tiff"><select class="bandsel" id="band1" hidden aria-label="Band for variable 1"></select></div>
+    <div class="uprow"><span class="uplab">Variable 2</span><input type="file" id="up2" accept=".tif,.tiff"><select class="bandsel" id="band2" hidden aria-label="Band for variable 2"></select></div>
+    <div class="uprow"><span class="uplab">Variable 3</span><input type="file" id="up3" accept=".tif,.tiff"><select class="bandsel" id="band3" hidden aria-label="Band for variable 3"></select></div>
+    <div class="uprow"><span class="uplab">Variable 4</span><input type="file" id="up4" accept=".tif,.tiff"><select class="bandsel" id="band4" hidden aria-label="Band for variable 4"></select></div>
+    <div class="uprow"><span class="uplab">Variable 5</span><input type="file" id="up5" accept=".tif,.tiff"><select class="bandsel" id="band5" hidden aria-label="Band for variable 5"></select></div>
     <div class="uprow"><span class="uplab">Deposit outlines</span><input type="file" id="updep" accept=".geojson,.json"></div>
     <div class="dlrow">
       <button class="btn primary" id="loadbtn">Load dataset</button>
@@ -2565,7 +2566,9 @@ async function inflateBytes(u8){
   }
   throw new Error("DEFLATE decode failed");
 }
-async function parseGeoTIFF(file){
+/* Reads the IFD only — no pixel decoding — so a file can be inspected for its
+   band list before the user commits to a band. */
+async function readTiffMeta(file){
   const buf=await file.arrayBuffer(); const dv=new DataView(buf);
   const bom=dv.getUint16(0,false);
   let le;
@@ -2597,7 +2600,13 @@ async function parseGeoTIFF(file){
   const Wt=vals(256)[0], Ht=vals(257)[0];
   const bits=(vals(258)||[32])[0], sf=(vals(339)||[1])[0];
   const comp=(vals(259)||[1])[0];
-  if(((vals(277)||[1])[0])!==1) throw new Error(file.name+": only single-band GeoTIFFs are supported");
+  const spp=(vals(277)||[1])[0];
+  const planar=(vals(284)||[1])[0];
+  const bpsList=vals(258)||[32], sfList=vals(339)||[1];
+  if(bpsList.some(v=>v!==bpsList[0]) || sfList.some(v=>v!==sfList[0]))
+    throw new Error(file.name+": bands have mixed sample types — split them into separate files");
+  const metaBytes=vals(42112);
+  const meta=metaBytes? String.fromCharCode.apply(null,metaBytes).replace(/\0.*$/,"") : "";
   if(vals(322)) throw new Error(file.name+": tiled GeoTIFF — please save as stripped/untiled (GDAL: -co TILED=NO)");
   if(((vals(317)||[1])[0])!==1) throw new Error(file.name+": predictor not supported — save without predictor");
   if(comp!==1&&comp!==8&&comp!==32946) throw new Error(file.name+": compression not supported — save uncompressed or DEFLATE");
@@ -2607,29 +2616,59 @@ async function parseGeoTIFF(file){
   if(!scale||!tie) throw new Error(file.name+": no georeference found (needs ModelPixelScale + ModelTiepoint)");
   const ndv=vals(42113);
   const nodata=ndv? parseFloat(String.fromCharCode(...ndv).replace(/\0.*$/,"")) : null;
+  return {buf,le,W:Wt,H:Ht,spp,planar,bits,sf,comp,offs,counts,rps,nodata,
+          bandNames:gdalBandNames(meta,spp),
+          cellX:scale[0],cellY:scale[1],
+          e0:tie[3]-tie[0]*scale[0],n0:tie[4]+tie[1]*scale[1]};
+}
+
+/* GDAL writes per-band descriptions into tag 42112; use them so bands carry
+   their real product names rather than "Band 3". */
+function gdalBandNames(meta,spp){
+  const names=new Array(spp).fill(null);
+  if(meta){
+    const re=/<Item\s+name="DESCRIPTION"\s+sample="(\d+)"[^>]*>([\s\S]*?)<\/Item>/g;
+    let m; while((m=re.exec(meta))){ const i=Number(m[1]); if(i>=0&&i<spp) names[i]=m[2].trim(); }
+  }
+  return names.map((n,i)=>n||("Band "+(i+1)));
+}
+
+/* Decodes one band. Interleaved (PlanarConfig 1) files stride by samples-per-pixel
+   within a strip; planar (PlanarConfig 2) files keep whole bands in their own strips. */
+async function decodeTiffBand(d,band){
+  const {buf,le,W,H,spp,planar,bits,sf,comp,offs,counts,rps,nodata}=d;
+  const b=Math.max(0,Math.min(spp-1,band|0));
   const bps=bits/8;
-  const out=new Float64Array(Wt*Ht);
+  const out=new Float64Array(W*H);
+  const perBand=Math.ceil(H/rps);
+  const first=planar===2? b*perBand : 0;
+  const last =planar===2? (b+1)*perBand : offs.length;
   let row=0;
-  for(let s=0;s<offs.length&&row<Ht;s++){
+  for(let s=first;s<last&&row<H;s++){
     let chunk=new Uint8Array(buf,offs[s],counts[s]);
     if(comp!==1) chunk=await inflateBytes(chunk);
     const cdv=new DataView(chunk.buffer,chunk.byteOffset,chunk.byteLength);
-    const nrows=Math.min(rps,Ht-row);
+    const nrows=Math.min(rps,H-row);
     for(let r=0;r<nrows;r++){
-      for(let c=0;c<Wt;c++){
-        const bo=(r*Wt+c)*bps;
+      for(let c=0;c<W;c++){
+        const bo=((r*W+c)*(planar===2?1:spp)+(planar===2?0:b))*bps;
         let v;
         if(sf===3) v=bits===64?cdv.getFloat64(bo,le):cdv.getFloat32(bo,le);
         else if(sf===2) v=bits===16?cdv.getInt16(bo,le):cdv.getInt32(bo,le);
         else v=bits===16?cdv.getUint16(bo,le):(bits===32?cdv.getUint32(bo,le):cdv.getUint8(bo));
         if(nodata!==null&&v===nodata) v=NaN;
-        out[(row+r)*Wt+c]=v;
+        out[(row+r)*W+c]=v;
       }
     }
     row+=nrows;
   }
-  return {W:Wt,H:Ht,cellX:scale[0],cellY:scale[1],
-          e0:tie[3]-tie[0]*scale[0],n0:tie[4]+tie[1]*scale[1],data:out};
+  return out;
+}
+
+async function parseGeoTIFF(file,band){
+  const d=await readTiffMeta(file);
+  return {W:d.W,H:d.H,cellX:d.cellX,cellY:d.cellY,e0:d.e0,n0:d.n0,
+          data:await decodeTiffBand(d,band||0)};
 }
 function parseDepositsGeoJSON(text){
   const gj=JSON.parse(text);
@@ -2707,16 +2746,57 @@ document.getElementById("runexample").addEventListener("click",()=>{
   document.getElementById("runbtn").click();
   document.querySelector(".mapcard").scrollIntoView({behavior:"smooth",block:"start"});
 });
+/* One buffer per physical file, so re-using a multi-band file across several
+   variable rows does not re-read it. */
+const tiffCache=new Map();
+async function tiffMetaCached(f){
+  const key=f.name+"|"+f.size+"|"+f.lastModified;
+  if(!tiffCache.has(key)) tiffCache.set(key, await readTiffMeta(f));
+  return tiffCache.get(key);
+}
+for(let i=1;i<=5;i++){
+  document.getElementById("up"+i).addEventListener("change",async ev=>{
+    const sel=document.getElementById("band"+ev.target.id.slice(2));
+    const st=document.getElementById("upstatus");
+    const f=ev.target.files[0];
+    sel.hidden=true; sel.textContent="";
+    if(!f) return;
+    try{
+      const d=await tiffMetaCached(f);
+      if(d.spp>1){
+        d.bandNames.forEach((nm,bi)=>{
+          const o=document.createElement("option"); o.value=bi; o.textContent=nm; sel.appendChild(o);
+        });
+        // default each row to a different band so a single stack fills several slots
+        sel.value=String(Math.min(d.spp-1, Number(ev.target.id.slice(2))-1));
+        sel.hidden=false;
+        st.textContent=`${f.name}: ${d.spp} bands — choose which one this variable uses.`;
+      } else {
+        st.textContent=`${f.name}: ${d.W}×${d.H} @ ${Math.round(d.cellX)} m.`;
+      }
+    }catch(err){ st.textContent="⚠ "+(err&&err.message||err); }
+  });
+}
+
 document.getElementById("loadbtn").addEventListener("click",async ()=>{
   const st=document.getElementById("upstatus");
-  const files=[];
-  for(let i=1;i<=5;i++){ const f=document.getElementById("up"+i).files[0]; if(f) files.push(f); }
-  if(!files.length){ st.textContent="Choose at least one GeoTIFF (Variable 1)."; return; }
+  const picks=[];
+  for(let i=1;i<=5;i++){
+    const f=document.getElementById("up"+i).files[0];
+    if(f) picks.push({file:f, band:Number(document.getElementById("band"+i).value||0)});
+  }
+  if(!picks.length){ st.textContent="Choose at least one GeoTIFF (Variable 1)."; return; }
   st.textContent="Reading grids…";
   try{
     const strip=nm=>nm.replace(/\.[^.]+$/,"");
+    const files=picks.map(p=>p.file);
     const grids=[];
-    for(const f of files) grids.push(await parseGeoTIFF(f));
+    for(const pk of picks){
+      const d=await tiffMetaCached(pk.file);
+      grids.push({W:d.W,H:d.H,cellX:d.cellX,cellY:d.cellY,e0:d.e0,n0:d.n0,
+        label: d.spp>1 ? d.bandNames[pk.band] : strip(pk.file.name),
+        data: await decodeTiffBand(d, pk.band)});
+    }
     const g1=grids[0];
     if(g1.W*g1.H>6e6) throw new Error("Grid is very large ("+g1.W+"×"+g1.H+") — please downsample below ~6 M cells.");
     for(let i=1;i<grids.length;i++){
@@ -2726,7 +2806,7 @@ document.getElementById("loadbtn").addEventListener("click",async ()=>{
     }
     const fd=document.getElementById("updep").files[0];
     const deps=fd? parseDepositsGeoJSON(await fd.text()) : [];
-    const vars=files.map((f,i)=>({label:strip(f.name),data:grids[i].data}));
+    const vars=grids.map(g=>({label:g.label,data:g.data}));
     USERDATA={W:g1.W,H:g1.H,cellM:g1.cellX,e0:g1.e0,n0:g1.n0,vars,
       deposits:deps,
       title:vars.map(v=>v.label).join(" + "),
