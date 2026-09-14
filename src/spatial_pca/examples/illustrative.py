@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd
 from matplotlib import patheffects as pe
 from matplotlib.lines import Line2D
-from matplotlib.patches import Rectangle
+from matplotlib.patches import FancyArrowPatch, Rectangle
 
 from spatial_pca.geodata.exports import build_top_windows_gdf
 from spatial_pca.spca.windows import WindowMatrix, build_univariate_window_matrix
@@ -112,7 +112,7 @@ def plot_grid_matrix_schematic(
     ax_grid.set_xticks(np.arange(-0.5, n, 1), minor=True)
     ax_grid.set_yticks(np.arange(-0.5, n, 1), minor=True)
     ax_grid.grid(which="minor", linestyle="-", linewidth=0.6, alpha=0.7)
-    ax_grid.tick_params(axis="both", which="both", length=0, labelsize=14)
+    ax_grid.tick_params(axis="both", which="both", length=0, labelsize=16.2)
 
     for window_id in (*reference_window_ids, int(training_window_index)):
         row, col = window_row_col(window_id, context.n_cols)
@@ -127,13 +127,16 @@ def plot_grid_matrix_schematic(
                 linestyle="--",
             )
         )
+        # ID in the window's top-right corner, inside the outline
         ax_grid.text(
-            col + 0.7,
-            row + 1.0,
+            col + win_w - 0.62,
+            row + win_h - 0.6,
             str(window_id),
             color="white",
             fontsize=16.2,
             fontweight="bold",
+            ha="right",
+            va="top",
         )
 
     ax_grid.add_patch(
@@ -146,18 +149,23 @@ def plot_grid_matrix_schematic(
             linewidth=3.5,
         )
     )
+    # label above the outline so it does not cover the window or its ID
     ax_grid.text(
-        context.train_col - 0.4,
-        context.train_row + 0.1,
-        "Known\nDeposit",
+        context.train_col + win_w / 2 - 0.5,
+        context.train_row + win_h - 0.5 + 0.35,
+        "Known Deposit",
         color="black",
         fontsize=16.2,
         fontweight="bold",
+        ha="center",
+        va="bottom",
+        bbox={"boxstyle": "round,pad=0.15", "facecolor": "white", "edgecolor": "none", "alpha": 0.85},
     )
-    ax_grid.text(0.9, -0.9, r"$\rightarrow$", color="black", fontsize=40.5, va="center", ha="center")
-    ax_grid.text(-1.1, 1.0, r"$\uparrow$", color="black", fontsize=40.5, va="center", ha="center")
-    ax_grid.text(1.0, -1.3, r"$s_x$", fontsize=21.6, color="black", va="center", ha="center")
-    ax_grid.text(-1.5, 1.1, r"$s_y$", fontsize=21.6, color="black", va="center", ha="center", rotation=90)
+    # stride arrows sit outside the tick labels so they do not cover them
+    ax_grid.text(0.5, -1.55, r"$\rightarrow$", color="black", fontsize=40.5, va="center", ha="center", clip_on=False)
+    ax_grid.text(-1.75, 0.5, r"$\uparrow$", color="black", fontsize=40.5, va="center", ha="center", clip_on=False)
+    ax_grid.text(1.85, -1.6, r"$s_x$", fontsize=21.6, color="black", va="center", ha="center", clip_on=False)
+    ax_grid.text(-1.8, 1.6, r"$s_y$", fontsize=21.6, color="black", va="center", ha="center", rotation=90, clip_on=False)
     ax_grid.annotate(
         "",
         xy=(context.train_col - 0.9, context.train_row + 0.5),
@@ -165,7 +173,7 @@ def plot_grid_matrix_schematic(
         arrowprops={"arrowstyle": "-[,widthB=2.9,lengthB=0.5", "lw": 1.6, "color": "black"},
     )
     ax_grid.text(
-        context.train_col - 1.5,
+        context.train_col - 1.75,
         context.train_row + 0.5,
         r"$w_y$",
         fontsize=18.9,
@@ -182,7 +190,7 @@ def plot_grid_matrix_schematic(
     )
     ax_grid.text(
         context.train_col + 0.5,
-        context.train_row - 1.6,
+        context.train_row - 1.8,
         r"$w_x$",
         fontsize=18.9,
         color="black",
@@ -217,17 +225,27 @@ def plot_grid_matrix_schematic(
         fontweight="bold",
     )
 
-    ax_grid.annotate(
-        "",
-        xy=(0.50, 0.5),
-        xytext=(0.46, 0.5),
-        xycoords="figure fraction",
-        textcoords="figure fraction",
-        arrowprops={"arrowstyle": "->", "lw": 3, "color": "black"},
-        annotation_clip=False,
-    )
+    fig.tight_layout(w_pad=5.0)
 
-    fig.tight_layout(w_pad=2.5)
+    # grid -> matrix arrow, placed in the gap between the grid and the matrix
+    # panel's y label (measured after layout so it never overlaps the label)
+    fig.canvas.draw()
+    renderer = fig.canvas.get_renderer()
+    fig_w = fig.bbox.width
+    gap_left = ax_grid.get_window_extent(renderer).x1 / fig_w
+    gap_right = ax_matrix.get_tightbbox(renderer).x0 / fig_w
+    margin = 0.08 * (gap_right - gap_left)
+    fig.add_artist(
+        FancyArrowPatch(
+            (gap_left + margin, 0.5),
+            (gap_right - margin, 0.5),
+            transform=fig.transFigure,
+            arrowstyle="-|>",
+            mutation_scale=22,
+            lw=3,
+            color="black",
+        )
+    )
     fig.savefig(path, dpi=400, bbox_inches="tight", facecolor="white")
     plt.close(fig)
     return path
