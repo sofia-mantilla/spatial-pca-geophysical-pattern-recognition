@@ -45,13 +45,13 @@ STEPS = [
     ]),
     dict(head="2. SAMPLING", dashed=False, lines=[
         r"The window slides across the study area with strides ($s_x$, $s_y$).",
-        r"Each window is flattened into one row of $X \in \mathbb{R}^{n \times p}$;",
-        r"the deposit window is the row $x_d^{\top}$.",
+        r"Each window is flattened into one row of $\mathbf{X} \in \mathbb{R}^{n \times p}$;",
+        r"the deposit window is the row $\mathbf{x}_d^{\top}$.",
     ]),
     dict(head="3. DECOMPOSITION (wPCA)", dashed=False, loop=True, lines=[
-        r"Standardize $X$ and decompose: $\widetilde{X} = ZL^{\top}$.",
+        r"Standardize $\mathbf{X}$ and decompose: $\widetilde{\mathbf{X}} = \mathbf{Z}\mathbf{L}^{\top}$.",
         "Each component is one building block of the geometry; the",
-        r"scores $Z$ measure how strongly each window expresses each.",
+        r"scores $\mathbf{Z}$ measure how strongly each window expresses each.",
     ]),
     dict(head="4. DEPOSIT WEIGHTS", dashed=False, loop=True, lines=[
         r"$w_m = z_{dm}^{2} / \sum_u z_{du}^{2}$",

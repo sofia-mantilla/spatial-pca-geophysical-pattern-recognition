@@ -201,11 +201,11 @@ def plot_grid_matrix_schematic(
     ax_matrix.set_xlabel(r"Feature index $j \in [1, p]$", fontsize=18.9)
     ax_matrix.set_ylabel("Sliding window ID", fontsize=18.9)
     ax_matrix.set_title(
-        rf"$X \in \mathbb{{R}}^{{n \times p}}$  ($n={x_matrix.shape[0]}$, $p={x_matrix.shape[1]}$)",
+        rf"$\mathbf{{X}} \in \mathbb{{R}}^{{n \times p}}$  ($n={x_matrix.shape[0]}$, $p={x_matrix.shape[1]}$)",
         fontsize=18.9,
     )
     ax_matrix.annotate(
-        "Known" "\n" "Deposit" "\n" f"Window ID {training_window_index}" "\n" r"$\mathbf{x}_d^{\top} \subset X$",
+        "Known" "\n" "Deposit" "\n" f"Window ID {training_window_index}" "\n" r"$\mathbf{x}_d^{\top} \subset \mathbf{X}$",
         xy=(x_matrix.shape[1] - 1, int(training_window_index)),
         xytext=(x_matrix.shape[1] + 0.8, int(training_window_index)),
         textcoords="data",
