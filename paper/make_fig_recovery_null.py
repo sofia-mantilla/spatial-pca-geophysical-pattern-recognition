@@ -25,6 +25,10 @@ sys.path.insert(0, str(HERE))
 import numpy as np
 import matplotlib.pyplot as plt
 
+# TrueType, no Type 3 - journals reject Type 3
+plt.rcParams["pdf.fonttype"] = 42
+plt.rcParams["ps.fonttype"] = 42
+
 import numpy_repro_concat as R
 import case1_uni_repro as C1
 import null_expectation as NE
@@ -52,7 +56,7 @@ def draw(ax, runs, rand_curve, rand_lo, rand_hi):
     x = np.arange(1, R.N_TOP + 1)
     ax.fill_between(x, rand_lo, rand_hi, color=GRAY, alpha=0.14, lw=0, zorder=1)
     ax.plot(x, rand_curve, color=GRAY, lw=2.0, ls="--", zorder=2,
-            label="Random selection (expected; shaded 5–95%)")
+            label="Random selection (exact expectation; shaded 5–95%)")
     for lab, d, col in runs:
         y = np.asarray(d["cum_mean_recovered_frac"], float)
         ax.step(x, y, where="post", color=col, lw=2.4, label=lab, zorder=3)
@@ -67,11 +71,11 @@ def draw(ax, runs, rand_curve, rand_lo, rand_hi):
             ax.annotate("+".join(str(t + 1) for t in ids), (r, yy),
                         textcoords="offset points", xytext=(0, 8), ha="center",
                         fontsize=14, fontweight="bold", color="#7a1010")
-    ax.scatter([], [], s=42, facecolors="#ffd21e", edgecolors="k", label="Overlap event (yellow)")
-    ax.scatter([], [], s=70, facecolors="#e03131", edgecolors="k", label="Hit event (red)")
+    ax.scatter([], [], s=42, facecolors="#ffd21e", edgecolors="k", label="Overlap event")
+    ax.scatter([], [], s=70, facecolors="#e03131", edgecolors="k", label="Hit event (test-deposit ID)")
     ax.set_xlim(0, R.N_TOP)
     ax.set_xlabel("Prediction rank")
-    ax.set_ylabel("Cumulative recovered fraction")
+    ax.set_ylabel(r"Mean recovered fraction $\bar{c}(t)$")
 
 
 def save(fig, stem):
@@ -97,8 +101,8 @@ lo1, hi1, _ = NE.mc_band(cells1, areas1, n1, nperm=args.nperm)
 o_spca = C1.rank_spca(17)
 o_raw = C1.rank_raw_uni("ddof1")
 runs1 = [
-    ("wPCA Uni (TMI) (k=17)", C1.recovery(*o_spca), "#1f4fd8"),
-    ("Raw Uni (TMI)", C1.recovery(*o_raw), "#e0a800"),
+    ("Windowed PCA (TMI, k=17)", C1.recovery(*o_spca), "#1f4fd8"),
+    ("Raw univariate TMI benchmark", C1.recovery(*o_raw), "#e0a800"),
 ]
 fig, ax = plt.subplots(figsize=(10.5, 7.4))
 draw(ax, runs1, rand1, lo1, hi1)
@@ -128,17 +132,19 @@ rand2 = NE.exact_random_curve(cells2, areas2, n2)
 lo2, hi2, _ = NE.mc_band(cells2, areas2, n2, nperm=args.nperm)
 
 runs2 = [
-    (f"wPCA Uni (TMI, k={K1})", R.run(DEP, K1, K2, 1.0), "#1f4fd8"),
-    (f"wPCA Uni (Radiometric_U, k={K2})", R.run(DEP, K1, K2, 0.0), "#8e24aa"),
-    ("Raw Multi (TMI+U)", R.run(DEP, K1, K2, 0.0, mode="raw"), "#e0a800"),
-    (rf"wPCA Multi (TMI+U, $\alpha_{{\mathrm{{TMI}}}}$={ALPHA:.3f})",
+    (f"Univariate wPCA (TMI, k={K1})", R.run(DEP, K1, K2, 1.0), "#1f4fd8"),
+    (f"Univariate wPCA (radiometric U, k={K2})", R.run(DEP, K1, K2, 0.0), "#8e24aa"),
+    ("Raw multi (TMI + U)", R.run(DEP, K1, K2, 0.0, mode="raw"), "#e0a800"),
+    (rf"Combined multivariate ranking, $\alpha_{{\mathrm{{TMI}}}}$={ALPHA:.3f}",
      R.run(DEP, K1, K2, ALPHA), "#2e9e2e"),
 ]
 fig, ax = plt.subplots(figsize=(10.5, 7.4))
 draw(ax, runs2, rand2, lo2, hi2)
 ax.set_ylim(0, 0.7)
-ax.legend(fontsize=14, loc="upper left")
-fig.tight_layout()
+# legend below the axes: inside, it covered the hit labels at ranks 95 and 142
+fig.legend(*ax.get_legend_handles_labels(), fontsize=13, loc="lower center", ncol=2,
+           frameon=False, columnspacing=1.2)
+fig.tight_layout(rect=(0, 0.17, 1, 1))
 save(fig, "multi_recovery_comparison")
 
 orders2 = dict(

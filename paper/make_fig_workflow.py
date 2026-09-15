@@ -18,6 +18,10 @@ from pathlib import Path
 os.environ.setdefault("MPLBACKEND", "Agg")
 
 import matplotlib.pyplot as plt
+
+# TrueType, no Type 3 - journals reject Type 3
+plt.rcParams["pdf.fonttype"] = 42
+plt.rcParams["ps.fonttype"] = 42
 from matplotlib.patches import FancyBboxPatch, Polygon, Rectangle, FancyArrowPatch
 
 ap = argparse.ArgumentParser(description=__doc__)
@@ -36,7 +40,7 @@ INK = "#111111"
 # margins, so the drawing width below equals the on-page width and point sizes
 # in this script are point sizes in the printed figure.
 W_IN = 0.82 * 6.30
-FS_TITLE, FS_HEAD, FS_BODY, FS_NOTE = 12.5, 10.8, 8.4, 7.6
+FS_HEAD, FS_BODY, FS_NOTE = 10.8, 8.4, 7.6
 
 STEPS = [
     dict(head="1. EXTENT", dashed=False, lines=[
@@ -84,7 +88,7 @@ PAD_TOP, PAD_BOT = 0.17, 0.09          # inches inside a box above/below text
 LINE_H = 0.132                          # inches per body line
 HEAD_H = 0.18                           # inches for the heading line
 GAP = 0.12                              # inches between boxes (arrow sits here)
-TITLE_H = 0.42
+TITLE_H = 0.10                          # top margin (no figure title: journal rule)
 LOOP_PAD = 0.13                         # dashed multivariate wrapper padding
 
 def line_h(ln):
@@ -98,9 +102,6 @@ H_IN = TITLE_H + sum(heights) + GAP * (len(STEPS) - 1) + extra_loop + 0.22
 
 fig = plt.figure(figsize=(W_IN, H_IN), dpi=args.dpi)
 ax = fig.add_axes([0, 0, 1, 1]); ax.set_xlim(0, W_IN); ax.set_ylim(0, H_IN); ax.axis("off")
-
-fig.text(0.5, 1 - 0.30 / H_IN, "Windowed PCA similarity workflow",
-         ha="center", va="center", fontsize=FS_TITLE, fontweight="bold", color=INK)
 
 x0, x1 = 0.30, W_IN - 0.30
 if loop_idx:

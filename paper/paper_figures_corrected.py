@@ -26,6 +26,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap, Normalize
 from matplotlib.lines import Line2D
+from matplotlib.patches import Patch, Rectangle
+from matplotlib.ticker import FuncFormatter
+from matplotlib.legend_handler import HandlerBase
 
 import numpy_repro_concat as R
 
@@ -36,16 +39,19 @@ _p.add_argument("--k1", type=int, default=2, help="TMI stage-1 PCs (default 2)")
 _p.add_argument("--k2", type=int, default=8, help="Radiometric-U stage-1 PCs (default 8)")
 _p.add_argument("--dep", type=int, default=3, help="reference deposit, 1-based (default 3)")
 _p.add_argument("--alpha", type=float, default=None, help="override alpha (default: alpha_uni rule)")
+_p.add_argument("--outdir", default=None, help="output directory (default: figures/paper_corrected beside this script)")
 _a = _p.parse_args()
 DEP, K1, K2 = _a.dep, _a.k1, _a.k2
 
-DEST = HERE / "figures" / ("paper_corrected" if (K1, K2) == (2, 8) else f"paper_k{K1}_{K2}")
+DEST = (Path(_a.outdir) if _a.outdir else
+        HERE / "figures" / ("paper_corrected" if (K1, K2) == (2, 8) else f"paper_k{K1}_{K2}"))
 DEST.mkdir(parents=True, exist_ok=True)
 
 PAPER_CMAP = LinearSegmentedColormap.from_list("spatial_pca_paper", (
     (0.00, "#0101ff"), (0.167, "#2dc4ff"), (0.334, "#26ff00"), (0.501, "#ffe101"),
     (0.668, "#ff0109"), (0.835, "#ef00ff"), (1.00, "#de9eff")))
 UNIT_LABELS = {"TMI": "TMI (nT)", "Radiometric_U": "eU (ppm)"}
+PANEL_TITLES = {"TMI": "TMI", "Radiometric_U": "Radiometric U"}
 TMI_LIMS = (-150.0, 150.0)     # config visualization.deposit_limits_tmi["3"]
 U_LIMS = (0.0, 15.0)           # config analysis_defaults vmin_var2/vmax_var2
 
@@ -131,9 +137,35 @@ def nice_len(target):
     return best
 
 
-fig, axes = plt.subplots(1, 2, figsize=(20, 10), squeeze=False)
-for _a in axes.ravel():
-    _a.tick_params(labelsize=16)
+class _StripesHandler(HandlerBase):
+    """Legend key for the top-250 windows: a small swatch of the bright colour ramp."""
+
+    def create_artists(self, legend, orig_handle, xdescent, ydescent, width, height, fontsize, trans):
+        n = 6
+        return [Rectangle((xdescent + i * width / n, ydescent), width / n, height,
+                          facecolor=PAPER_CMAP(i / (n - 1)), edgecolor="none", transform=trans)
+                for i in range(n)]
+
+
+class _OutlineOnDarkHandler(HandlerBase):
+    """Legend key for the top-10 windows: a white outline inset in a dark swatch,
+    so the key is visible on the white page."""
+
+    def create_artists(self, legend, orig_handle, xdescent, ydescent, width, height, fontsize, trans):
+        bg = Rectangle((xdescent, ydescent - 0.15 * height), width, 1.3 * height,
+                       facecolor="#3a3a3a", edgecolor="none", transform=trans)
+        box = Rectangle((xdescent + 0.25 * width, ydescent + 0.05 * height), 0.5 * width, 0.9 * height,
+                        facecolor="none", edgecolor="white", lw=0.9, transform=trans)
+        return [bg, box]
+
+
+# Built at the printed size: the figure is placed sideways at \textwidth, which is
+# 7.65 in wide on the landscape page, so font sizes below are printed points.
+FIG_W_IN, FIG_H_IN = 7.65, 2.95
+FS_TICK, FS_LABEL, FS_TITLE, FS_LEGEND = 8, 9, 10, 9
+km = FuncFormatter(lambda v, _pos: f"{v / 1000:.0f}")
+
+fig, axes = plt.subplots(1, 2, figsize=(FIG_W_IN, FIG_H_IN), squeeze=False, layout="constrained")
 panels = [("TMI", tmi, TMI_LIMS), ("Radiometric_U", u, U_LIMS)]
 for ax, (name, bg, (vmin, vmax)) in zip(axes.flat, panels):
     dark = rgba(bg, vmin, vmax, 0.35)
@@ -146,46 +178,52 @@ for ax, (name, bg, (vmin, vmax)) in zip(axes.flat, panels):
         x1, y2 = ox + c0 * R.PX, oy - r0 * R.PX
         ax.plot([x1, x1 + ww * R.PX, x1 + ww * R.PX, x1, x1],
                 [y2, y2, y2 - wh * R.PX, y2 - wh * R.PX, y2],
-                color="white", lw=1.0, zorder=6)
+                color="white", lw=0.6, zorder=6)
     # deposits: testing black, training red (reprojected, as in validation)
     for i, rings in enumerate(deps_wgs):
         col = "red" if i == DEP - 1 else "black"
-        lw = 3.0 if i == DEP - 1 else 2.5
+        lw = 1.3 if i == DEP - 1 else 1.1
         for ring in rings:
             xs = [p[0] for p in ring]; ys = [p[1] for p in ring]
             ax.plot(xs, ys, color=col, lw=lw, zorder=8 if col == "red" else 7)
     ax.set_xlim(extent[0], extent[1]); ax.set_ylim(extent[2], extent[3])
     ax.set_aspect("equal", adjustable="box")
-    ax.set_xlabel("Easting", fontsize=20); ax.set_ylabel("Northing", fontsize=20)
-    ax.tick_params(axis="both", which="major", labelsize=8)
-    ax.set_title(name, fontsize=23, fontweight="bold")
+    # coordinates in km (no 1e6 offset label)
+    ax.xaxis.set_major_formatter(km); ax.yaxis.set_major_formatter(km)
+    ax.set_xlabel("Easting (km)", fontsize=FS_LABEL); ax.set_ylabel("Northing (km)", fontsize=FS_LABEL)
+    ax.tick_params(axis="both", which="major", labelsize=FS_TICK)
+    ax.set_title(PANEL_TITLES.get(name, name), fontsize=FS_TITLE, fontweight="bold")
     # scale bar
     length = nice_len((extent[1] - extent[0]) * 0.2)
     bx0 = extent[0] + (extent[1] - extent[0]) * 0.06
     by = extent[2] + (extent[3] - extent[2]) * 0.08
-    ax.plot([bx0, bx0 + length], [by, by], color="black", lw=4, solid_capstyle="butt", zorder=20)
+    ax.plot([bx0, bx0 + length], [by, by], color="black", lw=2.0, solid_capstyle="butt", zorder=20)
     th = (extent[3] - extent[2]) * 0.015
     for bx in (bx0, bx0 + length):
-        ax.plot([bx, bx], [by - th / 2, by + th / 2], color="black", lw=2, zorder=20)
+        ax.plot([bx, bx], [by - th / 2, by + th / 2], color="black", lw=1.0, zorder=20)
     lab = f"{int(length / 1000)} km" if length >= 1000 else f"{int(length)} m"
     ax.text(bx0 + length / 2, by + (extent[3] - extent[2]) * 0.02, lab, ha="center",
-            va="bottom", fontsize=19, color="black",
-            bbox={"facecolor": "white", "alpha": 0.7, "edgecolor": "none", "pad": 1.5}, zorder=21)
+            va="bottom", fontsize=FS_TICK, color="black",
+            bbox={"facecolor": "white", "alpha": 0.7, "edgecolor": "none", "pad": 1.0}, zorder=21)
     sm = plt.cm.ScalarMappable(norm=Normalize(vmin=vmin, vmax=vmax, clip=True), cmap=PAPER_CMAP)
     sm.set_array([])
     cb = fig.colorbar(sm, ax=ax, fraction=0.035, pad=0.02)
-    cb.set_label(UNIT_LABELS.get(name, name), fontsize=20)
+    cb.set_label(UNIT_LABELS.get(name, name), fontsize=FS_LABEL)
+    cb.ax.tick_params(labelsize=FS_TICK)
 
+top250 = Patch(label="Top 250 Predicted Windows (bright)")
+top10 = Patch(label="Top 10 Predicted Windows")
 handles = [
-    Line2D([0], [0], color="black", lw=2.5, label="Test deposits"),
-    Line2D([0], [0], color="red", lw=3.0, label="Reference deposit"),
-    Line2D([0], [0], color="white", lw=1.0, label="Top 10 Predicted Windows"),
-    Line2D([0], [0], color="black", marker=r"$\uparrow$", linestyle="None", markersize=12, label="N"),
+    Line2D([0], [0], color="black", lw=1.1, label="Test deposits"),
+    Line2D([0], [0], color="red", lw=1.3, label="Reference deposit"),
+    top250,
+    top10,
+    Line2D([0], [0], color="black", marker=r"$\uparrow$", linestyle="None", markersize=8, label="N"),
 ]
-fig.legend(handles=handles, loc="lower center", ncol=4, frameon=False,
-           bbox_to_anchor=(0.5, -0.015), fontsize=20)
-fig.tight_layout(rect=(0, 0.03, 1, 0.95))
-fig.savefig(DEST / "multi_top250_windows.png", dpi=400, bbox_inches="tight", facecolor="white")
+fig.legend(handles=handles, loc="outside lower center", ncol=3, frameon=False,
+           fontsize=FS_LEGEND, handler_map={top250: _StripesHandler(), top10: _OutlineOnDarkHandler()},
+           columnspacing=2.0, handletextpad=0.6)
+fig.savefig(DEST / "multi_top250_windows.png", dpi=600, facecolor="white")
 plt.close(fig)
 print("multi_top250_windows.png written")
 

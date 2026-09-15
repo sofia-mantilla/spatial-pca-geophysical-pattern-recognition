@@ -232,20 +232,37 @@ def write_validation_payload(payload: dict[str, Any], output_path: str | Path) -
 
 def plot_cumulative_recovery(
     recovery: FootprintRecoveryResult,
-    output_path: str | Path,
+    output_path: str | Path | None = None,
     *,
     deposit_1based: int | None = None,
     min_cover: float = 0.5,
     title: str | None = None,
     hit_label_by_deposit: dict[int, str | int] | None = None,
-) -> Path:
-    """Plot cumulative footprint recovery using the legacy paper style."""
+    ax: Any | None = None,
+    fontsize: float | None = None,
+    xlabel: str | None = None,
+    ylabel: str | None = None,
+    curve_label: str | None = None,
+    overlap_label: str | None = None,
+    hit_label: str | None = None,
+    show_title: bool = True,
+    line_scale: float = 1.0,
+    legend_kwargs: dict[str, Any] | None = None,
+) -> Path | None:
+    """Plot cumulative footprint recovery using the legacy paper style.
 
-    path = Path(output_path)
-    path.parent.mkdir(parents=True, exist_ok=True)
+    Journal mode: pass ``ax`` to draw into an existing axes (nothing is saved
+    and ``None`` is returned), a base ``fontsize`` in points applied to every
+    text element, replacement axis/legend wording, ``show_title=False`` and
+    ``line_scale`` to scale line widths and marker areas to the print size.
+    """
+
     y = np.asarray(recovery.cum_recovered_frac_total, dtype=float).ravel()
     ranks = np.arange(1, y.size + 1)
     hit_labels = hit_label_by_deposit or {}
+    fs = None if fontsize is None else float(fontsize)
+    fs_small = None if fs is None else max(8.0, fs - 1.0)
+    ls = float(line_scale)
 
     if title is None:
         title = (
@@ -253,44 +270,56 @@ def plot_cumulative_recovery(
             f"Orange = any overlap event, Red = first threshold event (>={int(100 * min_cover)}% coverage)"
         )
 
-    fig, ax = plt.subplots(figsize=(7.8, 4.6), dpi=400)
+    own_figure = ax is None
+    if own_figure:
+        fig, ax = plt.subplots(figsize=(7.8, 4.6), dpi=400)
+    else:
+        fig = ax.figure
     ax.plot(
         ranks,
         y,
         color="black",
-        linewidth=2.0,
-        label="Cumulative recovered fraction (unique recovered area)",
+        linewidth=2.0 * ls,
+        label=curve_label or "Cumulative recovered fraction (unique recovered area)",
         zorder=2,
     )
     ax.set_xlim(1, max(1, y.size))
     ax.set_ylim(0, 1.02)
-    if deposit_1based is None:
-        ax.set_xlabel("Prediction rank (1 = most similar)")
-    else:
-        ax.set_xlabel(f"Prediction rank (1 = most similar to reference deposit {deposit_1based})")
-    ax.set_ylabel("Cumulative recovered fraction of all test-deposit area")
-    ax.set_title(title)
+    if xlabel is None:
+        if deposit_1based is None:
+            xlabel = "Prediction rank (1 = most similar)"
+        else:
+            xlabel = f"Prediction rank (1 = most similar to reference deposit {deposit_1based})"
+    text_kwargs = {} if fs is None else {"fontsize": fs}
+    ax.set_xlabel(xlabel, **text_kwargs)
+    ax.set_ylabel(ylabel or "Cumulative recovered fraction of all test-deposit area", **text_kwargs)
+    if show_title:
+        ax.set_title(title, **text_kwargs)
+    if fs_small is not None:
+        ax.tick_params(axis="both", labelsize=fs_small)
     if recovery.overlap_by_rank:
         overlap_ranks = np.asarray(sorted(recovery.overlap_by_rank), dtype=int)
         ax.scatter(
             overlap_ranks,
             y[overlap_ranks - 1],
-            s=28,
+            s=28 * ls**2,
             color="orange",
             linewidths=0,
-            label="Rank with any test-deposit overlap",
+            label=overlap_label or "Rank with any test-deposit overlap",
             zorder=3,
+            clip_on=own_figure,
         )
     if recovery.hit_by_rank:
         hit_ranks = np.asarray(sorted(recovery.hit_by_rank), dtype=int)
         ax.scatter(
             hit_ranks,
             y[hit_ranks - 1],
-            s=42,
+            s=42 * ls**2,
             color="red",
             linewidths=0,
-            label=f"Rank where a deposit first reaches the threshold (>={int(100 * min_cover)}%)",
+            label=hit_label or f"Rank where a deposit first reaches the threshold (>={int(100 * min_cover)}%)",
             zorder=4,
+            clip_on=own_figure,
         )
 
         for rank in hit_ranks:
@@ -300,16 +329,24 @@ def plot_cumulative_recovery(
                 ax.annotate(
                     text=str(dep_label),
                     xy=(int(rank), float(y[int(rank) - 1])),
-                    xytext=(0, 6 + offset_idx * 10),
+                    xytext=(0, (6 + offset_idx * 10) * (1.0 if fs is None else 0.5)),
                     textcoords="offset points",
                     ha="center",
                     va="bottom",
-                    fontsize=12.2,
+                    fontsize=12.2 if fs_small is None else fs_small,
                     color="red",
                 )
 
     ax.grid(True, alpha=0.3)
-    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.18), ncol=1, frameon=True)
+    legend_options = {"loc": "upper center", "bbox_to_anchor": (0.5, -0.18), "ncol": 1, "frameon": True}
+    if fs_small is not None:
+        legend_options["fontsize"] = fs_small
+    legend_options.update(legend_kwargs or {})
+    ax.legend(**legend_options)
+    if not own_figure:
+        return None
+    path = Path(output_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(path, dpi=600, bbox_inches="tight", facecolor="white")
     plt.close(fig)
     return path
@@ -322,7 +359,7 @@ def plot_top_windows_overlay(
     reference_deposit_index: int,
     background_layers: dict[str, dict[str, Any]],
     transform: Any,
-    output_path: str | Path,
+    output_path: str | Path | None = None,
     title: str | None = None,
     image_cmap: str | Any | None = None,
     image_origin: str = "upper",
@@ -334,8 +371,33 @@ def plot_top_windows_overlay(
     testing_linewidth: float = 2.5,
     training_linewidth: float = 3.0,
     predicted_linewidth: float = 1.0,
-) -> Path:
-    """Plot top-ranked SPCA windows with known deposit footprints."""
+    ax: Any | None = None,
+    fontsize: float | None = None,
+    figsize: tuple[float, float] | None = None,
+    dpi: int = 400,
+    bbox_inches: str | None = None,
+    colorbar_label: str | None = None,
+    coords_in_km: bool = False,
+    xlabel: str | None = None,
+    ylabel: str | None = None,
+    top_windows_label: str | None = None,
+    highlight_label: str | None = None,
+    legend_kwargs: dict[str, Any] | None = None,
+    scale_bar_linewidth_scale: float = 1.0,
+    north_markersize: float = 12,
+    annotation_stroke_width: float = 2.0,
+) -> Path | None:
+    """Plot top-ranked SPCA windows with known deposit footprints.
+
+    Journal mode: ``ax`` draws a single-variable map into an existing axes
+    (nothing is saved, ``None`` is returned); ``fontsize`` sets every text
+    element (tick labels, legend, colorbar ticks and scale bar at
+    ``fontsize - 1``, never below 8 pt); ``figsize``/``dpi``/``bbox_inches``
+    control the saved file; ``coords_in_km`` labels map coordinates in km
+    (no 1e6 offset); ``highlight_label`` adds a legend entry for the
+    full-colour (undimmed) ranked windows; ``top_windows_label``,
+    ``colorbar_label``, ``xlabel`` and ``ylabel`` replace the default wording.
+    """
 
     if top_windows_gdf.empty:
         raise ValueError("top_windows_gdf is empty.")
@@ -350,9 +412,6 @@ def plot_top_windows_overlay(
     if testing_linewidth < 0 or training_linewidth < 0 or predicted_linewidth < 0:
         raise ValueError("Line widths must be nonnegative.")
 
-    path = Path(output_path)
-    path.parent.mkdir(parents=True, exist_ok=True)
-
     deposits_plot = deposits_gdf.to_crs(top_windows_gdf.crs)
     deposits_plot = deposits_plot[deposits_plot.geometry.notnull()].copy()
     deposits_plot["geometry"] = deposits_plot.geometry.buffer(0)
@@ -363,7 +422,9 @@ def plot_top_windows_overlay(
     other_deposits = deposits_plot.drop(index=reference_label)
     ranked_windows = top_windows_gdf.sort_values("rank").reset_index(drop=True)
     top_subset = ranked_windows.head(min(10, len(ranked_windows)))
-    top_windows_label = f"Top {len(top_subset)} Predicted Windows"
+    top_windows_label = top_windows_label or f"Top {len(top_subset)} Predicted Windows"
+    fs = None if fontsize is None else float(fontsize)
+    fs_small = None if fs is None else max(8.0, fs - 1.0)
     annotate_training_index = annotate_indices if annotate_training_index is None else annotate_training_index
     annotate_testing_indices = annotate_indices if annotate_testing_indices is None else annotate_testing_indices
     annotate_predicted_indices = annotate_indices if annotate_predicted_indices is None else annotate_predicted_indices
@@ -382,12 +443,19 @@ def plot_top_windows_overlay(
         transform=transform,
     )
 
-    fig, axes = plt.subplots(
-        1,
-        len(ordered_vars),
-        figsize=(10 * len(ordered_vars), 10),
-        squeeze=False,
-    )
+    own_figure = ax is None
+    if own_figure:
+        fig, axes = plt.subplots(
+            1,
+            len(ordered_vars),
+            figsize=figsize if figsize is not None else (10 * len(ordered_vars), 10),
+            squeeze=False,
+        )
+    else:
+        if len(ordered_vars) != 1:
+            raise ValueError("Drawing into an existing axes supports a single background layer only.")
+        fig = ax.figure
+        axes = np.asarray([[ax]], dtype=object)
     cmap = resolve_colormap(image_cmap or DEFAULT_PAPER_CMAP)
 
     for ax, variable_name in zip(axes.flat, ordered_vars):
@@ -439,6 +507,7 @@ def plot_top_windows_overlay(
                 color="white",
                 stroke_color="black",
                 fontsize=annotation_fontsize,
+                stroke_width=annotation_stroke_width,
                 zorder=9,
             )
         if annotate_testing_indices:
@@ -449,6 +518,7 @@ def plot_top_windows_overlay(
                 color="black",
                 stroke_color="white",
                 fontsize=annotation_fontsize,
+                stroke_width=annotation_stroke_width,
                 zorder=20,
             )
         if annotate_training_index:
@@ -459,18 +529,32 @@ def plot_top_windows_overlay(
                 color="red",
                 stroke_color="white",
                 fontsize=annotation_fontsize,
+                stroke_width=annotation_stroke_width,
                 zorder=11,
             )
 
         ax.set_xlim(extent[0], extent[1])
         ax.set_ylim(extent[2], extent[3])
         ax.set_aspect("equal", adjustable="box")
-        ax.set_xlabel("Easting", fontsize=annotation_fontsize)
-        ax.set_ylabel("Northing", fontsize=annotation_fontsize)
+        label_fs = annotation_fontsize if fs is None else fs
+        tick_fs = annotation_fontsize - 1 if fs_small is None else fs_small
+        ax.set_xlabel(xlabel or ("Easting (km)" if coords_in_km else "Easting"), fontsize=label_fs)
+        ax.set_ylabel(ylabel or ("Northing (km)" if coords_in_km else "Northing"), fontsize=label_fs)
+        if coords_in_km:
+            from matplotlib.ticker import FuncFormatter
+
+            km_formatter = FuncFormatter(lambda value, _pos: f"{value / 1000.0:g}")
+            ax.xaxis.set_major_formatter(km_formatter)
+            ax.yaxis.set_major_formatter(km_formatter)
         # bigger tick labels for better readability in small subplots
-        ax.tick_params(axis="both", which="major", labelsize=annotation_fontsize - 1)
+        ax.tick_params(axis="both", which="major", labelsize=tick_fs)
         ax.grid(False)
-        _add_scale_bar(ax, extent)
+        _add_scale_bar(
+            ax,
+            extent,
+            fontsize=14.9 if fs_small is None else fs_small,
+            linewidth_scale=scale_bar_linewidth_scale,
+        )
         plot_vmin, plot_vmax = _resolve_plot_limits(background, vmin, vmax)
         scalar_mappable = plt.cm.ScalarMappable(
             norm=Normalize(vmin=plot_vmin, vmax=plot_vmax, clip=True),
@@ -478,25 +562,40 @@ def plot_top_windows_overlay(
         )
         scalar_mappable.set_array([])
         colorbar = fig.colorbar(scalar_mappable, ax=ax, fraction=0.035, pad=0.02)
-        colorbar.set_label(variable_display_label(variable_name), fontsize=annotation_fontsize)
+        colorbar.set_label(colorbar_label or variable_display_label(variable_name), fontsize=label_fs)
+        if fs_small is not None:
+            colorbar.ax.tick_params(labelsize=fs_small)
         if len(ordered_vars) > 1:
-            ax.set_title(variable_name, fontsize=annotation_fontsize, fontweight="bold")
+            ax.set_title(variable_name, fontsize=label_fs, fontweight="bold")
 
     legend_handles = [
         Line2D([0], [0], color="black", linewidth=testing_linewidth, label="Test deposits"),
         Line2D([0], [0], color="red", linewidth=training_linewidth, label="Reference deposit"),
         Line2D([0], [0], color="white", linewidth=predicted_linewidth, label=top_windows_label),
-        Line2D([0], [0], color="black", marker=r"$\uparrow$", linestyle="None", markersize=12, label="N"),
     ]
-    axes.flat[0].legend(
-        handles=legend_handles,
-        loc="best",
-        facecolor="#d4d4d8",
-        framealpha=0.65,
-        edgecolor="#52525b",
-        fontsize=annotation_fontsize,
+    handler_map = None
+    if highlight_label:
+        highlight_handle = _ColormapSwatch(cmap, label=highlight_label)
+        legend_handles.append(highlight_handle)
+        handler_map = {_ColormapSwatch: _ColormapSwatchHandler()}
+    legend_handles.append(
+        Line2D([0], [0], color="black", marker=r"$\uparrow$", linestyle="None", markersize=north_markersize, label="N"),
     )
+    legend_options = {
+        "handles": legend_handles,
+        "loc": "best",
+        "facecolor": "#d4d4d8",
+        "framealpha": 0.65,
+        "edgecolor": "#52525b",
+        "fontsize": annotation_fontsize if fs_small is None else fs_small,
+    }
+    if handler_map is not None:
+        legend_options["handler_map"] = handler_map
+    legend_options.update(legend_kwargs or {})
+    axes.flat[0].legend(**legend_options)
     title = title or f"Top {len(ranked_windows)} Prediction Windows"
+    if not own_figure:
+        return None
     if len(ordered_vars) == 1:
         if SHOW_FIGURE_TITLES:
             axes.flat[0].set_title(title, fontsize=annotation_fontsize)
@@ -504,9 +603,50 @@ def plot_top_windows_overlay(
     else:
         fig.suptitle(title, fontsize=annotation_fontsize)
         fig.tight_layout(rect=(0, 0, 1, 0.95))
-    fig.savefig(path, dpi=400)
+    path = Path(output_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if bbox_inches is None:
+        fig.savefig(path, dpi=dpi)
+    else:
+        fig.savefig(path, dpi=dpi, bbox_inches=bbox_inches, facecolor="white")
     plt.close(fig)
     return path
+
+
+class _ColormapSwatch:
+    """Legend proxy for full-colour raster windows drawn with a colormap."""
+
+    def __init__(self, cmap: Any, *, label: str) -> None:
+        self.cmap = cmap
+        self._label = label
+
+    def get_label(self) -> str:
+        return self._label
+
+
+class _ColormapSwatchHandler:
+    """Draw a small colormap gradient swatch as a legend key."""
+
+    def legend_artist(self, legend: Any, orig_handle: _ColormapSwatch, fontsize: float, handlebox: Any) -> Any:
+        from matplotlib.patches import Rectangle
+
+        x0, y0 = handlebox.xdescent, handlebox.ydescent
+        width, height = handlebox.width, handlebox.height
+        n_steps = 24
+        step = width / n_steps
+        artists = []
+        for i in range(n_steps):
+            rect = Rectangle(
+                (x0 + i * step, y0),
+                step * 1.02,
+                height,
+                facecolor=orig_handle.cmap((i + 0.5) / n_steps),
+                edgecolor="none",
+                transform=handlebox.get_transform(),
+            )
+            handlebox.add_artist(rect)
+            artists.append(rect)
+        return artists[0]
 
 
 def _annotate_gdf_indices(
@@ -518,6 +658,7 @@ def _annotate_gdf_indices(
     stroke_color: str,
     fontsize: float,
     zorder: int,
+    stroke_width: float = 2.0,
 ) -> None:
     """Annotate GeoDataFrame geometries at representative points."""
 
@@ -545,7 +686,7 @@ def _annotate_gdf_indices(
             va="center",
             zorder=zorder,
         )
-        text.set_path_effects([pe.withStroke(linewidth=2.0, foreground=stroke_color)])
+        text.set_path_effects([pe.withStroke(linewidth=stroke_width, foreground=stroke_color)])
 
 
 def _combined_total_bounds(*gdfs: gpd.GeoDataFrame) -> tuple[float, float, float, float]:
@@ -622,7 +763,13 @@ def _resolve_plot_limits(
     return float(vmin), float(vmax)
 
 
-def _add_scale_bar(ax: Any, extent: tuple[float, float, float, float]) -> None:
+def _add_scale_bar(
+    ax: Any,
+    extent: tuple[float, float, float, float],
+    *,
+    fontsize: float = 14.9,
+    linewidth_scale: float = 1.0,
+) -> None:
     x0, x1, y0, y1 = extent
     width = float(x1 - x0)
     height = float(y1 - y0)
@@ -630,11 +777,12 @@ def _add_scale_bar(ax: Any, extent: tuple[float, float, float, float]) -> None:
     bar_x0 = x0 + width * 0.06
     bar_y = y0 + height * 0.08
     bar_x1 = bar_x0 + length
+    lw = float(linewidth_scale)
 
-    ax.plot([bar_x0, bar_x1], [bar_y, bar_y], color="black", linewidth=4, solid_capstyle="butt", zorder=20)
+    ax.plot([bar_x0, bar_x1], [bar_y, bar_y], color="black", linewidth=4 * lw, solid_capstyle="butt", zorder=20)
     tick_height = height * 0.015
-    ax.plot([bar_x0, bar_x0], [bar_y - tick_height / 2, bar_y + tick_height / 2], color="black", linewidth=2, zorder=20)
-    ax.plot([bar_x1, bar_x1], [bar_y - tick_height / 2, bar_y + tick_height / 2], color="black", linewidth=2, zorder=20)
+    ax.plot([bar_x0, bar_x0], [bar_y - tick_height / 2, bar_y + tick_height / 2], color="black", linewidth=2 * lw, zorder=20)
+    ax.plot([bar_x1, bar_x1], [bar_y - tick_height / 2, bar_y + tick_height / 2], color="black", linewidth=2 * lw, zorder=20)
     label = f"{int(length / 1000)} km" if length >= 1000 else f"{int(length)} m"
     ax.text(
         (bar_x0 + bar_x1) / 2,
@@ -642,7 +790,7 @@ def _add_scale_bar(ax: Any, extent: tuple[float, float, float, float]) -> None:
         label,
         ha="center",
         va="bottom",
-        fontsize=14.9,
+        fontsize=fontsize,
         color="black",
         bbox={"facecolor": "white", "alpha": 0.7, "edgecolor": "none", "pad": 1.5},
         zorder=21,

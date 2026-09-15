@@ -20,6 +20,7 @@ Inputs (auto-located relative to this script):
   NASA Blue Marble bmng.jpg from the pip package `basemap-data`
 
 Output: docs/Spatial_PCA_paper_overleaf/figures/study_area_location_map.{png,pdf}
+        (or --outdir DIR). Sized at the printed width (5.14 in) with 8-9 pt text.
 """
 from __future__ import annotations
 
@@ -27,6 +28,7 @@ import importlib.util
 import io
 import os
 import urllib.request
+import argparse
 from pathlib import Path
 
 os.environ.setdefault("MPLBACKEND", "Agg")
@@ -36,6 +38,7 @@ import matplotlib.patheffects as pe
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.patches import FancyArrow, Rectangle
+from matplotlib.ticker import MultipleLocator
 from PIL import Image
 
 Image.MAX_IMAGE_PIXELS = None
@@ -109,7 +112,8 @@ def _esri_image(xmin, ymin, xmax, ymax, w=4200, h=2300, sr=32722):
         return np.asarray(Image.open(io.BytesIO(r.read())))
 
 
-def main() -> Path:
+def main(outdir: Path | None = None) -> Path:
+    outdir = Path(outdir) if outdir is not None else FIGDIR
     demo = gpd.read_file(DATA / "Carajas_Brazil_Univariate_TMI/Demo_area_polygon.shp").to_crs(UTM)
     deps = gpd.read_file(DATA / "Carajas_Brazil_Univariate_TMI/Prospect_in Carajas_v2.shp").to_crs(UTM)
     refs = {
@@ -126,9 +130,14 @@ def main() -> Path:
     brazil = countries[countries["ADMIN"] == "Brazil"]
     para = states[(states["admin"] == "Brazil") & (states["name"].isin(["Pará", "Para"]))]
 
-    fig = plt.figure(figsize=(13.2, 5.4), dpi=200)
-    ax_a = fig.add_axes([0.045, 0.10, 0.33, 0.84])
-    ax_b = fig.add_axes([0.455, 0.10, 0.535, 0.84])
+    # Sized at the printed width (\\textwidth = 5.14 in), so font sizes are printed sizes.
+    FW, FH = 5.08, 2.24                      # inches
+    AX_H, AX_Y = 1.56, 0.48                  # map height and bottom edge (in)
+    A_X, A_W = 0.36, 1.57                    # panel (a) left edge and width (in)
+    B_X, B_W = 2.33, 2.72                    # panel (b)
+    fig = plt.figure(figsize=(FW, FH), dpi=200)
+    ax_a = fig.add_axes([A_X / FW, AX_Y / FH, A_W / FW, AX_H / FH])
+    ax_b = fig.add_axes([B_X / FW, AX_Y / FH, B_W / FW, AX_H / FH])
 
     # ---------------------------------------------------------- panel (a)
     LON0, LON1, LAT0, LAT1 = -76.0, -32.0, -35.0, 8.0
@@ -144,9 +153,9 @@ def main() -> Path:
         origin="upper",
         interpolation=interp_a,
     )
-    countries.boundary.plot(ax=ax_a, color="white", linewidth=0.5, alpha=0.75)
-    brazil.boundary.plot(ax=ax_a, color="white", linewidth=1.1)
-    para.boundary.plot(ax=ax_a, color="#ffd21e", linewidth=1.1)
+    countries.boundary.plot(ax=ax_a, color="white", linewidth=0.3, alpha=0.75)
+    brazil.boundary.plot(ax=ax_a, color="white", linewidth=0.6)
+    para.boundary.plot(ax=ax_a, color="#ffd21e", linewidth=0.6)
     cx = 0.5 * (gxmin + gxmax)
     cy = 0.5 * (gymin + gymax)
     ax_a.add_patch(
@@ -156,48 +165,52 @@ def main() -> Path:
             gymax - gymin,
             fill=False,
             edgecolor="red",
-            linewidth=1.6,
+            linewidth=0.9,
             zorder=6,
         )
     )
     ax_a.annotate(
-        "Study area\n(Carajás Mineral Province)",
+        "Study area\n(Carajás Mineral\nProvince)",
         xy=(cx, cy - 0.8),
-        xytext=(-66.5, -15.5),
+        xytext=(-74.5, -17.0),
         color="white",
-        fontsize=10,
+        fontsize=8,
         ha="left",
         va="top",
-        path_effects=[pe.withStroke(linewidth=2.2, foreground="black")],
-        arrowprops={"arrowstyle": "-", "color": "white", "linewidth": 1.0},
+        path_effects=[pe.withStroke(linewidth=1.5, foreground="black")],
+        arrowprops={"arrowstyle": "-", "color": "white", "linewidth": 0.6},
         zorder=7,
     )
     ax_a.text(
-        -46.5,
-        -11.5,
+        -44.0,
+        -13.5,
         "BRAZIL",
         color="white",
-        fontsize=13,
+        fontsize=9,
         fontweight="bold",
         ha="center",
-        path_effects=[pe.withStroke(linewidth=2.4, foreground="black")],
+        path_effects=[pe.withStroke(linewidth=1.6, foreground="black")],
     )
     ax_a.text(
         -52.6,
         -4.6,
         "Pará",
         color="#ffd21e",
-        fontsize=10,
+        fontsize=8,
         ha="center",
-        path_effects=[pe.withStroke(linewidth=2.0, foreground="black")],
+        path_effects=[pe.withStroke(linewidth=1.4, foreground="black")],
     )
     ax_a.set_xlim(LON0, LON1)
     ax_a.set_ylim(LAT0, LAT1)
     ax_a.set_aspect(1.0 / np.cos(np.deg2rad(0.5 * (LAT0 + LAT1))))
-    ax_a.set_xlabel("Longitude (°)", fontsize=10)
-    ax_a.set_ylabel("Latitude (°)", fontsize=10)
-    ax_a.tick_params(labelsize=8)
-    ax_a.set_title("(a) Location in Brazil", fontsize=12)
+    ax_a.xaxis.set_major_locator(MultipleLocator(10))
+    ax_a.yaxis.set_major_locator(MultipleLocator(10))
+    ax_a.set_xlabel("Longitude (°)", fontsize=8, labelpad=1.5)
+    ax_a.set_ylabel("Latitude (°)", fontsize=8, labelpad=1.5)
+    ax_a.tick_params(labelsize=8, length=2, width=0.5, pad=1.5)
+    for s_ in ax_a.spines.values():
+        s_.set_linewidth(0.5)
+    ax_a.set_title("(a)", fontsize=9, loc="left", pad=3)
 
     # ---------------------------------------------------------- panel (b)
     pad = 12_000.0
@@ -229,43 +242,43 @@ def main() -> Path:
         interpolation=interp,
         zorder=1,
     )
-    demo.boundary.plot(ax=ax_b, color="red", linewidth=2.0, zorder=5)
+    demo.boundary.plot(ax=ax_b, color="red", linewidth=1.0, zorder=5)
     for i, (name, pt) in enumerate(refs.items()):
         ax_b.plot(
             pt.x,
             pt.y,
             marker="*",
-            ms=17,
+            ms=9,
             mfc=REFERENCE_COLOR,
             mec="white",
-            mew=1.1,
+            mew=0.6,
             linestyle="none",
             zorder=7,
         )
-        dy = 6_000 if i == 0 else -12_500
+        dy = 6_000 if i == 0 else -14_000
         ax_b.annotate(
             name,
             xy=(pt.x, pt.y),
-            xytext=(pt.x + 5_000, pt.y + dy),
+            xytext=(pt.x + 6_000, pt.y + dy),
             color="white",
-            fontsize=11,
+            fontsize=8,
             fontweight="bold",
-            path_effects=[pe.withStroke(linewidth=2.4, foreground="black")],
+            path_effects=[pe.withStroke(linewidth=1.5, foreground="black")],
             zorder=8,
         )
     # scale bar (50 km)
     L = 50_000.0
     sx0 = bxmin + 0.055 * (bxmax - bxmin)
     sy0 = bymin + 0.075 * (bymax - bymin)
-    ax_b.plot([sx0, sx0 + L], [sy0, sy0], color="white", lw=3.5, solid_capstyle="butt", zorder=9)
+    ax_b.plot([sx0, sx0 + L], [sy0, sy0], color="white", lw=2.0, solid_capstyle="butt", zorder=9)
     ax_b.text(
         sx0 + 0.5 * L,
-        sy0 + 0.018 * (bymax - bymin),
+        sy0 + 0.030 * (bymax - bymin),
         "50 km",
         color="white",
         ha="center",
-        fontsize=10,
-        path_effects=[pe.withStroke(linewidth=2.2, foreground="black")],
+        fontsize=8,
+        path_effects=[pe.withStroke(linewidth=1.4, foreground="black")],
         zorder=9,
     )
     # north arrow
@@ -277,66 +290,79 @@ def main() -> Path:
             ny,
             0,
             0.09 * (bymax - bymin),
-            width=1_300,
-            head_width=5_200,
-            head_length=6_500,
+            width=1_600,
+            head_width=7_000,
+            head_length=9_000,
             color="white",
             zorder=9,
         )
     )
     ax_b.text(
         nx,
-        ny - 0.045 * (bymax - bymin),
+        ny - 0.02 * (bymax - bymin),
         "N",
         color="white",
         ha="center",
-        fontsize=11,
+        va="top",
+        fontsize=8,
         fontweight="bold",
-        path_effects=[pe.withStroke(linewidth=2.2, foreground="black")],
+        path_effects=[pe.withStroke(linewidth=1.4, foreground="black")],
         zorder=9,
     )
     ax_b.text(
-        0.995,
-        0.012,
+        1.0,
+        -0.27,
         credit,
         transform=ax_b.transAxes,
-        color="white",
-        fontsize=6.5,
+        color="#424242",
+        fontsize=8,
         ha="right",
-        va="bottom",
-        path_effects=[pe.withStroke(linewidth=1.6, foreground="black")],
+        va="top",
         zorder=9,
     )
     handles = [
-        plt.Line2D([], [], color="red", lw=2.0, label="Search area"),
+        plt.Line2D([], [], color="red", lw=1.0, label="Study area"),
         plt.Line2D(
             [],
             [],
             marker="*",
-            ms=13,
+            ms=8,
             mfc=REFERENCE_COLOR,
             mec="white",
+            mew=0.6,
             linestyle="none",
             label="Reference deposits",
         ),
     ]
-    ax_b.legend(handles=handles, loc="upper left", fontsize=9, framealpha=0.85)
+    # legend sits above the map (outside), so it hides no imagery
+    ax_b.legend(handles=handles, loc="lower right", bbox_to_anchor=(1.0, 1.0), ncol=2,
+                fontsize=8, frameon=False, borderpad=0.0, handlelength=1.5,
+                handletextpad=0.4, columnspacing=1.0, borderaxespad=0.15)
     ax_b.set_xlim(bxmin, bxmax)
     ax_b.set_ylim(bymin, bymax)
     ax_b.set_aspect("equal", adjustable="box")
-    ax_b.set_xlabel("Easting (m)", fontsize=10)
-    ax_b.set_ylabel("Northing (m)", fontsize=10)
-    ax_b.tick_params(labelsize=8)
+    ax_b.set_xticks([450_000, 550_000, 650_000])
+    ax_b.set_yticks([9_250_000, 9_350_000])
+    ax_b.set_xlabel("Easting (m)", fontsize=8, labelpad=1.5)
+    ax_b.set_ylabel("Northing (m)", fontsize=8, labelpad=1.5)
+    ax_b.tick_params(labelsize=8, length=2, width=0.5, pad=1.5)
+    plt.setp(ax_b.get_yticklabels(), rotation=90, va="center")
+    for s_ in ax_b.spines.values():
+        s_.set_linewidth(0.5)
     ax_b.ticklabel_format(style="plain")
-    ax_b.set_title("(b) Study area and reference deposits", fontsize=12)
+    ax_b.set_title("(b)", fontsize=9, loc="left", pad=3)
 
-    out_png = FIGDIR / "study_area_location_map.png"
-    fig.savefig(out_png, dpi=600, bbox_inches="tight", facecolor="white")
-    fig.savefig(out_png.with_suffix(".pdf"), bbox_inches="tight", facecolor="white")
+    outdir.mkdir(parents=True, exist_ok=True)
+    out_png = outdir / "study_area_location_map.png"
+    fig.savefig(out_png, dpi=600, bbox_inches="tight", pad_inches=0.02, facecolor="white")
+    fig.savefig(out_png.with_suffix(".pdf"), bbox_inches="tight", pad_inches=0.02,
+                facecolor="white")
     plt.close(fig)
     print(f"Wrote {out_png} (+.pdf) | {credit}")
     return out_png
 
 
 if __name__ == "__main__":
-    main()
+    ap = argparse.ArgumentParser(description="Study-area location map.")
+    ap.add_argument("--outdir", type=Path, default=FIGDIR)
+    main(ap.parse_args().outdir)

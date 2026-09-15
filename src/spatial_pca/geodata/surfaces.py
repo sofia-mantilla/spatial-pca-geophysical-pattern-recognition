@@ -221,6 +221,23 @@ def plot_deposit_and_loading_surfaces(
     mesh_alpha: float = 0.3,
     vertical_exaggeration: float = 0.6,
     tick_fontsize: int = 13,
+    figsize: tuple[float, float] | None = None,
+    fontsize: float | None = None,
+    dpi: int = 200,
+    line_scale: float = 1.0,
+    xy_tick_formatter: Any | None = None,
+    z_tick_formatter: Any | None = None,
+    pc_panel_xy_ticks: bool = True,
+    pc_panel_z_ticks: bool = True,
+    top_panel_xy_labels: bool = True,
+    top_panel_xy_ticks: bool = True,
+    show_top_variable_label: bool = True,
+    variable_label_x: float = VARIABLE_LABEL_X,
+    xy_labelpad: float = 16,
+    tick_pad: float = 6,
+    z_tick_pad: float = 8,
+    xlabel: str = "Easting",
+    ylabel: str = "Northing",
 ) -> Path:
     """Plot the training deposit above top-weighted loading maps as 3D surfaces.
 
@@ -261,9 +278,14 @@ def plot_deposit_and_loading_surfaces(
     path = Path(output_path)
     path.parent.mkdir(parents=True, exist_ok=True)
 
+    fs_panel = 22 if fontsize is None else float(fontsize)
+    fs_label = LABEL_FONTSIZE if fontsize is None else float(fontsize)
+    fs_cbar_label = COLORBAR_LABEL_FONTSIZE if fontsize is None else float(fontsize)
+    fs_cbar_tick = TICK_FONTSIZE if fontsize is None else max(8.0, float(fontsize) - 1.0)
+    panel_pad = 8 if fontsize is None else 3
     n_grid_cols = max(6, 2 * n_show)
     top_margin_cols = max(1, n_grid_cols // 4)
-    fig = plt.figure(figsize=(5.6 * n_show, 9.6), dpi=150)
+    fig = plt.figure(figsize=figsize if figsize is not None else (5.6 * n_show, 9.6), dpi=150)
     grid = fig.add_gridspec(
         2,
         n_grid_cols,
@@ -296,8 +318,21 @@ def plot_deposit_and_loading_surfaces(
         mesh_linewidth=mesh_linewidth,
         mesh_alpha=mesh_alpha,
         vertical_exaggeration=vertical_exaggeration,
-        show_xy_labels=True,
+        show_xy_labels=top_panel_xy_labels,
+        show_xy_ticks=top_panel_xy_ticks,
+        show_variable_label=show_top_variable_label,
         tick_fontsize=tick_fontsize,
+        xlabel=xlabel,
+        ylabel=ylabel,
+        xy_label_fontsize=fs_label,
+        xy_labelpad=xy_labelpad,
+        variable_label_fontsize=fs_label,
+        variable_label_x=variable_label_x,
+        line_scale=line_scale,
+        tick_formatter=xy_tick_formatter,
+        z_tick_formatter=z_tick_formatter,
+        tick_pad=tick_pad,
+        z_tick_pad=z_tick_pad,
     )
     ax_top.set_position([0.255, 0.47, 0.49, 0.45])
     cbar_top_ax = fig.add_axes([0.775, 0.55, 0.013, 0.29])
@@ -308,8 +343,8 @@ def plot_deposit_and_loading_surfaces(
         vmin=deposit_vmin,
         vmax=deposit_vmax,
     )
-    cbar_top.set_label(variable_display_label(variable_name), fontsize=COLORBAR_LABEL_FONTSIZE)
-    cbar_top.ax.tick_params(labelsize=TICK_FONTSIZE)
+    cbar_top.set_label(variable_display_label(variable_name), fontsize=fs_cbar_label)
+    cbar_top.ax.tick_params(labelsize=fs_cbar_tick)
 
     bottom_axes = []
     for col, pc_idx in enumerate(order):
@@ -333,14 +368,27 @@ def plot_deposit_and_loading_surfaces(
             show_xy_labels=False,
             show_variable_label=False,
             tick_fontsize=tick_fontsize,
+            line_scale=line_scale,
+            tick_formatter=xy_tick_formatter,
+            z_tick_formatter=z_tick_formatter,
+            show_xy_ticks=pc_panel_xy_ticks,
+            show_z_ticks=pc_panel_z_ticks,
+            tick_pad=tick_pad,
+            z_tick_pad=z_tick_pad,
         )
-        ax.set_title(
-            f"PC {pc_idx + 1}\n"
-            rf"$z_{{d}}$={Z[int(deposit_index), pc_idx]:.2f} | "
-            f"w={100 * w[pc_idx]:.1f}%",
-            fontsize=22,
-            pad=8,
-        )
+        if fontsize is None:
+            panel_title = (
+                f"PC {pc_idx + 1}\n"
+                rf"$z_{{d}}$={Z[int(deposit_index), pc_idx]:.2f} | "
+                f"w={100 * w[pc_idx]:.1f}%"
+            )
+        else:
+            panel_title = (
+                f"PC {pc_idx + 1}\n"
+                rf"$z_{{d}}$ = {Z[int(deposit_index), pc_idx]:.2f}" "\n"
+                f"w = {100 * w[pc_idx]:.1f}%"
+            )
+        ax.set_title(panel_title, fontsize=fs_panel, pad=panel_pad)
         bottom_axes.append(ax)
 
     norm = colors.Normalize(vmin=-loading_vmax, vmax=loading_vmax)
@@ -354,14 +402,14 @@ def plot_deposit_and_loading_surfaces(
         vmin=-loading_vmax,
         vmax=loading_vmax,
     )
-    cbar_bottom.set_label("PCA loading", fontsize=COLORBAR_LABEL_FONTSIZE)
-    cbar_bottom.ax.tick_params(labelsize=TICK_FONTSIZE)
+    cbar_bottom.set_label("PCA loading", fontsize=fs_cbar_label)
+    cbar_bottom.ax.tick_params(labelsize=fs_cbar_tick)
 
     fig.subplots_adjust(left=0.03, right=0.90, top=0.92, bottom=0.02)
     ax_top.set_position([0.255, 0.47, 0.49, 0.45])
     cbar_top_ax.set_position([0.775, 0.55, 0.013, 0.29])
     cbar_bottom_ax.set_position([0.945, 0.09, 0.013, 0.29])
-    fig.savefig(path, dpi=200, bbox_inches="tight", facecolor="white")
+    fig.savefig(path, dpi=dpi, bbox_inches="tight", facecolor="white")
     plt.close(fig)
     return path
 
@@ -387,8 +435,33 @@ def plot_top_similar_windows_surfaces(
     mesh_linewidth: float = 0.2,
     mesh_alpha: float = 0.3,
     vertical_exaggeration: float = 0.35,
+    figsize: tuple[float, float] | None = None,
+    fontsize: float | None = None,
+    tick_fontsize: float | None = None,
+    dpi: int = 200,
+    line_scale: float = 1.0,
+    plain_panel_titles: bool = False,
+    show_variable_label: bool = True,
+    show_xy_labels: bool = True,
+    show_xy_ticks: bool = True,
+    xlabel: str = "Easting (pixels)",
+    ylabel: str = "Northing (pixels)",
+    z_tick_formatter: Any | None = None,
+    variable_label_x: float = VARIABLE_LABEL_X,
+    xy_labelpad: float = 8,
+    tick_pad: float = 6,
+    z_tick_pad: float = 8,
+    hspace: float = 0.34,
+    wspace: float = 0.18,
 ) -> Path:
-    """Plot top-ranked similar windows as 3D surfaces."""
+    """Plot top-ranked similar windows as 3D surfaces.
+
+    Journal mode: give ``figsize`` at the printed size and a base ``fontsize``;
+    ``plain_panel_titles`` writes "Rank 1, d = 3.61" instead of the code-style
+    "Rank 1 | idx=1189"; ``z_tick_formatter`` avoids scientific tick text and
+    ``show_xy_ticks``/``show_xy_labels`` drop horizontal coordinate text that
+    does not fit on small panels.
+    """
 
     windows = np.asarray(flattened_windows, dtype=float)
     rows = np.asarray(ranked_window_rows, dtype=int)
@@ -410,14 +483,27 @@ def plot_top_similar_windows_surfaces(
         )
         for i in range(n_show)
     ]
-    fig = plt.figure(figsize=(5.3 * int(n_cols), 4.6 * int(n_rows) + 1.7), dpi=150)
+    fs_panel = 16 if fontsize is None else float(fontsize)
+    fs_label = LABEL_FONTSIZE if fontsize is None else float(fontsize)
+    fs_xy_label = 13 if fontsize is None else float(fontsize)
+    if tick_fontsize is not None:
+        fs_tick = float(tick_fontsize)
+    elif fontsize is None:
+        fs_tick = TICK_FONTSIZE
+    else:
+        fs_tick = max(8.0, float(fontsize) - 1.0)
+    fs_cbar_label = COLORBAR_LABEL_FONTSIZE if fontsize is None else float(fontsize)
+    fig = plt.figure(
+        figsize=figsize if figsize is not None else (5.3 * int(n_cols), 4.6 * int(n_rows) + 1.7),
+        dpi=150,
+    )
     if SHOW_FIGURE_TITLES:
         fig.suptitle(
             f"Top {n_show} Most Similar Windows - 3D",
             fontsize=TITLE_FONTSIZE,
             y=0.995,
         )
-    grid = fig.add_gridspec(int(n_rows), int(n_cols), hspace=0.34, wspace=0.18,
+    grid = fig.add_gridspec(int(n_rows), int(n_cols), hspace=hspace, wspace=wspace,
                             top=0.86)
     axes = []
     for i, patch in enumerate(patches):
@@ -436,18 +522,26 @@ def plot_top_similar_windows_surfaces(
             mesh_linewidth=mesh_linewidth,
             mesh_alpha=mesh_alpha,
             vertical_exaggeration=vertical_exaggeration,
-            show_xy_labels=True,
-            xlabel="Easting (pixels)",
-            ylabel="Northing (pixels)",
-            xy_label_fontsize=13,
-            xy_labelpad=8,
-            show_variable_label=i % int(n_cols) == 0,
+            show_xy_labels=show_xy_labels,
+            xlabel=xlabel,
+            ylabel=ylabel,
+            xy_label_fontsize=fs_xy_label,
+            xy_labelpad=xy_labelpad,
+            show_variable_label=show_variable_label and i % int(n_cols) == 0,
+            variable_label_fontsize=fs_label,
+            variable_label_x=variable_label_x,
+            tick_fontsize=fs_tick,
+            line_scale=line_scale,
+            z_tick_formatter=z_tick_formatter,
+            show_xy_ticks=show_xy_ticks,
+            tick_pad=tick_pad,
+            z_tick_pad=z_tick_pad,
         )
-        ax.set_title(
-            f"Rank {i + 1} | idx={int(ids[i])}\nd={float(dists[i]):.3f}",
-            fontsize=16,
-            pad=8,
-        )
+        if plain_panel_titles:
+            panel_title = f"Rank {i + 1}\nd = {float(dists[i]):.2f}"
+        else:
+            panel_title = f"Rank {i + 1} | idx={int(ids[i])}\nd={float(dists[i]):.3f}"
+        ax.set_title(panel_title, fontsize=fs_panel, pad=8 if fontsize is None else 2)
         axes.append(ax)
 
     fig.subplots_adjust(left=0.03, right=0.88, top=0.90, bottom=0.05)
@@ -459,9 +553,9 @@ def plot_top_similar_windows_surfaces(
         vmin=vmin,
         vmax=vmax,
     )
-    cbar.set_label(variable_display_label(variable_name), fontsize=COLORBAR_LABEL_FONTSIZE)
-    cbar.ax.tick_params(labelsize=TICK_FONTSIZE)
-    fig.savefig(path, dpi=200, bbox_inches="tight", facecolor="white")
+    cbar.set_label(variable_display_label(variable_name), fontsize=fs_cbar_label)
+    cbar.ax.tick_params(labelsize=fs_tick)
+    fig.savefig(path, dpi=dpi, bbox_inches="tight", facecolor="white")
     plt.close(fig)
     return path
 
@@ -620,6 +714,15 @@ def _plot_surface_on_axis(
     ylabel: str = "Northing",
     xy_label_fontsize: float = LABEL_FONTSIZE,
     xy_labelpad: float = 16,
+    variable_label_fontsize: float = LABEL_FONTSIZE,
+    variable_label_x: float = VARIABLE_LABEL_X,
+    line_scale: float = 1.0,
+    tick_formatter: Any | None = None,
+    z_tick_formatter: Any | None = None,
+    show_xy_ticks: bool = True,
+    show_z_ticks: bool = True,
+    tick_pad: float = 6,
+    z_tick_pad: float = 8,
 ) -> Any:
     x_grid, y_grid, z_grid = _surface_grids(
         np.asarray(z_values, dtype=float),
@@ -633,7 +736,7 @@ def _plot_surface_on_axis(
         cmap=cmap,
         vmin=vmin,
         vmax=vmax,
-        linewidth=0.2,
+        linewidth=0.2 * float(line_scale),
         edgecolor=(0.2, 0.2, 0.2, 0.28),
         alpha=float(surface_alpha),
         antialiased=True,
@@ -645,7 +748,7 @@ def _plot_surface_on_axis(
             y_grid,
             z_grid,
             color=(0.05, 0.05, 0.05, float(mesh_alpha)),
-            linewidth=float(mesh_linewidth),
+            linewidth=float(mesh_linewidth) * float(line_scale),
             rstride=1,
             cstride=1,
         )
@@ -659,22 +762,31 @@ def _plot_surface_on_axis(
     ax.set_zlabel("")
     if show_variable_label:
         ax.text2D(
-            VARIABLE_LABEL_X,
+            variable_label_x,
             0.42,
             label,
             transform=ax.transAxes,
             rotation=90,
-            fontsize=LABEL_FONTSIZE,
+            fontsize=variable_label_fontsize,
             ha="center",
             va="center",
         )
-    _set_min_max_axis_ticks(ax, x_grid, y_grid, z_grid)
+    _set_min_max_axis_ticks(
+        ax,
+        x_grid,
+        y_grid,
+        z_grid,
+        tick_formatter=tick_formatter,
+        z_tick_formatter=z_tick_formatter,
+        show_xy_ticks=show_xy_ticks,
+        show_z_ticks=show_z_ticks,
+    )
     if zlim is not None:
         ax.set_zlim(float(zlim[0]), float(zlim[1]))
         ax.set_zticks([float(zlim[0]), float(zlim[1])])
         ax.set_zticklabels([_format_tick(float(zlim[0])), _format_tick(float(zlim[1]))])
-    ax.tick_params(axis="both", which="major", labelsize=tick_fontsize, pad=6)
-    ax.zaxis.set_tick_params(labelsize=tick_fontsize, pad=8)
+    ax.tick_params(axis="both", which="major", labelsize=tick_fontsize, pad=tick_pad)
+    ax.zaxis.set_tick_params(labelsize=tick_fontsize, pad=z_tick_pad)
     _set_surface_box_aspect(
         ax,
         x_grid,
@@ -752,17 +864,39 @@ def _set_min_max_axis_ticks(
     x_grid: np.ndarray,
     y_grid: np.ndarray,
     z_grid: np.ndarray,
+    *,
+    tick_formatter: Any | None = None,
+    z_tick_formatter: Any | None = None,
+    show_xy_ticks: bool = True,
+    show_z_ticks: bool = True,
 ) -> None:
+    """Label each 3D axis with its minimum and maximum only.
+
+    ``tick_formatter`` replaces the default number formatting (used to print
+    map coordinates in km and to avoid scientific "e3" tick text);
+    ``show_xy_ticks=False`` drops the horizontal coordinate ticks, which do
+    not fit on small multi-panel figures.
+    """
+
+    fmt = tick_formatter or _format_tick
+    z_fmt = z_tick_formatter or _format_tick
     x_min, x_max = _finite_min_max(x_grid)
     y_min, y_max = _finite_min_max(y_grid)
     z_min, z_max = _finite_min_max(z_grid)
 
-    ax.set_xticks([x_min, x_max])
-    ax.set_yticks([y_min, y_max])
-    ax.set_zticks([z_min, z_max])
-    ax.set_xticklabels([_format_tick(x_min), _format_tick(x_max)])
-    ax.set_yticklabels([_format_tick(y_min), _format_tick(y_max)])
-    ax.set_zticklabels([_format_tick(z_min), _format_tick(z_max)])
+    if show_xy_ticks:
+        ax.set_xticks([x_min, x_max])
+        ax.set_yticks([y_min, y_max])
+        ax.set_xticklabels([fmt(x_min), fmt(x_max)])
+        ax.set_yticklabels([fmt(y_min), fmt(y_max)])
+    else:
+        ax.set_xticks([])
+        ax.set_yticks([])
+    if show_z_ticks:
+        ax.set_zticks([z_min, z_max])
+        ax.set_zticklabels([z_fmt(z_min), z_fmt(z_max)])
+    else:
+        ax.set_zticks([])
 
 
 def _set_min_max_colorbar_ticks(

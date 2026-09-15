@@ -318,8 +318,23 @@ def plot_deposit_scores_and_weights(
     k_display: int | None = None,
     recompute_weights_from_scores: bool = False,
     weight_ylim: tuple[float, float] | None = None,
+    figsize: tuple[float, float] = (11, 11),
+    height_ratios: tuple[float, float] | None = None,
+    fontsize: float | None = None,
+    show_titles: bool = True,
+    score_ylabel: str = "Raw PCA score",
+    weight_ylabel: str = "Weight",
+    dpi: int = 400,
 ) -> Path:
-    """Plot deposit PCA scores and ranking weights for the PCs used."""
+    """Plot deposit PCA scores and ranking weights for the PCs used.
+
+    Journal mode: pass ``figsize`` at the printed size (inches) and a base
+    ``fontsize`` (points); every text element is then set from it (labels at
+    ``fontsize``, ticks and variance annotations at ``fontsize - 1``, never
+    below 8 pt), the score axis is expanded so the rotated variance labels
+    stay inside it, and ``show_titles=False`` moves the panel meaning into
+    ``score_ylabel``/``weight_ylabel``.
+    """
 
     Z = np.asarray(scores, dtype=float)
     explained = np.asarray(explained_variance_ratio, dtype=float)
@@ -348,12 +363,25 @@ def plot_deposit_scores_and_weights(
 
     path = Path(output_path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    fig, axes = plt.subplots(2, 1, figsize=(11, 11), sharex=True)
+    journal = fontsize is not None
+    fs_title = 21.6 if not journal else float(fontsize)
+    fs_label = 18.9 if not journal else float(fontsize)
+    fs_annot = 15.0 if not journal else max(8.0, float(fontsize) - 1.0)
+    fs_tick = None if not journal else max(8.0, float(fontsize) - 1.0)
+
+    fig, axes = plt.subplots(
+        2,
+        1,
+        figsize=figsize,
+        sharex=True,
+        gridspec_kw=None if height_ratios is None else {"height_ratios": list(height_ratios)},
+    )
 
     ax_top = axes[0]
-    ax_top.set_title(r"Deposit raw PCA scores $z_{d,m}$", fontsize=21.6)
+    if show_titles:
+        ax_top.set_title(r"Deposit raw PCA scores $z_{d,m}$", fontsize=fs_title)
     ax_top.bar(pcs, z_dep, color="#4c8bbe")
-    ax_top.set_ylabel("Raw PCA score", fontsize=18.9)
+    ax_top.set_ylabel(score_ylabel, fontsize=fs_label)
 
     finite_scores = z_dep[np.isfinite(z_dep)]
     if finite_scores.size:
@@ -371,29 +399,51 @@ def plot_deposit_scores_and_weights(
     if explained_sum > 1.0 + 1e-6:
         explained_display = explained_display / explained_sum
 
-    for pc, score, var_frac in zip(pcs, z_dep, explained_display):
-        label = rf"Var$_{{{pc}}}$ = {100 * float(var_frac):.1f}%"
-        va = "bottom" if score >= 0 else "top"
-        offset = label_offset if score >= 0 else -label_offset
-        ax_top.text(
-            pc,
-            score + offset,
-            label,
-            ha="center",
-            va=va,
-            fontsize=15.0,
-            rotation=90,
-            rotation_mode="anchor",
-            clip_on=False,
-        )
+    if journal:
+        # Keep the variance labels in a row above the panel: they then never
+        # overlap the bars and the score axis keeps its natural range.
+        from matplotlib.transforms import blended_transform_factory
+
+        blended = blended_transform_factory(ax_top.transData, ax_top.transAxes)
+        for pc, var_frac in zip(pcs, explained_display):
+            ax_top.text(
+                pc,
+                1.02,
+                rf"Var$_{{{pc}}}$ = {100 * float(var_frac):.1f}%",
+                transform=blended,
+                ha="center",
+                va="bottom",
+                fontsize=fs_annot,
+                rotation=90,
+                clip_on=False,
+            )
+    else:
+        for pc, score, var_frac in zip(pcs, z_dep, explained_display):
+            label = rf"Var$_{{{pc}}}$ = {100 * float(var_frac):.1f}%"
+            offset = label_offset if score >= 0 else -label_offset
+            ax_top.text(
+                pc,
+                score + offset,
+                label,
+                ha="center",
+                va="bottom" if score >= 0 else "top",
+                fontsize=fs_annot,
+                rotation=90,
+                rotation_mode="anchor",
+                clip_on=False,
+            )
     ax_top.axhline(0, color="black", linewidth=0.8)
 
     ax_bot = axes[1]
     weights_used = w_full[:k]
     ax_bot.bar(pcs, weights_used, color="#2ca02c")
-    ax_bot.set_title(r"Deposit-based weights $w_m$", fontsize=21.6)
-    ax_bot.set_xlabel("Principal component (m)", fontsize=18.9)
-    ax_bot.set_ylabel("Weight", fontsize=18.9)
+    if show_titles:
+        ax_bot.set_title(r"Deposit-based weights $w_m$", fontsize=fs_title)
+    ax_bot.set_xlabel("Principal component (m)", fontsize=fs_label)
+    ax_bot.set_ylabel(weight_ylabel, fontsize=fs_label)
+    if fs_tick is not None:
+        for ax in axes:
+            ax.tick_params(axis="both", labelsize=fs_tick)
     finite_weights = weights_used[np.isfinite(weights_used)]
     max_weight = float(np.nanmax(finite_weights)) if finite_weights.size else 0.0
     if weight_ylim is not None:
@@ -401,8 +451,13 @@ def plot_deposit_scores_and_weights(
     else:
         ax_bot.set_ylim(0, max_weight * 1.15 if max_weight > 0 else 1.0)
     ax_bot.set_xticks(pcs)
-    fig.tight_layout(rect=(0, 0, 1, 0.96))
-    fig.savefig(path, dpi=400, bbox_inches="tight")
+    if journal:
+        # the score axis only needs room for the bars; the variance labels sit
+        # above the panel and bbox_inches="tight" keeps them in the file
+        margin = 0.08 * score_span
+        ax_top.set_ylim(score_min - margin, score_max + margin)
+    fig.tight_layout(rect=(0, 0, 1, 0.96) if show_titles else None)
+    fig.savefig(path, dpi=dpi, bbox_inches="tight")
     plt.close(fig)
     return path
 
@@ -419,8 +474,16 @@ def plot_loading_maps(
     image_cmap: str | Any | None = None,
     feature_mask: np.ndarray | None = None,
     origin: str = "upper",
+    show_title: bool | None = None,
+    dpi: int = 400,
+    figsize: tuple[float, float] | None = None,
+    fontsize: float | None = None,
 ) -> Path:
-    """Plot weighted spatial PCA loading maps."""
+    """Plot weighted spatial PCA loading maps.
+
+    ``show_title`` draws the figure-level title; it defaults to the module
+    ``SHOW_FIGURE_TITLES`` switch (off for journal artwork).
+    """
 
     load = np.asarray(loadings, dtype=float)
     Z = np.asarray(scores, dtype=float)
@@ -447,18 +510,22 @@ def plot_loading_maps(
 
     order = np.argsort(w[:n_available])[::-1][:n_show]
 
+    fs_panel = 23.0 if fontsize is None else float(fontsize)
+    fs_cbar_label = 24.3 if fontsize is None else float(fontsize)
+    fs_cbar_tick = 20 if fontsize is None else max(8.0, float(fontsize) - 1.0)
     fig, axes = plt.subplots(
         1,
         n_show,
-        figsize=(4.6 * n_show + 0.8, 5.6),
+        figsize=figsize if figsize is not None else (4.6 * n_show + 0.8, 5.6),
         squeeze=False,
     )
 
-    fig.suptitle(
-        "Top-weighted windowed PCA loading maps (from ranking)",
-        fontsize=22.0,
-        y=1.005,
-    )
+    if SHOW_FIGURE_TITLES if show_title is None else show_title:
+        fig.suptitle(
+            "Top-weighted windowed PCA loading maps (from ranking)",
+            fontsize=22.0,
+            y=1.005,
+        )
     fig.subplots_adjust(top=0.80)
 
     selected_loadings = load[order, :]
@@ -487,7 +554,7 @@ def plot_loading_maps(
             f"PC {pc_idx + 1}\n"
             rf"$z_{{d}}$ = {Z[int(deposit_index), pc_idx]:.2f}" "\n"
             f"w = {100 * w[pc_idx]:.1f}%",
-            fontsize=23.0,
+            fontsize=fs_panel,
         )
 
         ax.set_xticks([])
@@ -505,10 +572,10 @@ def plot_loading_maps(
     if last_im is not None:
         cbar_ax = fig.add_axes([0.91, 0.18, 0.018, 0.58])
         cbar = fig.colorbar(last_im, cax=cbar_ax)
-        cbar.set_label("PCA loading", fontsize=24.3)
-        cbar.ax.tick_params(labelsize=20)
+        cbar.set_label("PCA loading", fontsize=fs_cbar_label)
+        cbar.ax.tick_params(labelsize=fs_cbar_tick)
 
-    fig.savefig(path, dpi=400, bbox_inches="tight", facecolor="white")
+    fig.savefig(path, dpi=dpi, bbox_inches="tight", facecolor="white")
     plt.close(fig)
 
     return path
@@ -569,6 +636,16 @@ def plot_score_pairs(
     annotate_highlights: bool = True,
     star_size: int = 240,
     point_size: int = 18,
+    figsize: tuple[float, float] | None = None,
+    fontsize: float | None = None,
+    show_title: bool | None = None,
+    marker_linewidth_scale: float = 1.0,
+    dpi: int = 400,
+    legend_kwargs: dict[str, Any] | None = None,
+    colorbar_fraction: float = 0.035,
+    colorbar_pad: float = 0.04,
+    wspace: float | None = None,
+    hspace: float | None = None,
 ) -> Path | None:
     """Plot PCA score pairs ordered by descending deposit-weight percentage.
 
@@ -580,6 +657,12 @@ def plot_score_pairs(
     ``n_pairs`` controls how many automatic pair subplots are drawn.
     ``max_pairs`` is kept as a backwards-compatible alias for older callers.
     Pass ``ranked_idx`` with ``top_n_to_plot`` to highlight top-ranked windows.
+
+    Journal mode: pass ``figsize`` at the printed size (inches) and a base
+    ``fontsize`` (points); panel headers and axis labels use ``fontsize``,
+    ticks, legend, colorbar ticks and rank labels use ``fontsize - 1`` (never
+    below 8 pt), and panel headers wrap onto two lines.
+    ``marker_linewidth_scale`` scales marker edge widths to match the print size.
     """
 
     Z = np.asarray(comparison_space, dtype=float)
@@ -629,17 +712,27 @@ def plot_score_pairs(
     n_pair = len(pairs)
     n_col = 2 if n_pair > 2 else n_pair
     n_row = int(math.ceil(n_pair / n_col))
-    fig, axes = plt.subplots(n_row, n_col, figsize=(8.4 * n_col, 7.6 * n_row),
-                             squeeze=False)
+    journal = fontsize is not None
+    fs_head = 21.6 if not journal else float(fontsize)
+    fs_label = 18.9 if not journal else float(fontsize)
+    fs_tick = 18 if not journal else max(8.0, float(fontsize) - 1.0)
+    fs_small = None if not journal else max(8.0, float(fontsize) - 1.0)
+    lw_scale = float(marker_linewidth_scale)
+    fig, axes = plt.subplots(
+        n_row,
+        n_col,
+        figsize=figsize if figsize is not None else (8.4 * n_col, 7.6 * n_row),
+        squeeze=False,
+    )
     for extra in axes.flat[n_pair:]:
         extra.axis("off")
     title_prefix = "Selected" if pc_pairs is not None else "Top-weighted"
-    if SHOW_FIGURE_TITLES:
+    if SHOW_FIGURE_TITLES if show_title is None else show_title:
         fig.suptitle(f"{title_prefix} PCA score plots colored by distance",
                  fontsize=26.0, y=0.995)
     last_sc = None
     for ax, (pc_x, pc_y) in zip(axes.flat, pairs):
-        ax.tick_params(axis="both", labelsize=18)
+        ax.tick_params(axis="both", labelsize=fs_tick)
         last_sc = ax.scatter(
             Z[mask, pc_x],
             Z[mask, pc_y],
@@ -656,7 +749,7 @@ def plot_score_pairs(
             s=star_size,
             c="none",
             edgecolors="black",
-            linewidths=1.5,
+            linewidths=1.5 * lw_scale,
             label="Reference deposit",
             zorder=5,
         )
@@ -668,36 +761,55 @@ def plot_score_pairs(
                 s=highlight_size,
                 facecolors="none",
                 edgecolors=highlight_color,
-                linewidths=2.0,
+                linewidths=2.0 * lw_scale,
                 label=f"Top {highlight_indices.size} ranked windows",
                 zorder=6,
             )
             if annotate_highlights:
+                offset = 4 if not journal else 2.5
                 for rank, window_idx in enumerate(highlight_indices, start=1):
                     text = ax.annotate(
                         str(rank),
                         xy=(Z[int(window_idx), pc_x], Z[int(window_idx), pc_y]),
-                        xytext=(4, 4),
+                        xytext=(offset, offset),
                         textcoords="offset points",
                         color=highlight_color,
-                        fontsize=13.5,
+                        fontsize=13.5 if not journal else fs_small,
                         fontweight="bold",
                         zorder=7,
                     )
-                    text.set_path_effects([pe.withStroke(linewidth=2.0, foreground="white")])
+                    text.set_path_effects(
+                        [pe.withStroke(linewidth=2.0 if not journal else 1.2, foreground="white")]
+                    )
+        header_sep = " vs " if not journal else " vs\n"
         ax.set_title(
-            f"PC {pc_x + 1} (w={100 * w[pc_x]:.1f}%) vs "
+            f"PC {pc_x + 1} (w={100 * w[pc_x]:.1f}%){header_sep}"
             f"PC {pc_y + 1} (w={100 * w[pc_y]:.1f}%)",
-            fontsize=21.6,
+            fontsize=fs_head,
         )
-        ax.set_xlabel(f"PC {pc_x + 1} score", fontsize=18.9)
-        ax.set_ylabel(f"PC {pc_y + 1} score", fontsize=18.9)
+        ax.set_xlabel(f"PC {pc_x + 1} score", fontsize=fs_label)
+        ax.set_ylabel(f"PC {pc_y + 1} score", fontsize=fs_label)
     if last_sc is not None:
-        cbar = fig.colorbar(last_sc, ax=axes.ravel().tolist(), fraction=0.035, pad=0.04)
-        cbar.set_label("Distance to deposit", fontsize=21.6)
+        cbar = fig.colorbar(
+            last_sc, ax=axes.ravel().tolist(), fraction=colorbar_fraction, pad=colorbar_pad
+        )
+        cbar.set_label("Distance to deposit", fontsize=21.6 if not journal else fs_label)
+        if journal:
+            cbar.ax.tick_params(labelsize=fs_small)
     if highlight_indices.size:
-        axes.flat[0].legend(loc="best", fontsize=14.9, frameon=True)
-    fig.savefig(path, dpi=400, bbox_inches="tight")
+        legend_options = {
+            "loc": "best",
+            "fontsize": 14.9 if not journal else fs_small,
+            "frameon": True,
+        }
+        legend_options.update(legend_kwargs or {})
+        axes.flat[0].legend(**legend_options)
+    if wspace is not None or hspace is not None:
+        fig.subplots_adjust(
+            **({} if wspace is None else {"wspace": wspace}),
+            **({} if hspace is None else {"hspace": hspace}),
+        )
+    fig.savefig(path, dpi=dpi, bbox_inches="tight")
     plt.close(fig)
     return path
 

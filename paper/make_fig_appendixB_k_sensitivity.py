@@ -43,61 +43,72 @@ INK, MUTED, BLUE, RUST, GREEN = "#1a1a1a", "#8a8f98", "#2563eb", "#c2410c", "#16
 ANNOTATE_K = {2, 3, 5, 9, 12, 17, 30, 60}
 
 
+# Built at the printed size (\textwidth = 5.14 in), so font sizes are printed points
+# (8-10 pt). Panels are stacked so both stay legible at that width.
+FIG_W_IN, FIG_H_IN = 5.14, 6.3
+FS_TICK, FS_LABEL, FS_NOTE, FS_HEAD = 8, 9, 8, 9
+
+
 def build(case1: pd.DataFrame, case2: pd.DataFrame):
-    fig, (ax, bx) = plt.subplots(1, 2, figsize=(10.4, 4.0))
+    fig, (ax, bx) = plt.subplots(2, 1, figsize=(FIG_W_IN, FIG_H_IN))
 
     k = case1["k_pcs"].to_numpy()
     c = case1["mean_recovered_frac_250"].to_numpy()
     hits = case1["n_hits"].to_numpy()
     ax.axvspan(*PLATEAU, color=GREEN, alpha=0.10, zorder=1)
-    ax.plot(k, c, lw=2.4, color=BLUE, marker="o", ms=4.5, zorder=5)
+    ax.plot(k, c, lw=2.0, color=BLUE, marker="o", ms=4.0, zorder=5)
     ax.axvline(K_RETAINED_CASE1, lw=1.2, color=MUTED, zorder=3)
     ax.annotate(f"retained\n$k={K_RETAINED_CASE1}$", xy=(K_RETAINED_CASE1, 0.10),
-                fontsize=8, color=INK, ha="center",
+                fontsize=FS_NOTE, color=INK, ha="center",
                 bbox=dict(fc="white", ec="none", alpha=0.85, pad=1.5))
-    plateau = case1[case1.k_pcs.between(*PLATEAU)]
-    ax.text(26, 0.505,
-            f"stable range $k={PLATEAU[0]}$–${PLATEAU[1]}$\n"
-            f"$\\bar{{c}}={plateau.mean_recovered_frac_250.iloc[0]:.3f}$, "
-            f"{int(plateau.n_hits.iloc[0])} hits",
-            fontsize=8, color=INK, ha="center")
+    # value quoted in the text is the one at the retained k, not the first plateau row
+    kept = case1[case1.k_pcs == K_RETAINED_CASE1].iloc[0]
+    ax.text(28, 0.25,
+            f"plateau $k={PLATEAU[0]}$–${PLATEAU[1]}$\n"
+            f"$\\bar{{c}}={kept.mean_recovered_frac_250:.3f}$ at $k={K_RETAINED_CASE1}$, "
+            f"{int(kept.n_hits)} hits",
+            fontsize=FS_NOTE, color=INK, ha="center", va="center",
+            bbox=dict(fc="white", ec="none", alpha=0.85, pad=1.5))
     for kk, cc, hh in zip(k, c, hits):
         if kk in ANNOTATE_K:
             ax.annotate(str(int(hh)), xy=(kk, cc), xytext=(0, 7),
-                        textcoords="offset points", fontsize=7, color=MUTED, ha="center")
+                        textcoords="offset points", fontsize=FS_NOTE, color=MUTED, ha="center")
     ticks = [2, 3, 5, 8, 12, 17, 25, 40, 60]
     ax.set_xscale("log")
     ax.set_xticks(ticks)
     ax.set_xticklabels(ticks)
     ax.set_xlabel("Retained components $k$")
     ax.set_ylabel("Mean recovered fraction $\\bar{c}(250)$")
-    ax.set_title("(a) Case 1 — Paulo Afonso, TMI", fontsize=10, loc="left", color=INK)
+    ax.set_title("(a) Case 1 — Paulo Afonso, TMI", fontsize=FS_HEAD, loc="left", color=INK)
     ax.set_ylim(0, 0.60)
 
     g = case2[case2.k1 == K_TMI].sort_values("k2")
-    bx.plot(g.k2, g.a_uni, lw=2.4, color=BLUE, marker="o", ms=4.5,
-            label="Combined, $\\alpha_v$ rule", zorder=5)
-    bx.plot(g.k2, g.U, lw=2.0, color=RUST, marker="s", ms=4,
+    bx.plot(g.k2, g.a_uni, lw=2.0, color=BLUE, marker="o", ms=4.0,
+            label="Combined ranking", zorder=5)
+    bx.plot(g.k2, g.U, lw=1.7, color=RUST, marker="s", ms=3.5,
             label="Radiometric U alone", zorder=4)
     bx.axhline(TMI_ALONE_HELDOUT, lw=1.8, ls="--", color=MUTED,
-               label=f"TMI alone ($k_{{TMI}}={K_TMI}$)", zorder=3)
+               label=f"TMI alone ($k_{{\\mathrm{{TMI}}}}={K_TMI}$)", zorder=3)
     bx.axvline(K_U_RETAINED, lw=1.2, color=MUTED, zorder=2)
     bx.annotate(f"retained\n$k_U={K_U_RETAINED}$", xy=(K_U_RETAINED, 0.26),
-                fontsize=8, color=INK, ha="center",
+                fontsize=FS_NOTE, color=INK, ha="center",
                 bbox=dict(fc="white", ec="none", alpha=0.85, pad=1.5))
-    bx.set_xlabel(f"Retained components $k_U$   (at $k_{{TMI}}={K_TMI}$)")
+    bx.set_xlabel(f"Retained components $k_U$   (at $k_{{\\mathrm{{TMI}}}}={K_TMI}$)")
     bx.set_ylabel("Held-out mean recovered fraction")
-    bx.set_title("(b) Case 2 — Alemão, leave-one-deposit-out", fontsize=10,
+    bx.set_title("(b) Case 2 — Alemão, leave-one-deposit-out", fontsize=FS_HEAD,
                  loc="left", color=INK)
     bx.set_ylim(0.24, 0.56)
     bx.set_xticks([1, 3, 5, 7, 9, 11, 13, 15])
-    bx.legend(fontsize=7.8, frameon=False, loc="lower right", labelcolor=INK)
+    bx.legend(fontsize=FS_NOTE, frameon=False, loc="lower right", labelcolor=INK)
 
     for a in (ax, bx):
+        a.xaxis.label.set_size(FS_LABEL)
+        a.yaxis.label.set_size(FS_LABEL)
+        a.tick_params(labelsize=FS_TICK)
         a.grid(alpha=0.18, lw=0.6)
         for side in ("top", "right"):
             a.spines[side].set_visible(False)
-    fig.tight_layout()
+    fig.tight_layout(h_pad=1.6)
     return fig
 
 
@@ -123,7 +134,7 @@ def main(argv: list[str] | None = None) -> int:
     matplotlib.rcParams["ps.fonttype"] = 42
     for ext, kw in (("pdf", {}), ("png", {"dpi": args.dpi})):
         p = outdir / f"{args.stem}.{ext}"
-        fig.savefig(p, bbox_inches="tight", **kw)
+        fig.savefig(p, **kw)  # no bbox tight: saved size = printed size
         print(f"Wrote {p}")
     plt.close(fig)
     return 0
