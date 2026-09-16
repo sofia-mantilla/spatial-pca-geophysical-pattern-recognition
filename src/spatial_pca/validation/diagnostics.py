@@ -789,6 +789,11 @@ def plot_score_pairs(
         )
         ax.set_xlabel(f"PC {pc_x + 1} score", fontsize=fs_label)
         ax.set_ylabel(f"PC {pc_y + 1} score", fontsize=fs_label)
+    if wspace is not None or hspace is not None:
+        fig.subplots_adjust(
+            **({} if wspace is None else {"wspace": wspace}),
+            **({} if hspace is None else {"hspace": hspace}),
+        )
     if last_sc is not None:
         cbar = fig.colorbar(
             last_sc, ax=axes.ravel().tolist(), fraction=colorbar_fraction, pad=colorbar_pad
@@ -804,11 +809,6 @@ def plot_score_pairs(
         }
         legend_options.update(legend_kwargs or {})
         axes.flat[0].legend(**legend_options)
-    if wspace is not None or hspace is not None:
-        fig.subplots_adjust(
-            **({} if wspace is None else {"wspace": wspace}),
-            **({} if hspace is None else {"hspace": hspace}),
-        )
     fig.savefig(path, dpi=dpi, bbox_inches="tight")
     plt.close(fig)
     return path
