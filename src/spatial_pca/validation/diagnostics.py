@@ -634,6 +634,7 @@ def plot_score_pairs(
     highlight_color: str = "#1f77b4",
     highlight_size: int = 95,
     annotate_highlights: bool = True,
+    annotation_offsets: Any | None = None,
     star_size: int = 240,
     point_size: int = 18,
     figsize: tuple[float, float] | None = None,
@@ -663,6 +664,10 @@ def plot_score_pairs(
     ticks, legend, colorbar ticks and rank labels use ``fontsize - 1`` (never
     below 8 pt), and panel headers wrap onto two lines.
     ``marker_linewidth_scale`` scales marker edge widths to match the print size.
+    ``annotation_offsets`` gives a per-rank (dx, dy) offset in points for the
+    rank labels, so they stay apart when the top-ranked windows nearly coincide.
+    A ``legend_kwargs`` entry ``bbox_transform="figure"`` anchors the legend in
+    figure coordinates (one legend below a multi-row panel grid).
     """
 
     Z = np.asarray(comparison_space, dtype=float)
@@ -768,10 +773,16 @@ def plot_score_pairs(
             if annotate_highlights:
                 offset = 4 if not journal else 2.5
                 for rank, window_idx in enumerate(highlight_indices, start=1):
+                    # per-rank offsets keep the labels apart when the top-ranked
+                    # windows sit almost on top of each other in a score plane
+                    if annotation_offsets is not None:
+                        dx, dy = annotation_offsets[(rank - 1) % len(annotation_offsets)]
+                    else:
+                        dx = dy = offset
                     text = ax.annotate(
                         str(rank),
                         xy=(Z[int(window_idx), pc_x], Z[int(window_idx), pc_y]),
-                        xytext=(offset, offset),
+                        xytext=(dx, dy),
                         textcoords="offset points",
                         color=highlight_color,
                         fontsize=13.5 if not journal else fs_small,
@@ -808,6 +819,10 @@ def plot_score_pairs(
             "frameon": True,
         }
         legend_options.update(legend_kwargs or {})
+        # allow callers to anchor the legend in figure coordinates (one legend
+        # under a multi-row panel grid) without needing the figure object
+        if legend_options.get("bbox_transform") == "figure":
+            legend_options["bbox_transform"] = fig.transFigure
         axes.flat[0].legend(**legend_options)
     fig.savefig(path, dpi=dpi, bbox_inches="tight")
     plt.close(fig)
@@ -888,8 +903,31 @@ def plot_reconstruction_progression(
     max_k: int = 10,
     image_cmap: str | Any | None = None,
     feature_mask: np.ndarray | None = None,
+    n_cols: int = 5,
+    figsize: tuple[float, float] | None = None,
+    fontsize: float | None = None,
+    cbar_label_fontsize: float | None = None,
+    cbar_tick_fontsize: float | None = None,
+    panel_label_template: str = "Recon. using: k={k}",
+    panel_label_pad: float | None = None,
+    colorbar_fraction: float = 0.025,
+    colorbar_pad: float = 0.03,
+    colorbar_ticks: Any | None = None,
+    colorbar_aspect: float | None = None,
+    wspace: float | None = None,
+    hspace: float | None = None,
+    dpi: int = 400,
 ) -> Path:
-    """Plot deposit reconstructions using the first k PCs."""
+    """Plot deposit reconstructions using the first k PCs.
+
+    Journal mode: pass ``figsize`` at the printed size (inches) and ``fontsize``
+    (points) for the per-panel labels; ``cbar_label_fontsize`` and
+    ``cbar_tick_fontsize`` default to ``fontsize`` when it is given. Use
+    ``panel_label_template`` to shorten the per-panel label (it must still name
+    the panel by ``k``), ``colorbar_ticks`` to thin the colorbar out, and
+    ``n_cols`` to rearrange the panel grid. Defaults reproduce the previous
+    on-screen figure exactly.
+    """
 
     Z = np.asarray(scores, dtype=float)
     components = np.asarray(loadings, dtype=float)
@@ -901,9 +939,18 @@ def plot_reconstruction_progression(
     path.parent.mkdir(parents=True, exist_ok=True)
 
     cmap = resolve_colormap(image_cmap or DEFAULT_IMAGE_CMAP)
-    n_cols = 5
+    n_cols = max(1, int(n_cols))
     n_rows = int(np.ceil(n_show / n_cols))
-    fig, axes = plt.subplots(n_rows, n_cols, figsize=(18, 3.4 * n_rows), squeeze=False)
+    journal = fontsize is not None
+    fs_panel = 20.2 if not journal else float(fontsize)
+    fs_cbar_label = (21.6 if not journal else float(fontsize)) if cbar_label_fontsize is None else float(cbar_label_fontsize)
+    fs_cbar_tick = (None if not journal else float(fontsize)) if cbar_tick_fontsize is None else float(cbar_tick_fontsize)
+    fig, axes = plt.subplots(
+        n_rows,
+        n_cols,
+        figsize=figsize if figsize is not None else (18, 3.4 * n_rows),
+        squeeze=False,
+    )
     if SHOW_FIGURE_TITLES:
         fig.suptitle(f"Deposit {deposit_1based} reconstruction progression (optimal k={optimal_k})", fontsize=22.0, y=1.005)
     last_im = None
@@ -926,13 +973,33 @@ def plot_reconstruction_progression(
             vmin=vmin,
             vmax=vmax,
         )
-        ax.set_title(f"Recon. using: k={k}", fontsize=20.2)
+        ax.set_title(
+            panel_label_template.format(k=k),
+            fontsize=fs_panel,
+            **({} if panel_label_pad is None else {"pad": panel_label_pad}),
+        )
         ax.set_xticks([])
         ax.set_yticks([])
+    # spacing must be applied before the colorbar, which shrinks the axes
+    if wspace is not None or hspace is not None:
+        fig.subplots_adjust(
+            **({} if wspace is None else {"wspace": wspace}),
+            **({} if hspace is None else {"hspace": hspace}),
+        )
     if last_im is not None:
-        cbar = fig.colorbar(last_im, ax=axes.ravel().tolist(), fraction=0.025, pad=0.03)
-        cbar.set_label(_variable_label(variable_name), fontsize=21.6)
-    fig.savefig(path, dpi=400, bbox_inches="tight")
+        cbar = fig.colorbar(
+            last_im,
+            ax=axes.ravel().tolist(),
+            fraction=colorbar_fraction,
+            pad=colorbar_pad,
+            **({} if colorbar_aspect is None else {"aspect": colorbar_aspect}),
+        )
+        cbar.set_label(_variable_label(variable_name), fontsize=fs_cbar_label)
+        if colorbar_ticks is not None:
+            cbar.set_ticks(list(colorbar_ticks))
+        if fs_cbar_tick is not None:
+            cbar.ax.tick_params(labelsize=fs_cbar_tick)
+    fig.savefig(path, dpi=dpi, bbox_inches="tight")
     plt.close(fig)
     return path
 
