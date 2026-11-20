@@ -1,0 +1,44 @@
+[
+ {
+  "test_set": "the five of the multivariate shapefile (as published)",
+  "n_test_deposits": 4,
+  "end": 63.7,
+  "auc": 106.1,
+  "hits": 3,
+  "hit_ranks": {
+   "10": [
+    0
+   ],
+   "142": [
+    1
+   ],
+   "246": [
+    4
+   ]
+  },
+  "a250": 0.0868,
+  "random_matched": 8.9,
+  "ratio": 7.17
+ },
+ {
+  "test_set": "all twelve known deposits",
+  "n_test_deposits": 11,
+  "end": 23.3,
+  "auc": 38.8,
+  "hits": 3,
+  "hit_ranks": {
+   "10": [
+    0
+   ],
+   "142": [
+    1
+   ],
+   "246": [
+    4
+   ]
+  },
+  "a250": 0.0868,
+  "random_matched": 9.1,
+  "ratio": 2.55
+ }
+]
