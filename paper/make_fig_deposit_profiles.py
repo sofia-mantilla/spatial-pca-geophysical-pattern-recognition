@@ -36,8 +36,10 @@ from extract_case1_windows import collect
 from make_fig_multiprofiles import PAPER_CMAP, km_extent, tmi_limits
 
 REF_DEP = 6          # Paulo Afonso, the Case-1 reference deposit
-NAMES = {1: "Tucumã", 2: "Pedra Branca", 3: "Alemão", 4: "Furnas", 5: "Salobo",
-         6: "Paulo Afonso", 7: "Cabano"}
+# Names come from deposit_names.py, the single source Table 1 also follows, so
+# that this figure and the tables cannot disagree. It covers all twelve; the
+# dict that used to live here stopped at 7 and left 8-12 labelled by number.
+from deposit_names import NAMES
 # 12 well-separated hues; the reference deposit is the heavy dark red.
 CURVE = {
     1: "#1f4fd8", 2: "#e07b00", 3: "#00897b", 4: "#2e9e2e", 5: "#8e24aa",
