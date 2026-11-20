@@ -16,6 +16,7 @@ from spatial_pca.geodata.deposits import (
     get_circle_patch_template,
     get_deposit_template,
     load_deposits,
+    resample_template,
 )
 from spatial_pca.geodata.exports import (
     build_circle_top_window_centers_gdf,
@@ -194,6 +195,22 @@ def run_single_case(
     )
 
 
+def _transform_template(
+    config: dict[str, Any],
+    template: TemplateData,
+    raster_data: RasterData,
+) -> TemplateData:
+    """Apply the configured reference rotation and scale to a template."""
+
+    defaults = config["analysis_defaults"]
+    return resample_template(
+        template,
+        raster_data,
+        rotation_angle=float(defaults.get("rotation_angle", 0.0)),
+        scale_factor=float(defaults.get("scale_factor", 1.0)),
+    )
+
+
 def _run_case_impl(
     *,
     config: dict[str, Any],
@@ -220,7 +237,11 @@ def _run_case_impl(
         deposits_gdf = _load_case_deposits(config, deposits_path, reference_raster.crs)
         patch_config = config.get("patch")
         if patch_config is None:
-            template = get_deposit_template(deposits_gdf, deposit_1based - 1, raster_data)
+            template = _transform_template(
+                config,
+                get_deposit_template(deposits_gdf, deposit_1based - 1, raster_data),
+                raster_data,
+            )
             window_matrix = build_univariate_window_matrix(
                 raster=raster_data.array,
                 deposit_template=template.array,
@@ -284,7 +305,11 @@ def _run_case_impl(
         patch_config = config.get("patch")
         if patch_config is None:
             template = {
-                var: get_deposit_template(deposits_gdf, deposit_1based - 1, raster_data[var])
+                var: _transform_template(
+                    config,
+                    get_deposit_template(deposits_gdf, deposit_1based - 1, raster_data[var]),
+                    raster_data[var],
+                )
                 for var in summary_variables
             }
             window_matrix = build_multivariate_window_matrix(

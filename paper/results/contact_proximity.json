@@ -1,0 +1,34 @@
+[
+ {
+  "population": "all candidate windows (Case 1 grid)",
+  "n": 13031,
+  "median_m": 1600.0,
+  "mean_m": 2400.0,
+  "within_1km": 0.378,
+  "within_2km": 0.581
+ },
+ {
+  "population": "the twelve known deposits",
+  "n": 12,
+  "median_m": 1760.0,
+  "mean_m": 2984.0,
+  "within_1km": 0.333,
+  "within_2km": 0.583
+ },
+ {
+  "population": "Case 1 top 250, no known deposit",
+  "n": 224,
+  "median_m": 1183.0,
+  "mean_m": 1647.0,
+  "within_1km": 0.469,
+  "within_2km": 0.71
+ },
+ {
+  "population": "Case 2 top 250, no known deposit",
+  "n": 234,
+  "median_m": 1265.0,
+  "mean_m": 1589.0,
+  "within_1km": 0.427,
+  "within_2km": 0.709
+ }
+]

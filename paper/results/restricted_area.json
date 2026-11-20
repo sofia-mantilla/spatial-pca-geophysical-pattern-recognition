@@ -1,0 +1,29 @@
+{
+ "published (whole survey)": {
+  "n_windows": 13031,
+  "search_area_km2": 35835.0,
+  "end": 47.0,
+  "hits": 5,
+  "a250": 0.1445,
+  "random_matched": 0.1521,
+  "ratio": 3.09
+ },
+ "basement (no Neoproterozoic or younger)": {
+  "n_windows": 11945,
+  "search_area_km2": 32307.0,
+  "end": 47.0,
+  "hits": 5,
+  "a250": 0.1602,
+  "random_matched": 0.1658,
+  "ratio": 2.84
+ },
+ "Archean only": {
+  "n_windows": 10387,
+  "search_area_km2": 28245.0,
+  "end": 48.0,
+  "hits": 5,
+  "a250": 0.1835,
+  "random_matched": 0.1729,
+  "ratio": 2.77
+ }
+}

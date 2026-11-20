@@ -1,0 +1,88 @@
+{
+ "strict": [
+  {
+   "population": "all candidate windows (Case 1 grid)",
+   "n": 13031,
+   "touching": 0.16,
+   "mean_fraction": 0.0127
+  },
+  {
+   "population": "the twelve known deposits (Case 1 window)",
+   "n": 12,
+   "touching": 0.167,
+   "mean_fraction": 0.016,
+   "enrichment": 1.26
+  },
+  {
+   "population": "Case 1 top 250, no known deposit",
+   "n": 224,
+   "touching": 0.205,
+   "mean_fraction": 0.0122,
+   "enrichment": 0.96
+  },
+  {
+   "population": "all candidate windows (Case 2 grid)",
+   "n": 13197,
+   "touching": 0.114,
+   "mean_fraction": 0.0125,
+   "enrichment": 0.98
+  },
+  {
+   "population": "the twelve known deposits (Case 2 window)",
+   "n": 12,
+   "touching": 0.167,
+   "mean_fraction": 0.0203,
+   "enrichment": 1.6
+  },
+  {
+   "population": "Case 2 top 250, no known deposit",
+   "n": 234,
+   "touching": 0.098,
+   "mean_fraction": 0.0068,
+   "enrichment": 0.54
+  }
+ ],
+ "broad": [
+  {
+   "population": "all candidate windows (Case 1 grid)",
+   "n": 13031,
+   "touching": 0.346,
+   "mean_fraction": 0.1
+  },
+  {
+   "population": "the twelve known deposits (Case 1 window)",
+   "n": 12,
+   "touching": 0.5,
+   "mean_fraction": 0.1257,
+   "enrichment": 1.26
+  },
+  {
+   "population": "Case 1 top 250, no known deposit",
+   "n": 224,
+   "touching": 0.384,
+   "mean_fraction": 0.0838,
+   "enrichment": 0.84
+  },
+  {
+   "population": "all candidate windows (Case 2 grid)",
+   "n": 13197,
+   "touching": 0.282,
+   "mean_fraction": 0.0996,
+   "enrichment": 1.0
+  },
+  {
+   "population": "the twelve known deposits (Case 2 window)",
+   "n": 12,
+   "touching": 0.333,
+   "mean_fraction": 0.1395,
+   "enrichment": 1.4
+  },
+  {
+   "population": "Case 2 top 250, no known deposit",
+   "n": 234,
+   "touching": 0.299,
+   "mean_fraction": 0.0846,
+   "enrichment": 0.85
+  }
+ ]
+}

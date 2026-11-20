@@ -8,6 +8,7 @@ from typing import Any
 
 import geopandas as gpd
 import numpy as np
+from skimage.transform import warp
 from rasterio.crs import CRS
 from rasterio.transform import Affine
 from shapely.geometry import Point
@@ -79,6 +80,95 @@ def extract_raster_template(array: Any, transform: Affine, polygon: BaseGeometry
 
     extent = _template_extent(transform, row_start, row_stop, col_start, col_stop)
     return TemplateData(array=template_array, extent=extent, polygon=polygon)
+
+
+def resample_template(
+    template: TemplateData,
+    raster_data: RasterData,
+    *,
+    rotation_angle: float = 0.0,
+    scale_factor: float = 1.0,
+) -> TemplateData:
+    """Re-sample a deposit template rotated and scaled about its own centre.
+
+    The window keeps its position, ground extent and pixel shape. Only the
+    geometry inside it changes, so the result can be used wherever the native
+    template is used.
+
+    ``rotation_angle`` is in degrees counter-clockwise in map coordinates, so a
+    positive angle turns the reference geometry anti-clockwise with respect to
+    north. Because the grids are used as flown, without reduction to the pole,
+    this turns the field-imposed dipole asymmetry together with the body. It
+    brackets the sensitivity to deposit orientation; it does not forward-model
+    a rotated body under an unchanged field.
+
+    ``scale_factor`` is the size of the modelled body relative to the reference
+    body. A factor of 1.25 samples a ground footprint 1/1.25 of the native one
+    and resamples it to the same pixel shape, so the anomaly fills more of the
+    window, as a body 25 per cent larger would.
+
+    Samples are taken from the raster itself, never padded, so a rotated or
+    enlarged window draws on real data outside the deposit bounds. A template
+    that reaches past the grid or into no-data raises, because the window
+    builder cannot accept a template containing NaN.
+    """
+
+    angle = float(rotation_angle)
+    scale = float(scale_factor)
+    if scale <= 0.0:
+        raise ValueError(f"scale_factor must be positive, got {scale}.")
+    if angle == 0.0 and scale == 1.0:
+        return template
+
+    raster = np.asarray(raster_data.array, dtype=float)
+    transform = raster_data.transform
+    height, width = np.asarray(template.array).shape
+
+    left, right, bottom, top = template.extent
+    col_start, row_start = (~transform) * (left, top)
+    col_stop, row_stop = (~transform) * (right, bottom)
+    row_centre = (round(row_start) + round(row_stop) - 1) / 2.0
+    col_centre = (round(col_start) + round(col_stop) - 1) / 2.0
+
+    d_row, d_col = np.meshgrid(
+        np.arange(height, dtype=float) - (height - 1) / 2.0,
+        np.arange(width, dtype=float) - (width - 1) / 2.0,
+        indexing="ij",
+    )
+    theta = np.deg2rad(angle)
+    cos_t, sin_t = np.cos(theta), np.sin(theta)
+    # Inverse map: where in the raster each output pixel is read from. Rows
+    # increase southward, which is why the row term carries the opposite sign
+    # to the usual counter-clockwise rotation in map coordinates.
+    src_row = row_centre + (d_row * cos_t + d_col * sin_t) / scale
+    src_col = col_centre + (-d_row * sin_t + d_col * cos_t) / scale
+
+    array = warp(
+        raster,
+        np.stack([src_row, src_col]),
+        order=1,
+        mode="constant",
+        cval=np.nan,
+        preserve_range=True,
+    )
+    if np.isnan(array).any():
+        raise ValueError(
+            f"Template rotated {angle:g} degrees and scaled by {scale:g} reaches "
+            f"outside the grid or into no-data at {int(np.isnan(array).sum())} of "
+            f"{array.size} pixels. Use a smaller angle or scale, or a reference "
+            "deposit further from the survey edge."
+        )
+
+    return TemplateData(
+        array=array,
+        extent=template.extent,
+        polygon=template.polygon,
+        deposit_id=template.deposit_id,
+        feature_mask=template.feature_mask,
+        center_x=template.center_x,
+        center_y=template.center_y,
+        radius_m=template.radius_m,
+    )
 
 
 def get_deposit_template(
