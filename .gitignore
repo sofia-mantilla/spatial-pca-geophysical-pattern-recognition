@@ -97,3 +97,9 @@ docs/references.bib
 docs/paper_era_backups/
 docs/repro_debug_deposit3_multivariate/
 docs/reproducibility_debug_deposit3_multivariate.md
+
+# Third-party geological maps: fetched with paper/fetch_geology.py
+data/Carajas_Brazil_Geology/
+
+# Scratch output of the paper figure scripts
+paper/figures_out/
