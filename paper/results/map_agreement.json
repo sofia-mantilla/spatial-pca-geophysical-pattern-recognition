@@ -1,0 +1,164 @@
+{
+ "coverage_pct": {
+  "sheets_100k": 76.5,
+  "sheet_1m": 100.0,
+  "arim_250k": 90.3
+ },
+ "overlap": {
+  "strict|1:100,000|ARIM": {
+   "a_pct_of_survey": 1.18,
+   "b_pct_of_survey": 0.74,
+   "iou": 0.585,
+   "a_captured_by_b": 0.598,
+   "b_captured_by_a": 0.963
+  },
+  "strict|1:1,000,000|ARIM": {
+   "a_pct_of_survey": 0.41,
+   "b_pct_of_survey": 0.74,
+   "iou": 0.101,
+   "a_captured_by_b": 0.256,
+   "b_captured_by_a": 0.144
+  },
+  "strict|1:100,000|1:1,000,000": {
+   "a_pct_of_survey": 1.18,
+   "b_pct_of_survey": 0.41,
+   "iou": 0.082,
+   "a_captured_by_b": 0.103,
+   "b_captured_by_a": 0.294
+  },
+  "broad|1:100,000|ARIM": {
+   "a_pct_of_survey": 9.92,
+   "b_pct_of_survey": 8.35,
+   "iou": 0.643,
+   "a_captured_by_b": 0.721,
+   "b_captured_by_a": 0.855
+  },
+  "broad|1:1,000,000|ARIM": {
+   "a_pct_of_survey": 6.96,
+   "b_pct_of_survey": 10.11,
+   "iou": 0.196,
+   "a_captured_by_b": 0.402,
+   "b_captured_by_a": 0.277
+  },
+  "broad|1:100,000|1:1,000,000": {
+   "a_pct_of_survey": 9.92,
+   "b_pct_of_survey": 6.39,
+   "iou": 0.206,
+   "a_captured_by_b": 0.281,
+   "b_captured_by_a": 0.436
+  }
+ },
+ "era_agreement": 0.652,
+ "era_confusion": {
+  "Cenozóico": [
+   [
+    "Neoarqueano",
+    0.627
+   ],
+   [
+    "Cenozóico",
+    0.338
+   ]
+  ],
+  "Mesoarqueano": [
+   [
+    "Mesoarqueano",
+    0.607
+   ],
+   [
+    "Neoarqueano",
+    0.33
+   ]
+  ],
+  "Mesozóico": [
+   [
+    "Mesozóico",
+    0.926
+   ],
+   [
+    "Paleoproterozóico",
+    0.074
+   ]
+  ],
+  "Neoarqueano": [
+   [
+    "Neoarqueano",
+    0.705
+   ],
+   [
+    "Mesoarqueano",
+    0.173
+   ]
+  ],
+  "Neoproterozóico": [
+   [
+    "Mesoarqueano",
+    0.335
+   ],
+   [
+    "Neoproterozóico",
+    0.334
+   ]
+  ],
+  "Paleoarqueano": [
+   [
+    "Neoarqueano",
+    0.601
+   ],
+   [
+    "Cenozóico",
+    0.331
+   ]
+  ],
+  "Paleoproterozóico": [
+   [
+    "Paleoproterozóico",
+    0.728
+   ],
+   [
+    "Cenozóico",
+    0.13
+   ]
+  ],
+  "Paleozóico": [
+   [
+    "Paleoproterozóico",
+    0.639
+   ],
+   [
+    "Mesozóico",
+    0.361
+   ]
+  ]
+ },
+ "magnetitite_by_map": {
+  "case1": {
+   "wPCA": {
+    "1:100,000 sheets": 0.96,
+    "ARIM 1:250,000": 0.89
+   },
+   "demeaned match": {
+    "1:100,000 sheets": 0.4,
+    "ARIM 1:250,000": 0.27
+   },
+   "correlation match": {
+    "1:100,000 sheets": 1.99,
+    "ARIM 1:250,000": 2.12
+   }
+  },
+  "case2": {
+   "wPCA": {
+    "1:100,000 sheets": 0.54,
+    "ARIM 1:250,000": 0.67
+   },
+   "demeaned match": {
+    "1:100,000 sheets": 0.16,
+    "ARIM 1:250,000": 0.12
+   },
+   "correlation match": {
+    "1:100,000 sheets": 2.76,
+    "ARIM 1:250,000": 2.51
+   }
+  }
+ }
+}
