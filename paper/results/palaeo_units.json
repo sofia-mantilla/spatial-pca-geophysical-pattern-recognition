@@ -1,0 +1,176 @@
+{
+ "case1": {
+  "n_clear": 224,
+  "by_unit": {
+   "PP23ac": {
+    "name": "Formação Águas Claras",
+    "age_ma": [
+     1800.1000000000001,
+     2300.0
+    ],
+    "survey": 6.72,
+    "top250": 2.49,
+    "ratio": 0.37
+   },
+   "PP3_gamma_ci": {
+    "name": "Corpo Granito Cigano",
+    "age_ma": [
+     1800.1000000000001,
+     2050.0
+    ],
+    "survey": 0.66,
+    "top250": 1.99,
+    "ratio": 3.0
+   },
+   "PP3_gamma_po": {
+    "name": "Corpo Granito Pojuca",
+    "age_ma": [
+     1800.1000000000001,
+     2050.0
+    ],
+    "survey": 0.08,
+    "top250": 0.0,
+    "ratio": 0.0
+   },
+   "PP3_gamma_rb": {
+    "name": "Corpo Granito Rio Branco",
+    "age_ma": [
+     1800.1000000000001,
+     2050.0
+    ],
+    "survey": 0.21,
+    "top250": 0.0,
+    "ratio": 0.0
+   },
+   "PP3_gamma_s": {
+    "name": "Corpo Granito Seringa",
+    "age_ma": [
+     1800.1000000000001,
+     2050.0
+    ],
+    "survey": 3.3,
+    "top250": 0.37,
+    "ratio": 0.11
+   },
+   "PP3_gamma_sc": {
+    "name": "Suíte Serra dos Carajás",
+    "age_ma": [
+     1800.1000000000001,
+     2050.0
+    ],
+    "survey": 0.76,
+    "top250": 0.0,
+    "ratio": 0.0
+   },
+   "PP3_gamma_vgvg": {
+    "name": "Corpo Granito Velho Guilherme",
+    "age_ma": [
+     1800.1000000000001,
+     2050.0
+    ],
+    "survey": 0.17,
+    "top250": 0.0,
+    "ratio": 0.0
+   }
+  },
+  "era_total": {
+   "name": "Paleoproterozóico",
+   "age_ma": null,
+   "survey": 11.91,
+   "top250": 4.84,
+   "ratio": 0.41
+  },
+  "granite_1p88ga": {
+   "top250": 2.36,
+   "survey": 5.18,
+   "fraction_of_era_selected": 0.488
+  }
+ },
+ "case2": {
+  "n_clear": 234,
+  "by_unit": {
+   "PP23ac": {
+    "name": "Formação Águas Claras",
+    "age_ma": [
+     1800.1000000000001,
+     2300.0
+    ],
+    "survey": 6.64,
+    "top250": 2.67,
+    "ratio": 0.4
+   },
+   "PP3_gamma_ci": {
+    "name": "Corpo Granito Cigano",
+    "age_ma": [
+     1800.1000000000001,
+     2050.0
+    ],
+    "survey": 0.66,
+    "top250": 4.44,
+    "ratio": 6.76
+   },
+   "PP3_gamma_po": {
+    "name": "Corpo Granito Pojuca",
+    "age_ma": [
+     1800.1000000000001,
+     2050.0
+    ],
+    "survey": 0.08,
+    "top250": 0.07,
+    "ratio": 0.95
+   },
+   "PP3_gamma_rb": {
+    "name": "Corpo Granito Rio Branco",
+    "age_ma": [
+     1800.1000000000001,
+     2050.0
+    ],
+    "survey": 0.2,
+    "top250": 0.0,
+    "ratio": 0.0
+   },
+   "PP3_gamma_s": {
+    "name": "Corpo Granito Seringa",
+    "age_ma": [
+     1800.1000000000001,
+     2050.0
+    ],
+    "survey": 3.17,
+    "top250": 6.38,
+    "ratio": 2.01
+   },
+   "PP3_gamma_sc": {
+    "name": "Suíte Serra dos Carajás",
+    "age_ma": [
+     1800.1000000000001,
+     2050.0
+    ],
+    "survey": 0.75,
+    "top250": 8.36,
+    "ratio": 11.1
+   },
+   "PP3_gamma_vgvg": {
+    "name": "Corpo Granito Velho Guilherme",
+    "age_ma": [
+     1800.1000000000001,
+     2050.0
+    ],
+    "survey": 0.17,
+    "top250": 0.76,
+    "ratio": 4.47
+   }
+  },
+  "era_total": {
+   "name": "Paleoproterozóico",
+   "age_ma": null,
+   "survey": 11.67,
+   "top250": 22.67,
+   "ratio": 1.94
+  },
+  "granite_1p88ga": {
+   "top250": 20.01,
+   "survey": 5.03,
+   "fraction_of_era_selected": 0.883
+  }
+ }
+}

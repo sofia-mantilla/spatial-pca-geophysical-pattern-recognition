@@ -59,6 +59,7 @@ to the repository's `data/` folder automatically.
 | `run_weight_ablation_area.py` | Appendix C weight ablation with the area budget (see above) |
 | `run_magnetite_units.py` | **R2.6**: whether the ranking finds mapped magnetitite and iron formation rather than mineralisation (Table 8) |
 | `run_era_shares.py` | **R2.6**: the age of the ground the ranking selects, against the survey as a whole (Table 8) |
+| `run_palaeo_units.py` | **R2.6**: which Palaeoproterozoic units carry the Case-2 age enrichment, unit by unit |
 | `run_contact_proximity.py` | **R2.6**: distance from the high-ranking windows to mapped geological contacts |
 | `run_restricted_area.py` | **R2.6**: whether restricting the candidate pool to basement removes the advantage over a random selection |
 | `run_highrank_geology.py` | **R2.6**: geology of the high-ranking areas that hold no known deposit |
