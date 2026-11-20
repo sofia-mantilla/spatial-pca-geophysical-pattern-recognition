@@ -49,6 +49,23 @@ to the repository's `data/` folder automatically.
 | `concat_alpha_lodo_select.py` | α selection by leave-one-deposit-out CV with a permutation-null gate |
 | `disentangle_significance.py` | Held-out significance / bootstrap of the k-choice advantage |
 
+**Major revision, November 2026** — the checks added for the reviewers' comments
+
+| Script | Reproduces |
+|---|---|
+| `run_rotation_scale_case1.py` | **R2.3**: Case-1 ranking with the reference window rotated (-55° to +90°) and the reference body rescaled (0.35-1.25), each scored with c̄(250), hits, a(250) and the ratio to a random selection of equal area (Table 6) |
+| `reference_geometry_ranges.py` | **R2.3**: the rotations and scales the Carajás deposits themselves justify, which set the ranges tested above |
+| `run_all_twelve_case2.py` | **R2.4**: the published Case-2 ranking rescored, unchanged and not re-tuned, against all twelve deposits instead of the five of the multivariate set |
+| `run_weight_ablation_area.py` | Appendix C weight ablation with the area budget (see above) |
+| `run_magnetite_units.py` | **R2.6**: whether the ranking finds mapped magnetitite and iron formation rather than mineralisation (Table 8) |
+| `run_era_shares.py` | **R2.6**: the age of the ground the ranking selects, against the survey as a whole (Table 8) |
+| `run_contact_proximity.py` | **R2.6**: distance from the high-ranking windows to mapped geological contacts |
+| `run_restricted_area.py` | **R2.6**: whether restricting the candidate pool to basement removes the advantage over a random selection |
+| `run_highrank_geology.py` | **R2.6**: geology of the high-ranking areas that hold no known deposit |
+| `fetch_geology.py` | Retrieves the Serviço Geológico do Brasil maps Appendix C uses, for the study-area bounding box alone |
+| `litho_classes.py` | The lithological grouping applied to the 1:100,000 units in Figure 26; the grouping is ours, not the survey's |
+| `deposit_names.py` | The names of the twelve deposits, the single source Table 1 and the figures share so they cannot disagree |
+
 **Figures** (file names as invoked by `main.tex`)
 
 | Script | Figure file(s) |
@@ -59,6 +76,11 @@ to the repository's `data/` folder automatically.
 | `make_fig_workflow.py` | `workflow_steps_schematic` |
 | `make_fig_recovery_null.py` | `case1_recovery_comparison`, `multi_recovery_comparison` (with the exact random expectation and band) |
 | `make_fig_recovery_area.py` | `recovery_vs_area` |
+| `make_fig_known_deposits_map.py` | `Fig2` (TMI with the twelve deposits labelled; names from `deposit_names.py`) |
+| `make_fig_rotation_scale.py` | `Fig25` (rotation and scale sensitivity) |
+| `make_fig_litho_combined.py` | `Fig26` (high-ranking windows on the mapped lithology, both cases) |
+| `make_fig_rotation_scale_explainer.py` | Explainer for the rotation and scale test; not a manuscript figure |
+| `make_fig_geology_targets.py`, `make_fig_litho_targets.py` | Single-case renderings of the high-ranking windows on the mapped geology, superseded in the paper by `make_fig_litho_combined.py` |
 | `plot_reconstruction_progression.py` | `case2_reconstruction_progression_tmi`, `case2_reconstruction_progression_u` |
 | `paper_figures_corrected.py` | Case-2 figures for the final configuration |
 | `make_multi_top_windows_3d.py` | Case-2 combined-ranking top-windows 3D figure (companion figure, not in the current manuscript text) |

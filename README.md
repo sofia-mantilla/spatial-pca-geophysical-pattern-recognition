@@ -98,11 +98,17 @@ and validates the top-ranked windows against independent deposit footprints.
   windows, about three times the expectation of a random selection of equal
   area.
 - **Case 2 — multivariate TMI + radiometric U** (reference: Alemão deposit):
-  validated. The combination recovers 64% of the test-deposit footprints and
-  hits three of four test deposits, more than either variable alone.
+  validated on deposits that express both variables. The combination recovers
+  64% of the test-deposit footprints and hits three of four test deposits, more
+  than either variable alone. Scored instead against all twelve deposits of the
+  study area, seven of which have no usable uranium expression, TMI alone ends
+  higher; the paper reports both and bounds the claim accordingly.
 - The scripts that reproduce the paper's numbers, tables, and figures live in
   [`paper/`](paper/) — see the [Reproducing the paper](#reproducing-the-paper)
-  section.
+  section. The checks added for the November 2026 major revision are there too:
+  rotation and scale sensitivity of the reference window, the multivariate
+  ranking rescored against all twelve deposits, and the high-ranking areas
+  compared with the published geological maps.
 
 <p align="center">
   <img src="docs/figures/multi_top250_windows.png" alt="Case 2 multivariate TMI + U top-ranked windows" width="900">
@@ -396,7 +402,7 @@ software release:
 **Software**
 
 > Mantilla Salas, S. (2026). *Windowed PCA (wPCA) for Geophysical Pattern
-> Recognition in Mineral Exploration* (v2.2.0). Zenodo.
+> Recognition in Mineral Exploration* (v2.3.1). Zenodo.
 > https://doi.org/10.5281/zenodo.20164768
 
 See [`CITATION.cff`](CITATION.cff) for machine-readable metadata; the Zenodo
