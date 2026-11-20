@@ -74,10 +74,13 @@ docs/repro_debug_deposit3_multivariate/rotation_recovery_smoke/
 
 # OS/editor
 .DS_Store
+.claude/
 docs/Spatial_PCA_paper_overleaf/
 
 # Analysis worktree and submission-internal documents (kept local, never published)
 _repro_worktree_*/
+_to_delete/
+docs/cover_letter_NRR_draft_*
 docs/NRR_SUBMISSION_CHECKLIST.md
 docs/cover_letter_NRR.md
 docs/Submission guidelines*
