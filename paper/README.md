@@ -43,6 +43,7 @@ to the repository's `data/` folder automatically.
 | Script | Reproduces |
 |---|---|
 | `run_ablation_checks.py` | **Case-2 headline numbers** (concat, TMI k=2 / U k=8, α=0.503: end 63.7, AUC 106.1, 3 hits) + weight-variant ablation (both cases), joint concat-PCA disclosure, Paulo Afonso check, classical baselines (demeaned match, correlation match, raw) |
+| `run_weight_ablation_area.py` | Appendix C weight-ablation table with the area budget: four weightings (deposit-based, standardized scores, uniform, whitened 1/λ) × both cases, each with c̄(250), AUC, hits, a(250) and the ratio to a random selection of equal area; also the variance-ledness of the published weights and the distinct-group counts of the top 250 (44 and 49) |
 | `run_refswap_case1.py` | Reference-swap: every deposit as reference (Case 1, k=17) |
 | `alpha_from_univariate.py` | Balance weight α set from univariate performance |
 | `concat_alpha_lodo_select.py` | α selection by leave-one-deposit-out CV with a permutation-null gate |
