@@ -1,0 +1,128 @@
+{
+ "shear zones": [
+  {
+   "population": "all candidate windows",
+   "n": 11972,
+   "dropped_outside_arim": 1059,
+   "median_m": 4104.0,
+   "mean_m": 6353.0,
+   "within_1km": 0.164,
+   "within_2km": 0.29,
+   "within_5km": 0.572
+  },
+  {
+   "population": "the twelve known deposits",
+   "n": 12,
+   "dropped_outside_arim": 0,
+   "median_m": 2733.0,
+   "mean_m": 4442.0,
+   "within_1km": 0.333,
+   "within_2km": 0.5,
+   "within_5km": 0.667
+  },
+  {
+   "population": "Case 1 top 250, no known deposit",
+   "n": 219,
+   "dropped_outside_arim": 5,
+   "median_m": 3805.0,
+   "mean_m": 5955.0,
+   "within_1km": 0.21,
+   "within_2km": 0.301,
+   "within_5km": 0.612
+  },
+  {
+   "population": "Case 2 top 250, no known deposit",
+   "n": 234,
+   "dropped_outside_arim": 0,
+   "median_m": 3977.0,
+   "mean_m": 6972.0,
+   "within_1km": 0.145,
+   "within_2km": 0.274,
+   "within_5km": 0.568
+  }
+ ],
+ "all structures but magnetic": [
+  {
+   "population": "all candidate windows",
+   "n": 11972,
+   "dropped_outside_arim": 1059,
+   "median_m": 1612.0,
+   "mean_m": 2137.0,
+   "within_1km": 0.356,
+   "within_2km": 0.579,
+   "within_5km": 0.911
+  },
+  {
+   "population": "the twelve known deposits",
+   "n": 12,
+   "dropped_outside_arim": 0,
+   "median_m": 1020.0,
+   "mean_m": 1163.0,
+   "within_1km": 0.417,
+   "within_2km": 0.833,
+   "within_5km": 1.0
+  },
+  {
+   "population": "Case 1 top 250, no known deposit",
+   "n": 219,
+   "dropped_outside_arim": 5,
+   "median_m": 1523.0,
+   "mean_m": 2125.0,
+   "within_1km": 0.42,
+   "within_2km": 0.584,
+   "within_5km": 0.9
+  },
+  {
+   "population": "Case 2 top 250, no known deposit",
+   "n": 234,
+   "dropped_outside_arim": 0,
+   "median_m": 1400.0,
+   "mean_m": 1786.0,
+   "within_1km": 0.389,
+   "within_2km": 0.645,
+   "within_5km": 0.953
+  }
+ ],
+ "named systems": [
+  {
+   "population": "all candidate windows",
+   "n": 11972,
+   "dropped_outside_arim": 1059,
+   "median_m": 53262.0,
+   "mean_m": 57272.0,
+   "within_1km": 0.014,
+   "within_2km": 0.025,
+   "within_5km": 0.07
+  },
+  {
+   "population": "the twelve known deposits",
+   "n": 12,
+   "dropped_outside_arim": 0,
+   "median_m": 27128.0,
+   "mean_m": 55617.0,
+   "within_1km": 0.0,
+   "within_2km": 0.083,
+   "within_5km": 0.083
+  },
+  {
+   "population": "Case 1 top 250, no known deposit",
+   "n": 219,
+   "dropped_outside_arim": 5,
+   "median_m": 56631.0,
+   "mean_m": 56215.0,
+   "within_1km": 0.023,
+   "within_2km": 0.027,
+   "within_5km": 0.068
+  },
+  {
+   "population": "Case 2 top 250, no known deposit",
+   "n": 234,
+   "dropped_outside_arim": 0,
+   "median_m": 29092.0,
+   "mean_m": 38490.0,
+   "within_1km": 0.009,
+   "within_2km": 0.026,
+   "within_5km": 0.103
+  }
+ ]
+}

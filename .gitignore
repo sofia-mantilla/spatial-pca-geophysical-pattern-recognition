@@ -106,3 +106,16 @@ data/Carajas_Brazil_Geology/
 
 # Scratch output of the paper figure scripts
 paper/figures_out/
+
+# ARIM Carajas structures (SGB 2019, 1:250,000, preliminary integration map).
+# Unlike the geology above there is no fetch script for this archive, and the
+# paper now prints numbers from it, so the two layers the proximity scripts
+# read are committed flat, with the coverage outline make_arim_footprint.py
+# derives. The 33 MB archive, its extracted tree and the reference GeoTIFF of
+# named shear zones stay out.
+data/sig_arim_carajas_versao_preliminar_vr.zip
+data/Geological_map_of_Carajas_EPSG31982.tif
+data/Carajas_Brazil_Structures/*
+!data/Carajas_Brazil_Structures/arim_estrutura.*
+!data/Carajas_Brazil_Structures/arim_recmin.*
+!data/Carajas_Brazil_Structures/arim_footprint.geojson

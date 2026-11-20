@@ -61,9 +61,13 @@ to the repository's `data/` folder automatically.
 | `run_era_shares.py` | **R2.6**: the age of the ground the ranking selects, against the survey as a whole (Table 8) |
 | `run_palaeo_units.py` | **R2.6**: which Palaeoproterozoic units carry the Case-2 age enrichment, unit by unit |
 | `run_contact_proximity.py` | **R2.6**: distance from the high-ranking windows to mapped geological contacts |
+| `run_structure_proximity.py` | **R2.6**: distance from the high-ranking windows to mapped shear zones, which tests a co-author's structural reading and does not confirm it. Magnetic lineaments are excluded as circular |
+| `run_occurrence_proximity.py` | **R2.6**: distance to mapped Cu-Au mineral occurrences, against an Fe-Mn control; the register is too sparse to discriminate, and that is the result |
+| `make_arim_footprint.py` | Reduces the ARIM lithology layer to the coverage outline the two proximity scripts above restrict their populations to |
 | `run_restricted_area.py` | **R2.6**: whether restricting the candidate pool to basement removes the advantage over a random selection |
 | `run_highrank_geology.py` | **R2.6**: geology of the high-ranking areas that hold no known deposit |
 | `fetch_geology.py` | Retrieves the Serviço Geológico do Brasil maps Appendix C uses, for the study-area bounding box alone |
+| — | The ARIM Carajás structures and occurrences have no fetch script: `data/Carajas_Brazil_Structures/arim_estrutura.*` and `arim_recmin.*` are committed, copied from the SGB 2019 preliminary integration map (http://rigeo.cprm.gov.br/jspui/handle/doc/19048) |
 | `litho_classes.py` | The lithological grouping applied to the 1:100,000 units in Figure 26; the grouping is ours, not the survey's |
 | `deposit_names.py` | The names of the twelve deposits, the single source Table 1 and the figures share so they cannot disagree |
 

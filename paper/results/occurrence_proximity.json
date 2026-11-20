@@ -1,0 +1,60 @@
+{
+ "Cu and Au occurrences": [
+  {
+   "population": "all candidate windows",
+   "n": 11972,
+   "dropped_outside_arim": 1059,
+   "median_m": 30087.0,
+   "mean_m": 32774.0,
+   "within_5km": 0.052,
+   "within_10km": 0.139
+  },
+  {
+   "population": "Case 1 top 250, no known deposit",
+   "n": 219,
+   "dropped_outside_arim": 5,
+   "median_m": 28840.0,
+   "mean_m": 31285.0,
+   "within_5km": 0.068,
+   "within_10km": 0.132
+  },
+  {
+   "population": "Case 2 top 250, no known deposit",
+   "n": 234,
+   "dropped_outside_arim": 0,
+   "median_m": 24407.0,
+   "mean_m": 28342.0,
+   "within_5km": 0.038,
+   "within_10km": 0.184
+  }
+ ],
+ "Fe and Mn occurrences (control)": [
+  {
+   "population": "all candidate windows",
+   "n": 11972,
+   "dropped_outside_arim": 1059,
+   "median_m": 28001.0,
+   "mean_m": 32248.0,
+   "within_5km": 0.057,
+   "within_10km": 0.154
+  },
+  {
+   "population": "Case 1 top 250, no known deposit",
+   "n": 219,
+   "dropped_outside_arim": 5,
+   "median_m": 20788.0,
+   "mean_m": 28717.0,
+   "within_5km": 0.1,
+   "within_10km": 0.164
+  },
+  {
+   "population": "Case 2 top 250, no known deposit",
+   "n": 234,
+   "dropped_outside_arim": 0,
+   "median_m": 29223.0,
+   "mean_m": 29651.0,
+   "within_5km": 0.017,
+   "within_10km": 0.145
+  }
+ ]
+}

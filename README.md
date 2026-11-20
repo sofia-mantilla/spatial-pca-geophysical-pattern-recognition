@@ -402,7 +402,7 @@ software release:
 **Software**
 
 > Mantilla Salas, S. (2026). *Windowed PCA (wPCA) for Geophysical Pattern
-> Recognition in Mineral Exploration* (v2.3.2). Zenodo.
+> Recognition in Mineral Exploration* (v2.3.3). Zenodo.
 > https://doi.org/10.5281/zenodo.20164768
 
 See [`CITATION.cff`](CITATION.cff) for machine-readable metadata; the Zenodo
