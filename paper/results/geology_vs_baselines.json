@@ -1,0 +1,200 @@
+{
+ "draws": 2000,
+ "seed": 20261120,
+ "case1": {
+  "rankings": {
+   "wPCA (published)": {
+    "magnetite strict": 0.9615937294056943,
+    "magnetite broad": 0.837998635108068,
+    "Archean": 1.1701750643844326,
+    "Palaeoproterozoic": 0.40683575500653835,
+    "Neoproterozoic and younger": 0.2170462637634972,
+    "contact distance m": 1183.0951894845302,
+    "shear distance m": 3805.2595180880894,
+    "n": 224,
+    "percentile": {
+     "magnetite strict": 0.4605,
+     "magnetite broad": 0.1295,
+     "Archean": 1.0,
+     "Palaeoproterozoic": 0.0,
+     "Neoproterozoic and younger": 0.0,
+     "contact distance m": 0.002,
+     "shear distance m": 0.182
+    }
+   },
+   "demeaned match": {
+    "magnetite strict": 0.3999446050772441,
+    "magnetite broad": 0.7371877408513233,
+    "Archean": 1.1246346612765032,
+    "Palaeoproterozoic": 0.33199743423503725,
+    "Neoproterozoic and younger": 0.7609109311080375,
+    "contact distance m": 1000.0,
+    "shear distance m": 3984.971769034255,
+    "n": 225,
+    "percentile": {
+     "magnetite strict": 0.0015,
+     "magnetite broad": 0.0245,
+     "Archean": 1.0,
+     "Palaeoproterozoic": 0.0,
+     "Neoproterozoic and younger": 0.075,
+     "contact distance m": 0.0,
+     "shear distance m": 0.3145
+    }
+   },
+   "correlation match": {
+    "magnetite strict": 1.9885898908334343,
+    "magnetite broad": 1.5606893041196928,
+    "Archean": 1.0374757162212875,
+    "Palaeoproterozoic": 0.5204533041275251,
+    "Neoproterozoic and younger": 1.327025208191464,
+    "contact distance m": 1009.9019513592784,
+    "shear distance m": 4308.131845707603,
+    "n": 230,
+    "percentile": {
+     "magnetite strict": 1.0,
+     "magnetite broad": 1.0,
+     "Archean": 0.9385,
+     "Palaeoproterozoic": 0.0005,
+     "Neoproterozoic and younger": 0.9015,
+     "contact distance m": 0.0,
+     "shear distance m": 0.662
+    }
+   }
+  },
+  "random": {
+   "magnetite strict": {
+    "mean": 1.0012167793139755,
+    "p5": 0.6571103109812018,
+    "p95": 1.3905848340023768
+   },
+   "magnetite broad": {
+    "mean": 0.9843147639935053,
+    "p5": 0.7779639715727324,
+    "p95": 1.2032385186331598
+   },
+   "Archean": {
+    "mean": 0.993706917089412,
+    "p5": 0.9464568749764659,
+    "p95": 1.0406402157216126
+   },
+   "Palaeoproterozoic": {
+    "mean": 1.0064095100374295,
+    "p5": 0.7471040362220713,
+    "p95": 1.2637570225399084
+   },
+   "Neoproterozoic and younger": {
+    "mean": 1.0511772450341952,
+    "p5": 0.7206081704715934,
+    "p95": 1.3981138277745515
+   },
+   "contact distance m": {
+    "mean": 1586.26731928331,
+    "p5": 1341.640786499874,
+    "p95": 1843.9088914585775
+   },
+   "shear distance m": {
+    "mean": 4159.5360963795565,
+    "p5": 3526.453894564545,
+    "p95": 4808.326112068523
+   }
+  }
+ },
+ "case2": {
+  "rankings": {
+   "wPCA (published)": {
+    "magnetite strict": 0.5382168388303357,
+    "magnetite broad": 0.8492546128690022,
+    "Archean": 0.9712135200987553,
+    "Palaeoproterozoic": 1.9437566364315493,
+    "Neoproterozoic and younger": 0.0,
+    "contact distance m": 1264.9110640673518,
+    "shear distance m": 3977.429208645048,
+    "n": 234,
+    "percentile": {
+     "magnetite strict": 0.0235,
+     "magnetite broad": 0.164,
+     "Archean": 0.1955,
+     "Palaeoproterozoic": 1.0,
+     "Neoproterozoic and younger": 0.0,
+     "contact distance m": 0.015,
+     "shear distance m": 0.329
+    }
+   },
+   "demeaned match": {
+    "magnetite strict": 0.16205183985701974,
+    "magnetite broad": 0.65000945953727,
+    "Archean": 0.9722434205777339,
+    "Palaeoproterozoic": 1.2255735869633047,
+    "Neoproterozoic and younger": 0.9516513398560161,
+    "contact distance m": 1821.9544457292886,
+    "shear distance m": 5882.176467941097,
+    "n": 242,
+    "percentile": {
+     "magnetite strict": 0.0,
+     "magnetite broad": 0.0045,
+     "Archean": 0.2085,
+     "Palaeoproterozoic": 0.9175,
+     "Neoproterozoic and younger": 0.3625,
+     "contact distance m": 0.9355,
+     "shear distance m": 1.0
+    }
+   },
+   "correlation match": {
+    "magnetite strict": 2.7641696507486744,
+    "magnetite broad": 1.5177438323448538,
+    "Archean": 0.9808263429336381,
+    "Palaeoproterozoic": 0.864535940499742,
+    "Neoproterozoic and younger": 1.3563940334779847,
+    "contact distance m": 1280.6248474865697,
+    "shear distance m": 4044.749683231337,
+    "n": 236,
+    "percentile": {
+     "magnetite strict": 1.0,
+     "magnetite broad": 1.0,
+     "Archean": 0.284,
+     "Palaeoproterozoic": 0.209,
+     "Neoproterozoic and younger": 0.94,
+     "contact distance m": 0.027,
+     "shear distance m": 0.404
+    }
+   }
+  },
+  "random": {
+   "magnetite strict": {
+    "mean": 0.9957195037856956,
+    "p5": 0.5999137378535294,
+    "p95": 1.4382347125592716
+   },
+   "magnetite broad": {
+    "mean": 0.9883175330549325,
+    "p5": 0.7679518980377843,
+    "p95": 1.222576542991868
+   },
+   "Archean": {
+    "mean": 0.9968498395256961,
+    "p5": 0.9467629187267633,
+    "p95": 1.0452638275453825
+   },
+   "Palaeoproterozoic": {
+    "mean": 1.000500745450273,
+    "p5": 0.7396005287166255,
+    "p95": 1.2719789476142214
+   },
+   "Neoproterozoic and younger": {
+    "mean": 1.028101283782881,
+    "p5": 0.7028809632207075,
+    "p95": 1.3760883181827086
+   },
+   "contact distance m": {
+    "mean": 1587.599068540942,
+    "p5": 1341.640786499874,
+    "p95": 1843.9088914585775
+   },
+   "shear distance m": {
+    "mean": 4158.09728122646,
+    "p5": 3492.8498393145956,
+    "p95": 4841.487374764082
+   }
+  }
+ }
+}

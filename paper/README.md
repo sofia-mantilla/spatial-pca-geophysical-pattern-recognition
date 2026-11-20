@@ -64,6 +64,7 @@ to the repository's `data/` folder automatically.
 | `run_structure_proximity.py` | **R2.6**: distance from the high-ranking windows to mapped shear zones, which tests a co-author's structural reading and does not confirm it. Magnetic lineaments are excluded as circular |
 | `run_occurrence_proximity.py` | **R2.6**: distance to mapped Cu-Au mineral occurrences, against an Fe-Mn control; the register is too sparse to discriminate, and that is the result |
 | `make_arim_footprint.py` | Reduces the ARIM lithology layer to the coverage outline the two proximity scripts above restrict their populations to |
+| `run_geology_vs_baselines.py` | **R2.6**: every published geological quantity for the wPCA selection, the two classical template baselines and 2,000 random draws of 250 windows, so the maps are read on the same footing as the validation |
 | `run_restricted_area.py` | **R2.6**: whether restricting the candidate pool to basement removes the advantage over a random selection |
 | `run_highrank_geology.py` | **R2.6**: geology of the high-ranking areas that hold no known deposit |
 | `fetch_geology.py` | Retrieves the Serviço Geológico do Brasil maps Appendix C uses, for the study-area bounding box alone |
@@ -84,6 +85,7 @@ to the repository's `data/` folder automatically.
 | `make_fig_known_deposits_map.py` | `Fig2` (TMI with the twelve deposits labelled; names from `deposit_names.py`) |
 | `make_fig_rotation_scale.py` | `Fig25` (rotation and scale sensitivity) |
 | `make_fig_litho_combined.py` | `Fig26` (high-ranking windows on the mapped lithology, both cases) |
+| — | `make_fig_litho_combined.py --structures` draws the ARIM shear zones over both panels and labels the named systems; that is how Fig26 is now generated |
 | `make_fig_rotation_scale_explainer.py` | Explainer for the rotation and scale test; not a manuscript figure |
 | `make_fig_geology_targets.py`, `make_fig_litho_targets.py` | Single-case renderings of the high-ranking windows on the mapped geology, superseded in the paper by `make_fig_litho_combined.py` |
 | `plot_reconstruction_progression.py` | `case2_reconstruction_progression_tmi`, `case2_reconstruction_progression_u` |

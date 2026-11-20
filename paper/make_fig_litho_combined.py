@@ -13,9 +13,17 @@ cent of the survey, and because at the printed width the survey plots at about
     (b) Case 2, multivariate TMI + radiometric U, reference Alemao,
         k_TMI=2, k_U=8, alpha_TMI=0.503
 
+With --structures the mapped shear zones of the ARIM Carajas preliminary
+integration map (SGB, 2019, 1:250,000) are drawn over both panels, and the
+named systems are labelled. That is the layer run_structure_proximity.py
+measures, so the figure and the measurement show the same features. Its
+magnetic lineaments are left out here as they are there: they are
+interpretations of the same aeromagnetic survey the ranking is built on.
+
 Run from inside paper/:
 
     python make_fig_litho_combined.py --outdir ../docs/Spatial_PCA_paper_overleaf/figures
+    python make_fig_litho_combined.py --structures --name Fig27 --outdir ...
 """
 from __future__ import annotations
 
@@ -25,6 +33,7 @@ from pathlib import Path
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.patheffects as pe
 from matplotlib.lines import Line2D
 from matplotlib.patches import Rectangle
 from shapely.geometry import box
@@ -36,6 +45,9 @@ from make_fig_litho_targets import deposit_frames, ranked_windows, study_area
 
 HERE = Path(__file__).resolve().parent
 GEOLOGY = HERE.parent / "data" / "Carajas_Brazil_Geology" / "para_1m_carajas.geojson"
+STRUCTURES = (HERE.parent / "data" / "Carajas_Brazil_Structures" / "arim_estrutura.shp")
+MAGNETIC = "Lineamento Magnético"     # circular here: excluded, as in the analysis
+SHEAR_COLOUR = "#b5003c"
 UTM22S = "EPSG:32722"
 N_TOP = 250
 FIG_W = 5.14                      # \textwidth = 372 pt
@@ -49,6 +61,8 @@ def main() -> int:
     parser.add_argument("--dpi", type=int, default=400)
     parser.add_argument("--name", default="Fig26")
     parser.add_argument("--colour", choices=("lithology", "age"), default="lithology")
+    parser.add_argument("--structures", action="store_true",
+                        help="overlay the mapped shear zones and label the named systems")
     args = parser.parse_args()
     args.outdir.mkdir(parents=True, exist_ok=True)
 
@@ -70,6 +84,17 @@ def main() -> int:
     present = [c for c in order if (geology["cls"] == c).any()]
     deposits = deposit_frames()
 
+    shear = named = None
+    if args.structures:
+        st = gpd.read_file(STRUCTURES).to_crs(UTM22S)
+        st = gpd.clip(st, box(xmin, ymin, xmax, ymax))
+        st = st[~st.geometry.is_empty]
+        st = st[st["TIPO_ESTRU"] != MAGNETIC]
+        shear = st[st["TIPO_ESTRU"].str.contains("cisalhamento", case=False, na=False)]
+        named = st[st["NOME_ESTRU"].notna()]
+        print("%d structures, %d of them shear zones, %d named"
+              % (len(st), len(shear), len(named)))
+
     panel_h = (FIG_W - 0.62) / ((xmax - xmin) / (ymax - ymin))
     fig, axes = plt.subplots(2, 1, figsize=(FIG_W, 2 * panel_h + 1.55))
 
@@ -88,6 +113,20 @@ def main() -> int:
                                    rect.bounds[2] - rect.bounds[0],
                                    rect.bounds[3] - rect.bounds[1],
                                    fill=False, ec="#1f3fd6", lw=0.65))
+        if shear is not None:
+            # White casing first, so the lines read over any lithology colour.
+            shear.plot(ax=ax, color="white", linewidth=1.5, alpha=0.9)
+            shear.plot(ax=ax, color=SHEAR_COLOUR, linewidth=0.7)
+            for name, grp in named.groupby("NOME_ESTRU"):
+                centre = grp.geometry.union_all().centroid
+                if not (xmin < centre.x < xmax and ymin < centre.y < ymax):
+                    continue
+                ax.annotate(str(name).replace("Zona de Cisalhamento ", "ZC ")
+                            .replace("Lineamento ", "Lin. ").replace("Falha ", "F. "),
+                            (centre.x, centre.y), fontsize=4.6, color=SHEAR_COLOUR,
+                            ha="center", va="center", fontweight="bold",
+                            path_effects=[pe.withStroke(linewidth=1.4,
+                                                        foreground="white")])
         deposits.boundary.plot(ax=ax, color="white", linewidth=1.2)
         deposits.boundary.plot(ax=ax, color="black", linewidth=0.65)
         deposits.iloc[[ref - 1]].boundary.plot(ax=ax, color="#1f3fd6", linewidth=1.2)
@@ -113,6 +152,9 @@ def main() -> int:
                 Line2D([], [], color="black", lw=1.0)]
     labels += [f"top {N_TOP}, no known deposit", f"top {N_TOP}, on a known deposit",
                "known deposit (blue: reference)"]
+    if shear is not None:
+        handles += [Line2D([], [], color=SHEAR_COLOUR, lw=0.9)]
+        labels += ["mapped shear zone (ARIM, 1:250,000)"]
     axes[1].legend(handles, labels, loc="upper center", bbox_to_anchor=(0.5, -0.20),
                    ncol=2, frameon=False, fontsize=5.5, handlelength=1.4,
                    handleheight=0.9, labelspacing=0.3, columnspacing=0.8)
