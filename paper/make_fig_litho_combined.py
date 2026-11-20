@@ -13,12 +13,15 @@ cent of the survey, and because at the printed width the survey plots at about
     (b) Case 2, multivariate TMI + radiometric U, reference Alemao,
         k_TMI=2, k_U=8, alpha_TMI=0.503
 
-With --structures the mapped shear zones of the ARIM Carajas preliminary
-integration map (SGB, 2019, 1:250,000) are drawn over both panels, and the
-named systems are labelled. That is the layer run_structure_proximity.py
-measures, so the figure and the measurement show the same features. Its
-magnetic lineaments are left out here as they are there: they are
-interpretations of the same aeromagnetic survey the ranking is built on.
+With --structures the mapped structures of the ARIM Carajas preliminary
+integration map (SGB, 2019, 1:250,000) are drawn over both panels and the
+named systems are labelled. Two populations are drawn apart, because they
+are treated apart. Shear zones are solid: they are what
+run_structure_proximity.py measures, so the figure and the measurement show
+the same features. Magnetic lineaments are dashed and are excluded from
+that measurement, being interpretations of the same aeromagnetic survey the
+ranking is built on -- drawing them is not circular, measuring against them
+would be. Pass --no-lineaments to leave them out.
 
 Run from inside paper/:
 
@@ -46,8 +49,9 @@ from make_fig_litho_targets import deposit_frames, ranked_windows, study_area
 HERE = Path(__file__).resolve().parent
 GEOLOGY = HERE.parent / "data" / "Carajas_Brazil_Geology" / "para_1m_carajas.geojson"
 STRUCTURES = (HERE.parent / "data" / "Carajas_Brazil_Structures" / "arim_estrutura.shp")
-MAGNETIC = "Lineamento Magnético"     # circular here: excluded, as in the analysis
+MAGNETIC = "Lineamento Magnético"     # drawn, but never measured against
 SHEAR_COLOUR = "#b5003c"
+LINEAMENT_COLOUR = "#0b6e6e"   # distinct from the blue of deposit-touching windows
 UTM22S = "EPSG:32722"
 N_TOP = 250
 FIG_W = 5.14                      # \textwidth = 372 pt
@@ -62,7 +66,9 @@ def main() -> int:
     parser.add_argument("--name", default="Fig26")
     parser.add_argument("--colour", choices=("lithology", "age"), default="lithology")
     parser.add_argument("--structures", action="store_true",
-                        help="overlay the mapped shear zones and label the named systems")
+                        help="overlay the mapped structures and label the named systems")
+    parser.add_argument("--no-lineaments", dest="lineaments", action="store_false",
+                        help="with --structures, omit the magnetic lineaments")
     args = parser.parse_args()
     args.outdir.mkdir(parents=True, exist_ok=True)
 
@@ -84,16 +90,20 @@ def main() -> int:
     present = [c for c in order if (geology["cls"] == c).any()]
     deposits = deposit_frames()
 
-    shear = named = None
+    shear = named = lineaments = None
     if args.structures:
         st = gpd.read_file(STRUCTURES).to_crs(UTM22S)
         st = gpd.clip(st, box(xmin, ymin, xmax, ymax))
         st = st[~st.geometry.is_empty]
-        st = st[st["TIPO_ESTRU"] != MAGNETIC]
-        shear = st[st["TIPO_ESTRU"].str.contains("cisalhamento", case=False, na=False)]
-        named = st[st["NOME_ESTRU"].notna()]
-        print("%d structures, %d of them shear zones, %d named"
-              % (len(st), len(shear), len(named)))
+        magnetic = st["TIPO_ESTRU"] == MAGNETIC
+        if args.lineaments:
+            lineaments = st[magnetic]
+        mapped = st[~magnetic]
+        shear = mapped[mapped["TIPO_ESTRU"].str.contains("cisalhamento",
+                                                         case=False, na=False)]
+        named = mapped[mapped["NOME_ESTRU"].notna()]
+        print("%d structures: %d shear zones, %d magnetic lineaments, %d named"
+              % (len(st), len(shear), int(magnetic.sum()), len(named)))
 
     panel_h = (FIG_W - 0.62) / ((xmax - xmin) / (ymax - ymin))
     fig, axes = plt.subplots(2, 1, figsize=(FIG_W, 2 * panel_h + 1.55))
@@ -113,6 +123,11 @@ def main() -> int:
                                    rect.bounds[2] - rect.bounds[0],
                                    rect.bounds[3] - rect.bounds[1],
                                    fill=False, ec="#1f3fd6", lw=0.65))
+        if lineaments is not None and len(lineaments):
+            # Under the shear zones: context, not the thing being measured.
+            lineaments.plot(ax=ax, color="white", linewidth=1.1, alpha=0.85)
+            lineaments.plot(ax=ax, color=LINEAMENT_COLOUR, linewidth=0.45,
+                            linestyle=(0, (3.5, 2.0)), alpha=0.9)
         if shear is not None:
             # White casing first, so the lines read over any lithology colour.
             shear.plot(ax=ax, color="white", linewidth=1.5, alpha=0.9)
@@ -155,6 +170,10 @@ def main() -> int:
     if shear is not None:
         handles += [Line2D([], [], color=SHEAR_COLOUR, lw=0.9)]
         labels += ["mapped shear zone (ARIM, 1:250,000)"]
+    if lineaments is not None and len(lineaments):
+        handles += [Line2D([], [], color=LINEAMENT_COLOUR, lw=0.7,
+                           linestyle=(0, (3.5, 2.0)))]
+        labels += ["magnetic lineament (not measured against)"]
     axes[1].legend(handles, labels, loc="upper center", bbox_to_anchor=(0.5, -0.20),
                    ncol=2, frameon=False, fontsize=5.5, handlelength=1.4,
                    handleheight=0.9, labelspacing=0.3, columnspacing=0.8)
