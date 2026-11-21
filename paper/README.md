@@ -51,6 +51,16 @@ to the repository's `data/` folder automatically.
 
 **Major revision, November 2026** — the checks added for the reviewers' comments
 
+> The geological-map comparisons below (`run_magnetite_units`, `run_era_shares`,
+> `run_palaeo_units`, `run_contact_proximity`, `run_restricted_area`,
+> `run_highrank_geology`, `run_geology_vs_baselines`, `run_map_agreement`,
+> `run_occurrence_proximity`) were run for R2.6 and then **taken out of the
+> paper**, which now answers that comment with a co-author's geological reading
+> instead. `run_structure_proximity.py` is the exception: its result is still
+> quoted, because it tests part of that reading. The rest are kept here because
+> they were done and they reproduce; they are not behind any number in the
+> current text.
+
 | Script | Reproduces |
 |---|---|
 | `run_rotation_scale_case1.py` | **R2.3**: Case-1 ranking with the reference window rotated (-55° to +90°) and the reference body rescaled (0.35-1.25), each scored with c̄(250), hits, a(250) and the ratio to a random selection of equal area (Table 6) |
