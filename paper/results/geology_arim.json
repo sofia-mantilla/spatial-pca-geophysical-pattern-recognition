@@ -1,0 +1,222 @@
+{
+ "draws": 2000,
+ "seed": 20261120,
+ "case1": {
+  "rankings": {
+   "wPCA": {
+    "magnetitite": 0.762,
+    "iron formation set": 0.82,
+    "Mesoarqueano": 0.972,
+    "Neoarqueano": 1.06,
+    "Paleoproterozóico": 1.017,
+    "Cenozóico": 0.251,
+    "sheets magnetitite": 0.831,
+    "sheets iron formation set": 0.687,
+    "n": 160,
+    "percentile": {
+     "magnetitite": 0.155,
+     "iron formation set": 0.072,
+     "Mesoarqueano": 0.426,
+     "Neoarqueano": 0.756,
+     "Paleoproterozóico": 0.544,
+     "Cenozóico": 0.0,
+     "sheets magnetitite": 0.235,
+     "sheets iron formation set": 0.007
+    }
+   },
+   "demeaned match": {
+    "magnetitite": 0.228,
+    "iron formation set": 1.157,
+    "Mesoarqueano": 0.963,
+    "Neoarqueano": 1.303,
+    "Paleoproterozóico": 0.593,
+    "Cenozóico": 0.113,
+    "sheets magnetitite": 0.206,
+    "sheets iron formation set": 0.658,
+    "n": 145,
+    "percentile": {
+     "magnetitite": 0.0,
+     "iron formation set": 0.858,
+     "Mesoarqueano": 0.391,
+     "Neoarqueano": 1.0,
+     "Paleoproterozóico": 0.001,
+     "Cenozóico": 0.0,
+     "sheets magnetitite": 0.0,
+     "sheets iron formation set": 0.003
+    }
+   },
+   "correlation match": {
+    "magnetitite": 2.127,
+    "iron formation set": 1.593,
+    "Mesoarqueano": 0.857,
+    "Neoarqueano": 1.278,
+    "Paleoproterozóico": 0.705,
+    "Cenozóico": 0.987,
+    "sheets magnetitite": 1.772,
+    "sheets iron formation set": 1.538,
+    "n": 138,
+    "percentile": {
+     "magnetitite": 0.999,
+     "iron formation set": 1.0,
+     "Mesoarqueano": 0.076,
+     "Neoarqueano": 1.0,
+     "Paleoproterozóico": 0.019,
+     "Cenozóico": 0.522,
+     "sheets magnetitite": 0.996,
+     "sheets iron formation set": 1.0
+    }
+   }
+  },
+  "random": {
+   "magnetitite": {
+    "mean": 1.042,
+    "p5": 0.613,
+    "p95": 1.539
+   },
+   "iron formation set": {
+    "mean": 1.017,
+    "p5": 0.797,
+    "p95": 1.241
+   },
+   "Mesoarqueano": {
+    "mean": 0.99,
+    "p5": 0.839,
+    "p95": 1.147
+   },
+   "Neoarqueano": {
+    "mean": 1.008,
+    "p5": 0.885,
+    "p95": 1.131
+   },
+   "Paleoproterozóico": {
+    "mean": 0.999,
+    "p5": 0.759,
+    "p95": 1.246
+   },
+   "Cenozóico": {
+    "mean": 0.98,
+    "p5": 0.673,
+    "p95": 1.32
+   },
+   "sheets magnetitite": {
+    "mean": 1.015,
+    "p5": 0.637,
+    "p95": 1.429
+   },
+   "sheets iron formation set": {
+    "mean": 1.002,
+    "p5": 0.779,
+    "p95": 1.239
+   }
+  }
+ },
+ "case2": {
+  "rankings": {
+   "wPCA": {
+    "magnetitite": 0.474,
+    "iron formation set": 0.565,
+    "Mesoarqueano": 0.6,
+    "Neoarqueano": 1.265,
+    "Paleoproterozóico": 1.471,
+    "Cenozóico": 0.139,
+    "sheets magnetitite": 0.39,
+    "sheets iron formation set": 0.643,
+    "n": 200,
+    "percentile": {
+     "magnetitite": 0.025,
+     "iron formation set": 0.001,
+     "Mesoarqueano": 0.0,
+     "Neoarqueano": 1.0,
+     "Paleoproterozóico": 0.996,
+     "Cenozóico": 0.0,
+     "sheets magnetitite": 0.003,
+     "sheets iron formation set": 0.005
+    }
+   },
+   "demeaned match": {
+    "magnetitite": 0.085,
+    "iron formation set": 0.754,
+    "Mesoarqueano": 1.236,
+    "Neoarqueano": 0.77,
+    "Paleoproterozóico": 0.989,
+    "Cenozóico": 1.036,
+    "sheets magnetitite": 0.082,
+    "sheets iron formation set": 0.555,
+    "n": 156,
+    "percentile": {
+     "magnetitite": 0.0,
+     "iron formation set": 0.034,
+     "Mesoarqueano": 0.991,
+     "Neoarqueano": 0.001,
+     "Paleoproterozóico": 0.463,
+     "Cenozóico": 0.601,
+     "sheets magnetitite": 0.0,
+     "sheets iron formation set": 0.001
+    }
+   },
+   "correlation match": {
+    "magnetitite": 2.296,
+    "iron formation set": 1.325,
+    "Mesoarqueano": 0.866,
+    "Neoarqueano": 1.018,
+    "Paleoproterozóico": 1.103,
+    "Cenozóico": 1.565,
+    "sheets magnetitite": 2.76,
+    "sheets iron formation set": 1.396,
+    "n": 155,
+    "percentile": {
+     "magnetitite": 1.0,
+     "iron formation set": 0.988,
+     "Mesoarqueano": 0.076,
+     "Neoarqueano": 0.59,
+     "Paleoproterozóico": 0.738,
+     "Cenozóico": 0.993,
+     "sheets magnetitite": 1.0,
+     "sheets iron formation set": 0.994
+    }
+   }
+  },
+  "random": {
+   "magnetitite": {
+    "mean": 1.025,
+    "p5": 0.555,
+    "p95": 1.582
+   },
+   "iron formation set": {
+    "mean": 1.007,
+    "p5": 0.782,
+    "p95": 1.24
+   },
+   "Mesoarqueano": {
+    "mean": 0.998,
+    "p5": 0.846,
+    "p95": 1.151
+   },
+   "Neoarqueano": {
+    "mean": 0.999,
+    "p5": 0.873,
+    "p95": 1.128
+   },
+   "Paleoproterozóico": {
+    "mean": 1.006,
+    "p5": 0.747,
+    "p95": 1.271
+   },
+   "Cenozóico": {
+    "mean": 0.984,
+    "p5": 0.63,
+    "p95": 1.376
+   },
+   "sheets magnetitite": {
+    "mean": 0.999,
+    "p5": 0.581,
+    "p95": 1.465
+   },
+   "sheets iron formation set": {
+    "mean": 0.996,
+    "p5": 0.751,
+    "p95": 1.253
+   }
+  }
+ }
+}

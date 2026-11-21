@@ -56,10 +56,10 @@ to the repository's `data/` folder automatically.
 > `run_highrank_geology`, `run_geology_vs_baselines`, `run_map_agreement`,
 > `run_occurrence_proximity`) were run for R2.6 and then **taken out of the
 > paper**, which now answers that comment with a co-author's geological reading
-> instead. `run_structure_proximity.py` is the exception: its result is still
-> quoted, because it tests part of that reading. The rest are kept here because
-> they were done and they reproduce; they are not behind any number in the
-> current text.
+> instead. `run_structure_proximity.py` went the same way on 20 November, with
+> the structural claim it tested, and `run_geology_arim.py` repeats the test on
+> the ARIM 1:250,000 map. All are kept here because they were done and they
+> reproduce; none is behind a number in the current text.
 
 | Script | Reproduces |
 |---|---|
