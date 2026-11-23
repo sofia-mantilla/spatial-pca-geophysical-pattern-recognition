@@ -47,7 +47,8 @@ from shapely.geometry import box
 import case1_uni_repro as C1
 import numpy_repro_concat as R
 from run_era_shares import clear_of_deposits
-from run_geology_vs_baselines import deposit_boxes
+from run_geology_vs_baselines import (_demeaned, deposit_boxes, ncc_scores,
+                                      rank_demeaned)
 
 HERE = Path(__file__).resolve().parent
 LITO = (HERE.parent / "data" / "Carajas_Brazil_Structures"
@@ -139,12 +140,30 @@ def main() -> int:
     for case in (1, 2):
         if case == 1:
             order, idx, wshape, origin, dep = C1.rank_spca(17)
+            Xb, _i, _w, _o = C1.window_matrix_uni()
+            d = Xb.shape[0] - 1
+            ranks = {"wPCA": order, "demeaned match": rank_demeaned(Xb, d),
+                     "correlation match": np.argsort(-ncc_scores(Xb, d))}
         else:
             order, idx, wshape, origin, dep = R.rank_concat(3, 2, 8, 0.503)
+            Xb, _i, _w, _o = R.window_matrix(3)
+            d = Xb.shape[0] - 1
+            npix = wshape[0] * wshape[1]
+            nT, nU = ncc_scores(Xb[:, :npix], d), ncc_scores(Xb[:, npix:2*npix], d)
+            dT = np.linalg.norm(_demeaned(Xb[:, :npix]) - _demeaned(Xb[:, :npix])[d], axis=1)
+            dU = np.linalg.norm(_demeaned(Xb[:, npix:2*npix])
+                                - _demeaned(Xb[:, npix:2*npix])[d], axis=1)
+            ranks = {"wPCA": order,
+                     "demeaned match": np.argsort(0.503*dT/dT.std() + 0.497*dU/dU.std()),
+                     "correlation match": np.argsort(-(0.503*nT + 0.497*nU))}
         allb = [(r, c) for r, c, _ in idx]
         base = measures(tally(grid, allb, wshape), hosts)
-        sel = measures(tally(grid, clear_of_deposits(order, idx, wshape, origin,
-                                                     dep, deposits), wshape), hosts)
+        others = {}
+        for lab, rk in ranks.items():
+            others[lab] = measures(tally(grid, clear_of_deposits(rk, idx, wshape,
+                                                                 origin, dep, deposits),
+                                          wshape), hosts)
+        sel = others["wPCA"]
         pool = np.arange(len(idx)); pool = pool[pool != dep]
         null = []
         for _ in range(args.draws):
@@ -160,18 +179,19 @@ def main() -> int:
                       "p5": round(float(np.percentile(v, 5)), 3),
                       "p95": round(float(np.percentile(v, 95)), 3),
                       "pct_of_draws_below": round(float((v < sel[k]).mean()), 3)}
-        out["case%d" % case] = {"selection": sel, "all windows": base, "random": rnd}
+        out["case%d" % case] = {"selection": sel, "rankings": others,
+                                "all windows": base, "random": rnd}
 
         print("\n=== Case %d, top %d clear of known deposits" % (case, N_TOP))
-        print("  %-10s %10s %10s %10s %14s %8s"
-              % ("", "selection", "deposits", "all windows", "random mean",
-                 "pctile"))
-        for k, lab in (("units", "units"), ("effective", "effective"),
-                       ("largest", "largest"), ("on_hosts", "on hosts")):
-            print("  %-10s %10s %10s %10s %14s %7.0f%%"
-                  % (lab, sel[k], out["the twelve known deposits"][k], base[k],
-                     "%.2f (%.2f-%.2f)" % (rnd[k]["mean"], rnd[k]["p5"], rnd[k]["p95"]),
-                     100 * rnd[k]["pct_of_draws_below"]))
+        print("  %-10s %9s %9s %9s %9s %9s %16s"
+              % ("", "wPCA", "demeaned", "corr.", "deposits", "all win",
+                 "random (5-95%)"))
+        for k in ("units", "effective", "largest", "on_hosts"):
+            print("  %-10s %9s %9s %9s %9s %9s   %s"
+                  % (k, others["wPCA"][k], others["demeaned match"][k],
+                     others["correlation match"][k],
+                     out["the twelve known deposits"][k], base[k],
+                     "%.2f (%.2f-%.2f)" % (rnd[k]["mean"], rnd[k]["p5"], rnd[k]["p95"])))
 
     OUT_DIR.mkdir(exist_ok=True)
     (OUT_DIR / "arim_diversity.json").write_text(json.dumps(out, indent=1,
