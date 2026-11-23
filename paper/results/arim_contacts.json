@@ -1,0 +1,149 @@
+{
+ "draws": 400,
+ "buffer_m": 500.0,
+ "the twelve known deposits": {
+  "n": 12,
+  "median_m": 506,
+  "mean_m": 968,
+  "within_buf": 0.5,
+  "within_1km": 0.667
+ },
+ "case1": {
+  "rankings": {
+   "all candidate windows": {
+    "n": 11972,
+    "median_m": 825,
+    "mean_m": 1423,
+    "within_buf": 0.357,
+    "within_1km": 0.564,
+    "percentile": {
+     "median_m": 0.328,
+     "within_buf": 0.55,
+     "within_1km": 0.555
+    }
+   },
+   "wPCA": {
+    "n": 219,
+    "median_m": 600,
+    "mean_m": 868,
+    "within_buf": 0.466,
+    "within_1km": 0.699,
+    "percentile": {
+     "median_m": 0.0,
+     "within_buf": 1.0,
+     "within_1km": 1.0
+    }
+   },
+   "demeaned match": {
+    "n": 205,
+    "median_m": 600,
+    "mean_m": 1170,
+    "within_buf": 0.42,
+    "within_1km": 0.639,
+    "percentile": {
+     "median_m": 0.0,
+     "within_buf": 0.98,
+     "within_1km": 0.988
+    }
+   },
+   "correlation match": {
+    "n": 201,
+    "median_m": 447,
+    "mean_m": 992,
+    "within_buf": 0.522,
+    "within_1km": 0.741,
+    "percentile": {
+     "median_m": 0.0,
+     "within_buf": 1.0,
+     "within_1km": 1.0
+    }
+   }
+  },
+  "random": {
+   "median_m": {
+    "mean": 862.075,
+    "p5": 721.0,
+    "p95": 1010.5
+   },
+   "within_buf": {
+    "mean": 0.354,
+    "p5": 0.301,
+    "p95": 0.407
+   },
+   "within_1km": {
+    "mean": 0.558,
+    "p5": 0.5,
+    "p95": 0.615
+   }
+  }
+ },
+ "case2": {
+  "rankings": {
+   "all candidate windows": {
+    "n": 12118,
+    "median_m": 825,
+    "mean_m": 1418,
+    "within_buf": 0.364,
+    "within_1km": 0.567,
+    "percentile": {
+     "median_m": 0.403,
+     "within_buf": 0.52,
+     "within_1km": 0.522
+    }
+   },
+   "wPCA": {
+    "n": 234,
+    "median_m": 1131,
+    "mean_m": 1466,
+    "within_buf": 0.295,
+    "within_1km": 0.466,
+    "percentile": {
+     "median_m": 0.998,
+     "within_buf": 0.013,
+     "within_1km": 0.0
+    }
+   },
+   "demeaned match": {
+    "n": 225,
+    "median_m": 1000,
+    "mean_m": 1501,
+    "within_buf": 0.329,
+    "within_1km": 0.524,
+    "percentile": {
+     "median_m": 0.815,
+     "within_buf": 0.155,
+     "within_1km": 0.12
+    }
+   },
+   "correlation match": {
+    "n": 207,
+    "median_m": 566,
+    "mean_m": 1214,
+    "within_buf": 0.488,
+    "within_1km": 0.657,
+    "percentile": {
+     "median_m": 0.0,
+     "within_buf": 0.998,
+     "within_1km": 1.0
+    }
+   }
+  },
+  "random": {
+   "median_m": {
+    "mean": 847.955,
+    "p5": 721.0,
+    "p95": 1000.0
+   },
+   "within_buf": {
+    "mean": 0.36,
+    "p5": 0.312,
+    "p95": 0.417
+   },
+   "within_1km": {
+    "mean": 0.564,
+    "p5": 0.511,
+    "p95": 0.611
+   }
+  }
+ }
+}
