@@ -76,6 +76,7 @@ to the repository's `data/` folder automatically.
 | `make_arim_footprint.py` | Reduces the ARIM lithology layer to the coverage outline the two proximity scripts above restrict their populations to |
 | `run_geology_vs_baselines.py` | **R2.6**: every published geological quantity for the wPCA selection, the two classical template baselines and 2,000 random draws of 250 windows, so the maps are read on the same footing as the validation |
 | `run_map_agreement.py` | **R2.6**: whether the three maps used across Appendix C agree — magnetitite outlines, era, and the Table 10 headline re-read off the ARIM 1:250,000 map instead of the 1:100,000 sheets |
+| `run_arim_diversity.py` | **R2.6**: how far each selection spreads over the ARIM map's own unit codes, against the twelve deposits and 2,000 random draws. Measures a co-author's claim that a prediction confined to one host lithology would be the suspect outcome; no keyword rule or grouping of ours enters it |
 | `run_restricted_area.py` | **R2.6**: whether restricting the candidate pool to basement removes the advantage over a random selection |
 | `run_highrank_geology.py` | **R2.6**: geology of the high-ranking areas that hold no known deposit |
 | `fetch_geology.py` | Retrieves the Serviço Geológico do Brasil maps Appendix C uses, for the study-area bounding box alone |

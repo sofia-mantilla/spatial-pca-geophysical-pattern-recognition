@@ -1,0 +1,122 @@
+{
+ "draws": 2000,
+ "seed": 20261123,
+ "n_host_units": 29,
+ "host_units": [
+  "A3_gamma_cp",
+  "A3_gamma_cv",
+  "A3_gamma_cz",
+  "A3_gamma_rm",
+  "A3bj",
+  "A3sqa",
+  "A3sqm",
+  "A3tm1",
+  "A3tm2",
+  "A3xi",
+  "A4_delta_pi",
+  "A4_delta_si",
+  "A4_gamma_2gl",
+  "A4_gamma_2pl",
+  "A4_mu_c",
+  "A4ci",
+  "A4cj",
+  "A4ib",
+  "A4lbq",
+  "A4lbs",
+  "A4pj",
+  "A4pjf",
+  "A4pjm",
+  "A4pjx",
+  "A4ppm",
+  "Elm",
+  "PP23ac",
+  "PP3_gamma_rb",
+  "Q2a"
+ ],
+ "the twelve known deposits": {
+  "units": 29,
+  "effective": 15.24,
+  "largest": 0.192,
+  "on_hosts": 1.0
+ },
+ "case1": {
+  "selection": {
+   "units": 72,
+   "effective": 30.56,
+   "largest": 0.161,
+   "on_hosts": 0.587
+  },
+  "all windows": {
+   "units": 93,
+   "effective": 38.15,
+   "largest": 0.135,
+   "on_hosts": 0.557
+  },
+  "random": {
+   "units": {
+    "mean": 81.965,
+    "p5": 77.0,
+    "p95": 86.0,
+    "pct_of_draws_below": 0.0
+   },
+   "effective": {
+    "mean": 34.555,
+    "p5": 31.08,
+    "p95": 38.001,
+    "pct_of_draws_below": 0.029
+   },
+   "largest": {
+    "mean": 0.136,
+    "p5": 0.108,
+    "p95": 0.165,
+    "pct_of_draws_below": 0.913
+   },
+   "on_hosts": {
+    "mean": 0.537,
+    "p5": 0.493,
+    "p95": 0.58,
+    "pct_of_draws_below": 0.971
+   }
+  }
+ },
+ "case2": {
+  "selection": {
+   "units": 62,
+   "effective": 20.62,
+   "largest": 0.221,
+   "on_hosts": 0.436
+  },
+  "all windows": {
+   "units": 93,
+   "effective": 37.97,
+   "largest": 0.137,
+   "on_hosts": 0.56
+  },
+  "random": {
+   "units": {
+    "mean": 77.308,
+    "p5": 72.0,
+    "p95": 82.0,
+    "pct_of_draws_below": 0.0
+   },
+   "effective": {
+    "mean": 34.106,
+    "p5": 30.489,
+    "p95": 37.771,
+    "pct_of_draws_below": 0.0
+   },
+   "largest": {
+    "mean": 0.138,
+    "p5": 0.11,
+    "p95": 0.17,
+    "pct_of_draws_below": 1.0
+   },
+   "on_hosts": {
+    "mean": 0.547,
+    "p5": 0.5,
+    "p95": 0.593,
+    "pct_of_draws_below": 0.0
+   }
+  }
+ }
+}
