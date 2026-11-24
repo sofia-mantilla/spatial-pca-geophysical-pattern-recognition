@@ -1,8 +1,8 @@
 """Rebuild Figure 18 (fig:multiprofiles) from data at publication resolution.
 
 Content matches the figure it replaces (which was a raster lifted from v9 image18 and
-had no generating script): centered south-north profiles for Deposits 1-5 and each
-deposit's TMI and radiometric U windows.
+had no generating script): centered south-north profiles for the Case-2 deposits and
+each deposit's TMI and radiometric U windows.
 
 The figure is laid out at its printed width (\\textwidth = 5.14 in) with 8 pt text, so
 nothing prints below the journal's 8 pt floor.
@@ -16,7 +16,7 @@ Differences from the raster it replaces, all deliberate:
     configs/carajas_uni_tmi.yaml (visualization.deposit_limits_tmi) - the same limits
     the pipeline plots with, so panel colours match the rest of the paper. They are
     asymmetric by design: raw TMI carries a regional baseline, so zero is not neutral.
-    A shared TMI scale is NOT used either: amplitudes span 8x across the five deposits,
+    A shared TMI scale is NOT used either: amplitudes span 8x across the deposits,
     so a common scale would flatten the Deposit 3 dipole. Each panel carries its own
     colourbar.
 
@@ -37,6 +37,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 
+import deposit_names as DN
 import numpy_repro_concat as R
 from extract_dep_windows import collect, DEPS
 
@@ -47,8 +48,10 @@ PAPER_CMAP = LinearSegmentedColormap.from_list("spatial_pca_paper", (
     (0.668, "#ff0109"), (0.835, "#ef00ff"), (1.00, "#de9eff")))
 U_LIMS = (0.0, 15.0)          # config analysis_defaults vmin_var2/vmax_var2
 REF_DEP = 3                   # Alemao, the reference deposit
-DEP_NAMES = {1: "Tucumã", 2: "Pedra Branca", 3: "Alemão", 4: "Furnas", 5: "Salobo"}
-CURVE = {1: "#1f4fd8", 2: "#e07b00", 3: "#c62828", 4: "#2e9e2e", 5: "#8e24aa"}
+# Names come from deposit_names.py, the single source the tables and figures share.
+DEP_NAMES = DN.NAMES
+CURVE = {1: "#1f4fd8", 2: "#e07b00", 3: "#c62828", 4: "#2e9e2e", 5: "#8e24aa",
+         6: "#00838f"}
 
 mpl.rcParams.update({
     "font.size": 8,
@@ -135,7 +138,8 @@ GRID_TOP = LEGEND_TOP + 0.50           # window grid starts here
 MARG_L = 0.16
 CBAR_U_W = 0.55                        # room on the right for the shared U colourbar
 COL_GAP = 0.14
-COL_W = (FIG_W - MARG_L - CBAR_U_W - 4 * COL_GAP) / 5
+N_COL = len(DEPS)
+COL_W = (FIG_W - MARG_L - CBAR_U_W - (N_COL - 1) * COL_GAP) / N_COL
 
 ROW_LAB_H = 0.18                       # "TMI windows" / "Radiometric U windows"
 NAME_H = 0.20                          # deposit name above the TMI row
@@ -213,8 +217,9 @@ def build(data, outdir: Path, stem: str, dpi: int, normalize_profiles: bool = Fa
     u_lab_y = tmi_img_bot + SIZE_H + CBAR_H + CBAR_LAB_H + SECTION_GAP
     u_img_bot = u_lab_y + ROW_LAB_H + row_h
 
-    _text(fig, MARG_L, tmi_lab_y + 0.13, "TMI windows", ha="left", va="baseline",
-          fontsize=8)
+    _text(fig, MARG_L, tmi_lab_y + 0.13,
+          "TMI windows (extent in km, colour scale in nT)", ha="left",
+          va="baseline", fontsize=8)
     _text(fig, MARG_L, u_lab_y + 0.13, "Radiometric U windows", ha="left",
           va="baseline", fontsize=8)
 
@@ -235,16 +240,16 @@ def build(data, outdir: Path, stem: str, dpi: int, normalize_profiles: bool = Fa
 
         # window size, once per column: the two variables share the window
         _text(fig, x0 + COL_W / 2, tmi_img_bot + 0.04,
-              f"{ext[1] - ext[0]:.1f} \u00d7 {ext[3] - ext[2]:.1f} km",
+              f"{ext[1] - ext[0]:.1f}\u00d7{ext[3] - ext[2]:.1f}",
               ha="center", va="top", fontsize=8, color="#616161")
 
-        cax = _ax(fig, x0 + 0.13, tmi_img_bot + SIZE_H, COL_W - 0.26, CBAR_H)
+        # Narrow enough that the end-value labels of adjacent columns clear
+        # each other at 8 pt.
+        cax = _ax(fig, x0 + 0.15, tmi_img_bot + SIZE_H, COL_W - 0.30, CBAR_H)
         cb = fig.colorbar(im, cax=cax, orientation="horizontal")
         cb.set_ticks([vmin, vmax])   # end values only: the columns are narrow
         cb.ax.tick_params(labelsize=8, length=2, pad=1.5)
         cb.outline.set_linewidth(0.5)
-        _text(fig, x0 + COL_W - 0.11, tmi_img_bot + SIZE_H + CBAR_H / 2, "nT",
-              ha="left", va="center", fontsize=8)
 
         ax = _ax(fig, x0, u_img_bot - h, COL_W, h)
         imu = ax.imshow(v["u"], origin="upper", cmap=PAPER_CMAP,
@@ -252,15 +257,15 @@ def build(data, outdir: Path, stem: str, dpi: int, normalize_profiles: bool = Fa
                         interpolation="nearest")
         style_window(ax, ref)
 
-        # Each deposit is named once, above the TMI row; the two rows share a
-        # column, so the name carries down to the radiometric U panel. The
-        # reference deposit is named in red, with a red window frame, and is
-        # called out in the legend (the columns are too narrow for a second line).
-        _text(fig, x0 + COL_W / 2, tmi_img_bot - h - 0.05, f"{d} {DEP_NAMES[d]}",
+        # The columns are too narrow for a deposit name at 8 pt, so each column
+        # is headed by its deposit number and the legend above carries the names.
+        # Headers sit on one line, above the tallest window of the row, rather
+        # than following each window's own height.
+        _text(fig, x0 + COL_W / 2, tmi_img_bot - row_h - 0.05, f"{d}",
               ha="center", va="bottom", fontsize=8,
               color="#c62828" if ref else "black")
 
-    cax = _ax(fig, col_x(4) + COL_W + 0.10, u_img_bot - row_h + 0.02, 0.09,
+    cax = _ax(fig, col_x(N_COL - 1) + COL_W + 0.10, u_img_bot - row_h + 0.02, 0.09,
               row_h - 0.04)
     cb = fig.colorbar(imu, cax=cax)
     cb.set_label("ppm eU", fontsize=8, labelpad=2)

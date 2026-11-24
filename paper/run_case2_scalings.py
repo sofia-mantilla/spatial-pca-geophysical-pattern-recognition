@@ -91,6 +91,32 @@ def main() -> int:
     out["single_variables"] = {"TMI alone": score(np.argsort(dT)),
                                "radiometric U alone": score(np.argsort(dU))}
 
+    # --- does the balance weight actually balance anything? ---
+    # Sweeping alpha under each rule and counting how much of the top 250 each
+    # ranking shares with the single variables. Under the unscaled rule the
+    # weight barely moves the ranking until it reaches exactly 1.
+    sweep = []
+    for al in (0.0, 0.1, 0.3, 0.5, 0.7, 0.9, 1.0):
+        o_un = R.rank_concat(REF, K_TMI, K_U, al, scale=None)[0]
+        o_md = np.argsort(al * dT / np.median(dT) + (1 - al) * dU / np.median(dU))
+        row = {"alpha": al}
+        for tag, o in (("unscaled", o_un), ("median", o_md)):
+            t = top250(o)
+            row[tag] = {"shared_with_TMI_alone": len(t & topT),
+                        "shared_with_U_alone": len(t & topU)}
+        sweep.append(row)
+    out["alpha_sweep"] = sweep
+    print("\n  how far the balance weight moves the top 250")
+    print("  %-7s %-26s %-26s" % ("", "unscaled", "median-scaled"))
+    print("  %-7s %13s %12s %13s %12s"
+          % ("alpha", "w/ TMI", "w/ U", "w/ TMI", "w/ U"))
+    for r in sweep:
+        print("  %-7.1f %13d %12d %13d %12d"
+              % (r["alpha"], r["unscaled"]["shared_with_TMI_alone"],
+                 r["unscaled"]["shared_with_U_alone"],
+                 r["median"]["shared_with_TMI_alone"],
+                 r["median"]["shared_with_U_alone"]))
+
     OUT_DIR.mkdir(exist_ok=True)
     (OUT_DIR / "case2_scalings.json").write_text(json.dumps(out, indent=1))
 

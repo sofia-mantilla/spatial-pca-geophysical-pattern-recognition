@@ -1,4 +1,4 @@
-"""Extract Deposits 1-5 TMI / radiometric-U windows and centered S-N profiles.
+"""Extract the Case-2 deposits' TMI / radiometric-U windows and centered S-N profiles.
 
 Uses numpy_repro_concat.window_matrix(dep), whose returned X has the deposit's own
 window as its last row (TMI half then U half), reshaped to wshape.
@@ -9,7 +9,9 @@ import numpy as np
 import numpy_repro_concat as R
 
 PX_KM = R.PX / 1000.0
-DEPS = (1, 2, 3, 4, 5)
+# The deposits that pass the uranium threshold of Section 5.2, which are the
+# Case-2 set: deposit 3 is the reference and the other five are the test set.
+DEPS = (1, 2, 3, 4, 5, 6)
 
 
 def deposit_windows(dep: int):
