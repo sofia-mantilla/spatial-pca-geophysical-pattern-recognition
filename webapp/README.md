@@ -43,7 +43,11 @@ node --max-old-space-size=6144 validate_gates.cjs      # both cases, ~40 s
 ```
 
 In the app itself, switching the map to **Paper 200 m (exact)** and pressing
-Run with the default settings reproduces Case 1 to the digit.
+Run with the default settings reproduces Case 1 to the digit. Ticking
+radiometric U as well switches to the Case-2 defaults (reference Alemão, TMI
+k=2, U k=8, weights 54.1 / 45.9, test deposits Tucumã, Pedra Branca, Furnas,
+Salobo and Paulo Afonso), and Run then reproduces Case 2: 58.8%, AUC 122.9,
+3 of 5 deposits.
 
 ## Data security
 

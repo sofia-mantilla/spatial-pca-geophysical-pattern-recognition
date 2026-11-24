@@ -456,7 +456,7 @@
     </div>
   </div>
   <div class="strips">
-    <div class="mockup-banner"><b>Reproducible by construction.</b> At Paper 200&nbsp;m (exact) the default run reproduces Case&nbsp;1 to the digit: 47.0% recovery · AUC 57.9 · 5 of 11 deposits. The 400&nbsp;m preview answers in seconds.</div>
+    <div class="mockup-banner"><b>Reproducible by construction.</b> At Paper 200&nbsp;m (exact) the default run reproduces Case&nbsp;1 to the digit: 47.0% recovery · AUC 57.9 · 5 of 11 deposits. Tick radiometric U as well and it reproduces Case&nbsp;2: 58.8% · AUC 122.9 · 3 of 5 deposits. The 400&nbsp;m preview answers in seconds.</div>
     <div class="lockline"><svg class="ico"><use href="#i-lock"/></svg> <span><b>Your data never leaves your computer.</b> A single static page — no backend, no uploads, no analytics; zero network requests after load (verify in the Network tab). Save the file and it runs fully offline.</span></div>
   </div>
   <div class="tabs" role="tablist">
@@ -1385,7 +1385,7 @@ function setResolution(cell){
   buildDeposits(CARAJAS.deposits);
   if (fromUser) {
     state.customTests = []; state.customCount = 0; state.customRef = null; state.result = null;
-    state.varSel = new Set(["tmi"]); state.weights = { tmi: 50, u: 50 };
+    state.varSel = new Set(["tmi"]); state.weights = { tmi: 54.1, u: 45.9 };
     state.variable = "tmi"; state.kBy = { tmi: 17, u: 8 };
     state.refId = 6;
     state.testIds = new Set(CARAJAS.deposits.filter(d => d.id !== 6).map(d => d.id));
@@ -1455,7 +1455,7 @@ function rampLUT(colors){
 
 /* ============ state ============ */
 const state = {
-  varSel:new Set(["tmi"]), weights:{tmi:50,u:50}, variable:"tmi", cmap:"paper", cmapBy:{},
+  varSel:new Set(["tmi"]), weights:{tmi:54.1,u:45.9}, variable:"tmi", cmap:"paper", cmapBy:{},
   area:null,   // set to full extent by setResolution at boot
   refId:6, autoWin:true, winKm:6, customRef:null,
   testIds:new Set(CARAJAS.deposits.filter(d=>d.id!==6).map(d=>d.id)),
@@ -1859,7 +1859,7 @@ function renderVarControls(){
   const outs=[];
   const refresh=()=>{
     const vars=activeVars(), nw=normWeights(vars);
-    outs.forEach(([k,o])=>{ const i=vars.indexOf(k); o.textContent=i>=0?nw[i].toFixed(2):""; });
+    outs.forEach(([k,o])=>{ const i=vars.indexOf(k); o.textContent=i>=0?nw[i].toFixed(3):""; });
   };
   for(const k of VARKEYS){
     const row=document.createElement("div");
@@ -1875,7 +1875,8 @@ function renderVarControls(){
         // reference + test set follow the paper's cases; only when on the default ref (not a custom-drawn one)
         if(multiNow){
           if(state.refId===6 && !state.customRef) setReference(3);   // Alemão
-          if(state.refId===3 && !state.customRef){ state.testIds=new Set([1,2,4,5]); renderTestList(); }   // Case 2 tests: Tucumã, Pedra Branca, Furnas, Salobo
+          if(state.refId===3 && !state.customRef){ state.testIds=new Set([1,2,4,5,6]); renderTestList(); }   // Case 2 tests: Tucumã, Pedra Branca, Furnas, Salobo, Paulo Afonso
+          state.weights.tmi=54.1; state.weights.u=45.9;   // paper Case 2: alpha_TMI = 0.541
         } else {
           if(state.refId===3 && !state.customRef) setReference(6);   // Paulo Afonso
           if(state.refId===6 && !state.customRef){ state.testIds=new Set(CARAJAS.deposits.filter(d=>d.id!==6).map(d=>d.id)); renderTestList(); }   // Case 1 tests: all others
@@ -1889,7 +1890,7 @@ function renderVarControls(){
     lab.appendChild(sp);
     row.appendChild(lab);
     if(multi&&state.varSel.has(k)){
-      const sl=document.createElement("input"); sl.type="range"; sl.min="0"; sl.max="100";
+      const sl=document.createElement("input"); sl.type="range"; sl.min="0"; sl.max="100"; sl.step="0.1";
       sl.value=state.weights[k]??50; sl.style.width="58px";
       const o=document.createElement("output");
       o.style.cssText="font-size:11px;color:var(--ink);font-weight:600;min-width:30px;text-align:right";
