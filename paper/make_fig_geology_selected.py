@@ -1,21 +1,22 @@
-"""Mapped geology, bright only where the ranking predicts, dim everywhere else.
+"""Mapped geology at full colour inside the selection, pale outside it.
 
-The treatment of Figure 21: the background is the same map at low saturation,
-and the geology inside the top-250 windows is drawn over it at full colour, so
-the eye reads which units the ranking actually selected rather than which
-units are large.
+The treatment Figure 21 gives the rasters: the background is the same map at
+low saturation, and the geology inside the top-250 windows is drawn over it at
+full colour, so the eye reads which units the ranking selected rather than
+which units are large.
 
 Run from inside paper/:
 
-    python make_fig_geology_highlight.py --outdir OUT --colour age
-    python make_fig_geology_highlight.py --outdir OUT --colour lithology --case 1
-    python make_fig_geology_highlight.py --outdir OUT --compare    # Case 2, both rules
+    python make_fig_geology_selected.py --outdir OUT --colour age
+    python make_fig_geology_selected.py --outdir OUT --colour lithology --case 1
+    python make_fig_geology_selected.py --outdir OUT --compare    # Case 2, both rules
 
 Writes <name>.pdf and <name>.png.
 """
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import re
 from pathlib import Path
@@ -218,6 +219,8 @@ def main() -> int:
                     help="overlay the ARIM shear zones and magnetic lineaments")
     ap.add_argument("--no-lineaments", dest="lineaments", action="store_false",
                     help="with --structures, omit the magnetic lineaments")
+    ap.add_argument("--paper", action="store_true",
+                    help="size at \\textwidth with 6.5 pt type, for the manuscript")
     ap.add_argument("--name", default=None)
     a = ap.parse_args()
     a.outdir.mkdir(parents=True, exist_ok=True)
@@ -227,7 +230,18 @@ def main() -> int:
     else:
         g, colour, label, order, extent = load_geology(a.colour)
     present = [c for c in order if (g["cls"] == c).any()]
-    legend_units = present[:N_LEGEND] if a.colour == "arim" else present
+    legend_units = present
+    if a.colour == "arim":
+        # Name the units the enrichment table discusses, so a reader can move
+        # between the two. Falls back to the largest by area if it has not run.
+        ej = HERE / "results" / "case2_unit_enrichment.json"
+        named = []
+        if ej.exists():
+            rec = json.loads(ej.read_text())["units"]
+            named = [sg for sg, r in rec.items()
+                     if r["survey_share_pct"] >= 1.0 and r["case2"].get("above_random")]
+            named = [sg for sg in present if sg in named]
+        legend_units = named or present[:N_LEGEND]
     struct = load_structures(extent, a.lineaments) if a.structures else None
 
     if a.compare:
@@ -248,12 +262,20 @@ def main() -> int:
         if a.structures:
             stem += "_struct"
 
-    nrow_legend = -(-(len(legend_units) + 4) // 3)
-    leg_h = 0.28 * nrow_legend + 0.25
-    h = 4.6 * len(panels) + leg_h
-    fig, axes = plt.subplots(len(panels), 1, figsize=(10.5, h), squeeze=False)
-    for ax, (title, rects) in zip(axes.flat, panels):
+    if a.paper:
+        plt.rcParams.update({"font.size": 6.5, "axes.titlesize": 7.0,
+                             "pdf.fonttype": 42, "ps.fonttype": 42})
+    fig_w = 5.14 if a.paper else 10.5
+    xmin, ymin, xmax, ymax = extent
+    panel_h = (fig_w - 0.62) / ((xmax - xmin) / (ymax - ymin))
+    nrow_legend = -(-(len(legend_units) + 4) // (2 if a.paper else 3))
+    leg_h = (0.135 if a.paper else 0.28) * nrow_legend + 0.12
+    h = (panel_h if a.paper else 4.6) * len(panels) + leg_h + (0.25 if a.paper else 0)
+    fig, axes = plt.subplots(len(panels), 1, figsize=(fig_w, h), squeeze=False)
+    for j, (ax, (title, rects)) in enumerate(zip(axes.flat, panels)):
         bright = draw(ax, g, rects, present, colour, extent, title, struct)
+        if j < len(panels) - 1:
+            ax.set_xticklabels([])
         shares = (bright.area.groupby(bright["cls"]).sum() / bright.area.sum() * 100)
         top = shares.sort_values(ascending=False).head(3)
         print("%s: selected area by class -> %s" % (
@@ -275,9 +297,11 @@ def main() -> int:
             handles.append(Line2D([0], [0], color=LINEAMENT_COLOUR, lw=0.9,
                                   linestyle=(0, (3.5, 2.0))))
             labels.append("magnetic lineament (drawn, not measured against)")
-    fig.legend(handles, labels, loc="lower center", ncol=3, frameon=False,
-               bbox_to_anchor=(0.5, 0.0))
-    fig.tight_layout(rect=(0, leg_h / h, 1, 1))
+    fig.legend(handles, labels, loc="lower center",
+               ncol=2 if a.paper else 3, frameon=False, bbox_to_anchor=(0.5, 0.0),
+               fontsize=6.0 if a.paper else None)
+    fig.tight_layout(rect=(0, leg_h / h, 1, 1),
+                     h_pad=1.4 if a.paper else 1.0)
     pdf, png = a.outdir / (stem + ".pdf"), a.outdir / (stem + ".png")
     fig.savefig(pdf, facecolor="white")
     fig.savefig(png, dpi=a.dpi, facecolor="white")

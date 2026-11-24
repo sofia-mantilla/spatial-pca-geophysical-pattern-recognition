@@ -1,0 +1,2639 @@
+{
+ "draws": 2000,
+ "n_units": 94,
+ "note": "ARIM 1:250,000 SIGLA_UNID; no grouping of ours",
+ "units": {
+  "A3_gamma_af": {
+   "name": "Trondhjemito \u00c1gua Fria",
+   "survey_share_pct": 0.18,
+   "case1": {
+    "selected_share_pct": 0.771,
+    "enrichment": 4.288,
+    "random_share_p5_p95": [
+     0.0,
+     0.345
+    ],
+    "above_random": true,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.369
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0
+   }
+  },
+  "A3_gamma_al": {
+   "name": "Metagranodiorito \u00c1gua Limpa",
+   "survey_share_pct": 0.632,
+   "case1": {
+    "selected_share_pct": 0.964,
+    "enrichment": 1.526,
+    "random_share_p5_p95": [
+     0.243,
+     1.2
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.92,
+    "enrichment": 1.456,
+    "random_share_p5_p95": [
+     0.173,
+     1.268
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.094,
+    "enrichment": 0.148
+   }
+  },
+  "A3_gamma_az": {
+   "name": "Metagranodiorito \u00c1gua Azul",
+   "survey_share_pct": 0.239,
+   "case1": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.008,
+     0.545
+    ],
+    "above_random": false,
+    "below_random": true
+   },
+   "case2": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.629
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0
+   }
+  },
+  "A3_gamma_bs": {
+   "name": "Granito Boa Sorte",
+   "survey_share_pct": 0.489,
+   "case1": {
+    "selected_share_pct": 0.383,
+    "enrichment": 0.783,
+    "random_share_p5_p95": [
+     0.088,
+     1.017
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.017,
+     1.129
+    ],
+    "above_random": false,
+    "below_random": true
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.83,
+    "enrichment": 1.697
+   }
+  },
+  "A3_gamma_cc": {
+   "name": "Metagranito Cana\u00e3 dos Caraj\u00e1s",
+   "survey_share_pct": 1.181,
+   "case1": {
+    "selected_share_pct": 0.24,
+    "enrichment": 0.203,
+    "random_share_p5_p95": [
+     0.399,
+     2.22
+    ],
+    "above_random": false,
+    "below_random": true
+   },
+   "case2": {
+    "selected_share_pct": 0.697,
+    "enrichment": 0.59,
+    "random_share_p5_p95": [
+     0.373,
+     2.332
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 1.745,
+    "enrichment": 1.478
+   }
+  },
+  "A3_gamma_co": {
+   "name": "Trondhjemito Colorado",
+   "survey_share_pct": 4.048,
+   "case1": {
+    "selected_share_pct": 0.461,
+    "enrichment": 0.114,
+    "random_share_p5_p95": [
+     2.91,
+     6.044
+    ],
+    "above_random": false,
+    "below_random": true
+   },
+   "case2": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     2.59,
+     6.311
+    ],
+    "above_random": false,
+    "below_random": true
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.453,
+    "enrichment": 0.112
+   }
+  },
+  "A3_gamma_cp": {
+   "name": "Carapan\u00e3",
+   "survey_share_pct": 8.441,
+   "case1": {
+    "selected_share_pct": 6.558,
+    "enrichment": 0.777,
+    "random_share_p5_p95": [
+     6.287,
+     10.927
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 1.916,
+    "enrichment": 0.227,
+    "random_share_p5_p95": [
+     6.054,
+     11.491
+    ],
+    "above_random": false,
+    "below_random": true
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.391,
+    "enrichment": 0.046
+   }
+  },
+  "A3_gamma_cv": {
+   "name": "Metatonalito Campina Verde",
+   "survey_share_pct": 0.244,
+   "case1": {
+    "selected_share_pct": 0.565,
+    "enrichment": 2.317,
+    "random_share_p5_p95": [
+     0.0,
+     0.556
+    ],
+    "above_random": true,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.633
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.716,
+    "enrichment": 2.935
+   }
+  },
+  "A3_gamma_cz": {
+   "name": "Metagranito Cruzad\u00e3o",
+   "survey_share_pct": 1.606,
+   "case1": {
+    "selected_share_pct": 2.46,
+    "enrichment": 1.532,
+    "random_share_p5_p95": [
+     0.692,
+     2.476
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 2.275,
+    "enrichment": 1.416,
+    "random_share_p5_p95": [
+     0.646,
+     2.696
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 3.762,
+    "enrichment": 2.343
+   }
+  },
+  "A3_gamma_mo": {
+   "name": "Trondhjemito Mogno",
+   "survey_share_pct": 0.459,
+   "case1": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.002,
+     0.953
+    ],
+    "above_random": false,
+    "below_random": true
+   },
+   "case2": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     1.001
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0
+   }
+  },
+  "A3_gamma_nc": {
+   "name": "Leucogranodiorito Nova Canad\u00e1",
+   "survey_share_pct": 1.646,
+   "case1": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.796,
+     2.855
+    ],
+    "above_random": false,
+    "below_random": true
+   },
+   "case2": {
+    "selected_share_pct": 0.066,
+    "enrichment": 0.04,
+    "random_share_p5_p95": [
+     0.68,
+     3.011
+    ],
+    "above_random": false,
+    "below_random": true
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.644,
+    "enrichment": 0.391
+   }
+  },
+  "A3_gamma_pt": {
+   "name": "Leucogranodiorito Pantanal",
+   "survey_share_pct": 0.131,
+   "case1": {
+    "selected_share_pct": 0.173,
+    "enrichment": 1.323,
+    "random_share_p5_p95": [
+     0.0,
+     0.324
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.405
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.703,
+    "enrichment": 5.366
+   }
+  },
+  "A3_gamma_rm": {
+   "name": "Granodiorito Rio Maria",
+   "survey_share_pct": 1.427,
+   "case1": {
+    "selected_share_pct": 1.526,
+    "enrichment": 1.069,
+    "random_share_p5_p95": [
+     0.353,
+     2.015
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 4.36,
+    "enrichment": 3.055,
+    "random_share_p5_p95": [
+     0.32,
+     2.209
+    ],
+    "above_random": true,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.523,
+    "enrichment": 0.366
+   }
+  },
+  "A3_gamma_rp": {
+   "name": "Metatonalito Racha Placa",
+   "survey_share_pct": 0.012,
+   "case1": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.04
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.068
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0
+   }
+  },
+  "A3_gamma_sc": {
+   "name": "Metatonalito S\u00e3o Carlos",
+   "survey_share_pct": 0.498,
+   "case1": {
+    "selected_share_pct": 0.435,
+    "enrichment": 0.873,
+    "random_share_p5_p95": [
+     0.086,
+     1.058
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.029,
+     1.138
+    ],
+    "above_random": false,
+    "below_random": true
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.153,
+    "enrichment": 0.307
+   }
+  },
+  "A3_gamma_sd": {
+   "name": "Granito Vila Serra Dourada",
+   "survey_share_pct": 0.088,
+   "case1": {
+    "selected_share_pct": 0.614,
+    "enrichment": 7.007,
+    "random_share_p5_p95": [
+     0.0,
+     0.271
+    ],
+    "above_random": true,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.355
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.698,
+    "enrichment": 7.96
+   }
+  },
+  "A3_gamma_tc": {
+   "name": "Tonalito Caracol",
+   "survey_share_pct": 2.499,
+   "case1": {
+    "selected_share_pct": 0.591,
+    "enrichment": 0.237,
+    "random_share_p5_p95": [
+     1.147,
+     3.859
+    ],
+    "above_random": false,
+    "below_random": true
+   },
+   "case2": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.986,
+     3.822
+    ],
+    "above_random": false,
+    "below_random": true
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.526,
+    "enrichment": 0.21
+   }
+  },
+  "A3bj": {
+   "name": "Ortognaisse Bom Jesus",
+   "survey_share_pct": 1.835,
+   "case1": {
+    "selected_share_pct": 2.003,
+    "enrichment": 1.091,
+    "random_share_p5_p95": [
+     1.018,
+     2.684
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 3.561,
+    "enrichment": 1.94,
+    "random_share_p5_p95": [
+     0.89,
+     2.941
+    ],
+    "above_random": true,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 5.498,
+    "enrichment": 2.995
+   }
+  },
+  "A3ch": {
+   "name": "Ortogranulito Chicrin-Catet\u00e9",
+   "survey_share_pct": 0.83,
+   "case1": {
+    "selected_share_pct": 0.743,
+    "enrichment": 0.894,
+    "random_share_p5_p95": [
+     0.16,
+     1.747
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 1.47,
+    "enrichment": 1.771,
+    "random_share_p5_p95": [
+     0.082,
+     1.817
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0
+   }
+  },
+  "A3ni": {
+   "name": "Gnaisse Nova India",
+   "survey_share_pct": 1.226,
+   "case1": {
+    "selected_share_pct": 2.848,
+    "enrichment": 2.323,
+    "random_share_p5_p95": [
+     0.504,
+     2.275
+    ],
+    "above_random": true,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.782,
+    "enrichment": 0.638,
+    "random_share_p5_p95": [
+     0.382,
+     2.438
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.006,
+    "enrichment": 0.004
+   }
+  },
+  "A3ro": {
+   "name": "Rio Novo",
+   "survey_share_pct": 0.592,
+   "case1": {
+    "selected_share_pct": 0.944,
+    "enrichment": 1.595,
+    "random_share_p5_p95": [
+     0.231,
+     1.113
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.162,
+     1.232
+    ],
+    "above_random": false,
+    "below_random": true
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.546,
+    "enrichment": 0.923
+   }
+  },
+  "A3saf": {
+   "name": "Sapucaia, Forma\u00e7\u00e3o Ferr\u00edfera Bandada",
+   "survey_share_pct": 0.047,
+   "case1": {
+    "selected_share_pct": 0.081,
+    "enrichment": 1.737,
+    "random_share_p5_p95": [
+     0.0,
+     0.117
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.144
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0
+   }
+  },
+  "A3sam": {
+   "name": "Sapucaia, M\u00e1fica",
+   "survey_share_pct": 1.078,
+   "case1": {
+    "selected_share_pct": 2.415,
+    "enrichment": 2.241,
+    "random_share_p5_p95": [
+     0.69,
+     1.619
+    ],
+    "above_random": true,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.193,
+    "enrichment": 0.179,
+    "random_share_p5_p95": [
+     0.57,
+     1.693
+    ],
+    "above_random": false,
+    "below_random": true
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.105,
+    "enrichment": 0.097
+   }
+  },
+  "A3sas": {
+   "name": "Sapucaia, Metassedimentar",
+   "survey_share_pct": 0.51,
+   "case1": {
+    "selected_share_pct": 1.785,
+    "enrichment": 3.502,
+    "random_share_p5_p95": [
+     0.113,
+     1.045
+    ],
+    "above_random": true,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.067,
+     1.139
+    ],
+    "above_random": false,
+    "below_random": true
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0
+   }
+  },
+  "A3sqa": {
+   "name": "Sequerinho, \u00c1cida a intermedi\u00e1ria",
+   "survey_share_pct": 0.349,
+   "case1": {
+    "selected_share_pct": 0.659,
+    "enrichment": 1.887,
+    "random_share_p5_p95": [
+     0.062,
+     0.725
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.673,
+    "enrichment": 1.928,
+    "random_share_p5_p95": [
+     0.012,
+     0.88
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0
+   }
+  },
+  "A3sqff": {
+   "name": "Sequeirinho, Forma\u00e7\u00e3o Ferr\u00edfera Bandada",
+   "survey_share_pct": 0.001,
+   "case1": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.002
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.004
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.003,
+    "enrichment": 4.452
+   }
+  },
+  "A3sqm": {
+   "name": "Sequeirinho, M\u00e1fico",
+   "survey_share_pct": 0.492,
+   "case1": {
+    "selected_share_pct": 0.303,
+    "enrichment": 0.615,
+    "random_share_p5_p95": [
+     0.091,
+     0.859
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.001,
+    "enrichment": 0.003,
+    "random_share_p5_p95": [
+     0.046,
+     0.994
+    ],
+    "above_random": false,
+    "below_random": true
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.707,
+    "enrichment": 1.437
+   }
+  },
+  "A3sqms": {
+   "name": "Sequeirinho, Metassedimentar",
+   "survey_share_pct": 0.025,
+   "case1": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.075
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.113
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0
+   }
+  },
+  "A3squ": {
+   "name": "Sequeirinho, Ultram\u00e1fico",
+   "survey_share_pct": 0.015,
+   "case1": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.051
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.07
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.008,
+    "enrichment": 0.539
+   }
+  },
+  "A3tm1": {
+   "name": "Tucum\u00e3, Metam\u00e1fico",
+   "survey_share_pct": 1.08,
+   "case1": {
+    "selected_share_pct": 2.599,
+    "enrichment": 2.405,
+    "random_share_p5_p95": [
+     0.484,
+     1.514
+    ],
+    "above_random": true,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 2.208,
+    "enrichment": 2.044,
+    "random_share_p5_p95": [
+     0.443,
+     1.741
+    ],
+    "above_random": true,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.665,
+    "enrichment": 0.615
+   }
+  },
+  "A3tm2": {
+   "name": "Tucum\u00e3, Metavulc\u00e2nico \u00c1cido",
+   "survey_share_pct": 0.459,
+   "case1": {
+    "selected_share_pct": 0.261,
+    "enrichment": 0.57,
+    "random_share_p5_p95": [
+     0.043,
+     0.755
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.068,
+    "enrichment": 0.147,
+    "random_share_p5_p95": [
+     0.015,
+     0.87
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.011,
+    "enrichment": 0.024
+   }
+  },
+  "A3tm3": {
+   "name": "Tucum\u00e3, Metassedimentar",
+   "survey_share_pct": 0.766,
+   "case1": {
+    "selected_share_pct": 0.988,
+    "enrichment": 1.29,
+    "random_share_p5_p95": [
+     0.214,
+     1.416
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.012,
+    "enrichment": 0.015,
+    "random_share_p5_p95": [
+     0.134,
+     1.614
+    ],
+    "above_random": false,
+    "below_random": true
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.513,
+    "enrichment": 0.67
+   }
+  },
+  "A3tm4": {
+   "name": "Tucum\u00e3, Metarenito",
+   "survey_share_pct": 0.216,
+   "case1": {
+    "selected_share_pct": 0.068,
+    "enrichment": 0.314,
+    "random_share_p5_p95": [
+     0.0,
+     0.463
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.446
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0
+   }
+  },
+  "A3vs": {
+   "name": "Gnaisse Vila Sass\u00e1",
+   "survey_share_pct": 0.557,
+   "case1": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.099,
+     1.151
+    ],
+    "above_random": false,
+    "below_random": true
+   },
+   "case2": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.047,
+     1.263
+    ],
+    "above_random": false,
+    "below_random": true
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0
+   }
+  },
+  "A3xi": {
+   "name": "Xingu",
+   "survey_share_pct": 13.906,
+   "case1": {
+    "selected_share_pct": 16.176,
+    "enrichment": 1.163,
+    "random_share_p5_p95": [
+     11.095,
+     16.135
+    ],
+    "above_random": true,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 12.333,
+    "enrichment": 0.887,
+    "random_share_p5_p95": [
+     10.941,
+     16.802
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 5.88,
+    "enrichment": 0.423
+   }
+  },
+  "A4_delta_i": {
+   "name": "M\u00e1ficas Indiscriminadas",
+   "survey_share_pct": 0.049,
+   "case1": {
+    "selected_share_pct": 0.025,
+    "enrichment": 0.503,
+    "random_share_p5_p95": [
+     0.002,
+     0.116
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.142
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0
+   }
+  },
+  "A4_delta_pi": {
+   "name": "Diopsidio Norito Pium",
+   "survey_share_pct": 0.573,
+   "case1": {
+    "selected_share_pct": 1.081,
+    "enrichment": 1.889,
+    "random_share_p5_p95": [
+     0.036,
+     1.115
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.806,
+    "enrichment": 1.407,
+    "random_share_p5_p95": [
+     0.021,
+     1.295
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.056,
+    "enrichment": 0.099
+   }
+  },
+  "A4_delta_si": {
+   "name": "Gabro Santa In\u00eas",
+   "survey_share_pct": 0.042,
+   "case1": {
+    "selected_share_pct": 0.013,
+    "enrichment": 0.311,
+    "random_share_p5_p95": [
+     0.0,
+     0.074
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.098
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.021,
+    "enrichment": 0.487
+   }
+  },
+  "A4_gamma_2e": {
+   "name": "Metagranito Estrela",
+   "survey_share_pct": 1.158,
+   "case1": {
+    "selected_share_pct": 1.128,
+    "enrichment": 0.975,
+    "random_share_p5_p95": [
+     0.397,
+     2.17
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 2.919,
+    "enrichment": 2.521,
+    "random_share_p5_p95": [
+     0.285,
+     2.361
+    ],
+    "above_random": true,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 1.636,
+    "enrichment": 1.413
+   }
+  },
+  "A4_gamma_2gl": {
+   "name": "Metagranito Igarap\u00e9 Gelado",
+   "survey_share_pct": 2.272,
+   "case1": {
+    "selected_share_pct": 1.624,
+    "enrichment": 0.715,
+    "random_share_p5_p95": [
+     0.655,
+     2.71
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 5.381,
+    "enrichment": 2.368,
+    "random_share_p5_p95": [
+     0.734,
+     3.071
+    ],
+    "above_random": true,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 9.418,
+    "enrichment": 4.145
+   }
+  },
+  "A4_gamma_2lv": {
+   "name": "Metagranito Lavrado",
+   "survey_share_pct": 0.317,
+   "case1": {
+    "selected_share_pct": 1.048,
+    "enrichment": 3.304,
+    "random_share_p5_p95": [
+     0.015,
+     0.768
+    ],
+    "above_random": true,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.013,
+    "enrichment": 0.042,
+    "random_share_p5_p95": [
+     0.0,
+     0.883
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 2.085,
+    "enrichment": 6.572
+   }
+  },
+  "A4_gamma_2pb": {
+   "name": "Pedra Branca",
+   "survey_share_pct": 0.012,
+   "case1": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.044
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.083
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0
+   }
+  },
+  "A4_gamma_2pl": {
+   "name": "Planalto",
+   "survey_share_pct": 1.712,
+   "case1": {
+    "selected_share_pct": 2.438,
+    "enrichment": 1.424,
+    "random_share_p5_p95": [
+     1.076,
+     2.495
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 2.248,
+    "enrichment": 1.313,
+    "random_share_p5_p95": [
+     0.916,
+     2.676
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 3.471,
+    "enrichment": 2.027
+   }
+  },
+  "A4_gamma_2pq": {
+   "name": "Metagranito Plaqu\u00ea",
+   "survey_share_pct": 7.904,
+   "case1": {
+    "selected_share_pct": 11.257,
+    "enrichment": 1.424,
+    "random_share_p5_p95": [
+     6.366,
+     10.38
+    ],
+    "above_random": true,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 19.971,
+    "enrichment": 2.527,
+    "random_share_p5_p95": [
+     6.012,
+     10.657
+    ],
+    "above_random": true,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 16.988,
+    "enrichment": 2.149
+   }
+  },
+  "A4_gamma_2se": {
+   "name": "Metagranito Rio Sereno",
+   "survey_share_pct": 0.041,
+   "case1": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.14
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.231
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0
+   }
+  },
+  "A4_gamma_2vc": {
+   "name": "Leucogranito Velha Canada",
+   "survey_share_pct": 0.391,
+   "case1": {
+    "selected_share_pct": 0.348,
+    "enrichment": 0.89,
+    "random_share_p5_p95": [
+     0.011,
+     0.852
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.958
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.436,
+    "enrichment": 1.114
+   }
+  },
+  "A4_gamma_2vj": {
+   "name": "Vila Jussara",
+   "survey_share_pct": 0.554,
+   "case1": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.119,
+     1.109
+    ],
+    "above_random": false,
+    "below_random": true
+   },
+   "case2": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.052,
+     1.236
+    ],
+    "above_random": false,
+    "below_random": true
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0
+   }
+  },
+  "A4_gamma_i": {
+   "name": "Granitoides indiscriminados",
+   "survey_share_pct": 0.621,
+   "case1": {
+    "selected_share_pct": 0.283,
+    "enrichment": 0.456,
+    "random_share_p5_p95": [
+     0.189,
+     0.901
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.221,
+    "enrichment": 0.355,
+    "random_share_p5_p95": [
+     0.144,
+     1.103
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.001,
+    "enrichment": 0.002
+   }
+  },
+  "A4_mu_c": {
+   "name": "Catet\u00e9",
+   "survey_share_pct": 2.341,
+   "case1": {
+    "selected_share_pct": 5.458,
+    "enrichment": 2.331,
+    "random_share_p5_p95": [
+     1.474,
+     3.349
+    ],
+    "above_random": true,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 2.051,
+    "enrichment": 0.876,
+    "random_share_p5_p95": [
+     1.264,
+     3.555
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.552,
+    "enrichment": 0.236
+   }
+  },
+  "A4_mu_lm": {
+   "name": "Luanga M\u00e1fica",
+   "survey_share_pct": 0.815,
+   "case1": {
+    "selected_share_pct": 0.673,
+    "enrichment": 0.826,
+    "random_share_p5_p95": [
+     0.39,
+     1.427
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 1.681,
+    "enrichment": 2.063,
+    "random_share_p5_p95": [
+     0.282,
+     1.589
+    ],
+    "above_random": true,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 2.096,
+    "enrichment": 2.573
+   }
+  },
+  "A4_mu_lu": {
+   "name": "Luanga Ultram\u00e1fica",
+   "survey_share_pct": 0.052,
+   "case1": {
+    "selected_share_pct": 0.101,
+    "enrichment": 1.963,
+    "random_share_p5_p95": [
+     0.0,
+     0.138
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.189
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0
+   }
+  },
+  "A4_mu_v": {
+   "name": "Vermelho",
+   "survey_share_pct": 0.022,
+   "case1": {
+    "selected_share_pct": 0.142,
+    "enrichment": 6.438,
+    "random_share_p5_p95": [
+     0.0,
+     0.073
+    ],
+    "above_random": true,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.144,
+    "enrichment": 6.548,
+    "random_share_p5_p95": [
+     0.0,
+     0.127
+    ],
+    "above_random": true,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.201,
+    "enrichment": 9.13
+   }
+  },
+  "A4aq": {
+   "name": "Aquiri",
+   "survey_share_pct": 0.198,
+   "case1": {
+    "selected_share_pct": 0.595,
+    "enrichment": 3.003,
+    "random_share_p5_p95": [
+     0.0,
+     0.456
+    ],
+    "above_random": true,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.556
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.263,
+    "enrichment": 1.327
+   }
+  },
+  "A4az": {
+   "name": "Azulona",
+   "survey_share_pct": 0.092,
+   "case1": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.236
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.037,
+    "enrichment": 0.397,
+    "random_share_p5_p95": [
+     0.0,
+     0.286
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0
+   }
+  },
+  "A4bu": {
+   "name": "Buritirama",
+   "survey_share_pct": 0.794,
+   "case1": {
+    "selected_share_pct": 1.276,
+    "enrichment": 1.606,
+    "random_share_p5_p95": [
+     0.239,
+     1.232
+    ],
+    "above_random": true,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.248,
+    "enrichment": 0.313,
+    "random_share_p5_p95": [
+     0.18,
+     1.34
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.223,
+    "enrichment": 0.281
+   }
+  },
+  "A4bus": {
+   "name": "Sereno",
+   "survey_share_pct": 0.072,
+   "case1": {
+    "selected_share_pct": 0.337,
+    "enrichment": 4.708,
+    "random_share_p5_p95": [
+     0.0,
+     0.179
+    ],
+    "above_random": true,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.173,
+    "enrichment": 2.424,
+    "random_share_p5_p95": [
+     0.0,
+     0.215
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.047,
+    "enrichment": 0.654
+   }
+  },
+  "A4ci": {
+   "name": "Igarap\u00e9 Cigarra",
+   "survey_share_pct": 3.794,
+   "case1": {
+    "selected_share_pct": 2.961,
+    "enrichment": 0.781,
+    "random_share_p5_p95": [
+     2.99,
+     5.327
+    ],
+    "above_random": false,
+    "below_random": true
+   },
+   "case2": {
+    "selected_share_pct": 2.407,
+    "enrichment": 0.634,
+    "random_share_p5_p95": [
+     2.628,
+     5.592
+    ],
+    "above_random": false,
+    "below_random": true
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 1.444,
+    "enrichment": 0.381
+   }
+  },
+  "A4cj": {
+   "name": "Caraj\u00e1s",
+   "survey_share_pct": 0.764,
+   "case1": {
+    "selected_share_pct": 0.832,
+    "enrichment": 1.088,
+    "random_share_p5_p95": [
+     0.508,
+     1.163
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.503,
+    "enrichment": 0.658,
+    "random_share_p5_p95": [
+     0.428,
+     1.236
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.556,
+    "enrichment": 0.728
+   }
+  },
+  "A4cu": {
+   "name": "Cuxi\u00fa",
+   "survey_share_pct": 0.916,
+   "case1": {
+    "selected_share_pct": 0.263,
+    "enrichment": 0.287,
+    "random_share_p5_p95": [
+     0.373,
+     1.7
+    ],
+    "above_random": false,
+    "below_random": true
+   },
+   "case2": {
+    "selected_share_pct": 0.941,
+    "enrichment": 1.028,
+    "random_share_p5_p95": [
+     0.296,
+     1.823
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0
+   }
+  },
+  "A4ib": {
+   "name": "Igarap\u00e9 Bahia",
+   "survey_share_pct": 0.034,
+   "case1": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.009
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.018
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0
+   }
+  },
+  "A4lb": {
+   "name": "Liberdade",
+   "survey_share_pct": 0.83,
+   "case1": {
+    "selected_share_pct": 0.104,
+    "enrichment": 0.125,
+    "random_share_p5_p95": [
+     0.324,
+     1.389
+    ],
+    "above_random": false,
+    "below_random": true
+   },
+   "case2": {
+    "selected_share_pct": 0.35,
+    "enrichment": 0.422,
+    "random_share_p5_p95": [
+     0.293,
+     1.527
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.001,
+    "enrichment": 0.002
+   }
+  },
+  "A4lbq": {
+   "name": "Liberdade, quartz\u00edtica",
+   "survey_share_pct": 0.572,
+   "case1": {
+    "selected_share_pct": 0.549,
+    "enrichment": 0.961,
+    "random_share_p5_p95": [
+     0.153,
+     0.828
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.116,
+    "enrichment": 0.203,
+    "random_share_p5_p95": [
+     0.134,
+     1.022
+    ],
+    "above_random": false,
+    "below_random": true
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.118,
+    "enrichment": 0.207
+   }
+  },
+  "A4lbs": {
+   "name": "Liberdade, metassedimentar",
+   "survey_share_pct": 0.442,
+   "case1": {
+    "selected_share_pct": 0.624,
+    "enrichment": 1.41,
+    "random_share_p5_p95": [
+     0.011,
+     0.562
+    ],
+    "above_random": true,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.725
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0
+   }
+  },
+  "A4lbxf": {
+   "name": "Liberdade, xisto-forma\u00e7\u00e3o ferr\u00edfera",
+   "survey_share_pct": 0.094,
+   "case1": {
+    "selected_share_pct": 0.236,
+    "enrichment": 2.507,
+    "random_share_p5_p95": [
+     0.0,
+     0.235
+    ],
+    "above_random": true,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.112,
+    "enrichment": 1.188,
+    "random_share_p5_p95": [
+     0.0,
+     0.285
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.036,
+    "enrichment": 0.38
+   }
+  },
+  "A4pb": {
+   "name": "Piabanha",
+   "survey_share_pct": 0.452,
+   "case1": {
+    "selected_share_pct": 0.432,
+    "enrichment": 0.956,
+    "random_share_p5_p95": [
+     0.094,
+     0.925
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.103,
+    "enrichment": 0.228,
+    "random_share_p5_p95": [
+     0.047,
+     1.015
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0
+   }
+  },
+  "A4pj": {
+   "name": "Salobo-Pojuca",
+   "survey_share_pct": 1.064,
+   "case1": {
+    "selected_share_pct": 0.964,
+    "enrichment": 0.906,
+    "random_share_p5_p95": [
+     0.267,
+     1.097
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 1.351,
+    "enrichment": 1.27,
+    "random_share_p5_p95": [
+     0.246,
+     1.303
+    ],
+    "above_random": true,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 1.843,
+    "enrichment": 1.731
+   }
+  },
+  "A4pjf": {
+   "name": "Salobo-Pojuca, Forma\u00e7\u00e3o ferr\u00edfera",
+   "survey_share_pct": 0.048,
+   "case1": {
+    "selected_share_pct": 0.219,
+    "enrichment": 4.544,
+    "random_share_p5_p95": [
+     0.0,
+     0.11
+    ],
+    "above_random": true,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.206,
+    "enrichment": 4.269,
+    "random_share_p5_p95": [
+     0.0,
+     0.183
+    ],
+    "above_random": true,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.076,
+    "enrichment": 1.57
+   }
+  },
+  "A4pjg": {
+   "name": "Salobo-Pojuca, granada xisto",
+   "survey_share_pct": 0.009,
+   "case1": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.0
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.0
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0
+   }
+  },
+  "A4pjm": {
+   "name": "Salobo-Pojuca, Metam\u00e1fica",
+   "survey_share_pct": 1.763,
+   "case1": {
+    "selected_share_pct": 1.866,
+    "enrichment": 1.059,
+    "random_share_p5_p95": [
+     0.261,
+     2.011
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 4.446,
+    "enrichment": 2.522,
+    "random_share_p5_p95": [
+     0.321,
+     2.292
+    ],
+    "above_random": true,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 4.095,
+    "enrichment": 2.323
+   }
+  },
+  "A4pjx": {
+   "name": "Salobo-Pojuca, Xisto",
+   "survey_share_pct": 0.024,
+   "case1": {
+    "selected_share_pct": 0.082,
+    "enrichment": 3.412,
+    "random_share_p5_p95": [
+     0.0,
+     0.039
+    ],
+    "above_random": true,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.059
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.001,
+    "enrichment": 0.057
+   }
+  },
+  "A4ppf": {
+   "name": "Parauapebas, F\u00e9lsico",
+   "survey_share_pct": 1.169,
+   "case1": {
+    "selected_share_pct": 1.837,
+    "enrichment": 1.571,
+    "random_share_p5_p95": [
+     0.606,
+     1.94
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 1.623,
+    "enrichment": 1.389,
+    "random_share_p5_p95": [
+     0.488,
+     2.169
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.937,
+    "enrichment": 0.802
+   }
+  },
+  "A4ppm": {
+   "name": "Parauapebas, M\u00e1fico",
+   "survey_share_pct": 3.073,
+   "case1": {
+    "selected_share_pct": 2.554,
+    "enrichment": 0.831,
+    "random_share_p5_p95": [
+     2.251,
+     4.417
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 4.485,
+    "enrichment": 1.459,
+    "random_share_p5_p95": [
+     2.039,
+     4.6
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 4.935,
+    "enrichment": 1.606
+   }
+  },
+  "A4sf4": {
+   "name": "S\u00e3o F\u00e9lix metassedimentar",
+   "survey_share_pct": 0.48,
+   "case1": {
+    "selected_share_pct": 0.008,
+    "enrichment": 0.017,
+    "random_share_p5_p95": [
+     0.0,
+     0.731
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.441,
+    "enrichment": 0.92,
+    "random_share_p5_p95": [
+     0.0,
+     0.959
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0
+   }
+  },
+  "A4sg": {
+   "name": "Serra da Gaivota",
+   "survey_share_pct": 0.279,
+   "case1": {
+    "selected_share_pct": 0.137,
+    "enrichment": 0.492,
+    "random_share_p5_p95": [
+     0.09,
+     0.542
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.219,
+    "enrichment": 0.784,
+    "random_share_p5_p95": [
+     0.048,
+     0.636
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0
+   }
+  },
+  "A4ta": {
+   "name": "Tapirap\u00e9",
+   "survey_share_pct": 0.622,
+   "case1": {
+    "selected_share_pct": 1.017,
+    "enrichment": 1.636,
+    "random_share_p5_p95": [
+     0.02,
+     0.677
+    ],
+    "above_random": true,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.138,
+    "enrichment": 0.222,
+    "random_share_p5_p95": [
+     0.0,
+     0.781
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.085,
+    "enrichment": 0.137
+   }
+  },
+  "Elm": {
+   "name": "Coberturas Later\u00edticas Maturas",
+   "survey_share_pct": 1.838,
+   "case1": {
+    "selected_share_pct": 0.833,
+    "enrichment": 0.453,
+    "random_share_p5_p95": [
+     1.242,
+     2.418
+    ],
+    "above_random": false,
+    "below_random": true
+   },
+   "case2": {
+    "selected_share_pct": 0.378,
+    "enrichment": 0.206,
+    "random_share_p5_p95": [
+     1.137,
+     2.622
+    ],
+    "above_random": false,
+    "below_random": true
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.211,
+    "enrichment": 0.115
+   }
+  },
+  "J_delta_ro": {
+   "name": "Gabro Rio da On\u00e7a",
+   "survey_share_pct": 0.096,
+   "case1": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.15
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.207
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0
+   }
+  },
+  "NPct": {
+   "name": "Couto Magalh\u00e3es",
+   "survey_share_pct": 0.354,
+   "case1": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.107,
+     0.66
+    ],
+    "above_random": false,
+    "below_random": true
+   },
+   "case2": {
+    "selected_share_pct": 0.301,
+    "enrichment": 0.85,
+    "random_share_p5_p95": [
+     0.001,
+     0.738
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0
+   }
+  },
+  "PP23ac": {
+   "name": "\u00c1guas Claras",
+   "survey_share_pct": 4.903,
+   "case1": {
+    "selected_share_pct": 3.89,
+    "enrichment": 0.793,
+    "random_share_p5_p95": [
+     3.414,
+     6.746
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 6.015,
+    "enrichment": 1.227,
+    "random_share_p5_p95": [
+     3.333,
+     6.983
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 2.026,
+    "enrichment": 0.413
+   }
+  },
+  "PP23ibs": {
+   "name": "Igarap\u00e9 Boa Sorte",
+   "survey_share_pct": 0.028,
+   "case1": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.095
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.158
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0
+   }
+  },
+  "PP3_alfa_sr": {
+   "name": "Santa Rosa",
+   "survey_share_pct": 0.828,
+   "case1": {
+    "selected_share_pct": 0.843,
+    "enrichment": 1.019,
+    "random_share_p5_p95": [
+     0.098,
+     1.529
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.081,
+    "enrichment": 0.098,
+    "random_share_p5_p95": [
+     0.063,
+     1.636
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0
+   }
+  },
+  "PP3_delta_t": {
+   "name": "Gabro Vila do T",
+   "survey_share_pct": 0.034,
+   "case1": {
+    "selected_share_pct": 0.118,
+    "enrichment": 3.494,
+    "random_share_p5_p95": [
+     0.0,
+     0.091
+    ],
+    "above_random": true,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.074,
+    "enrichment": 2.178,
+    "random_share_p5_p95": [
+     0.0,
+     0.117
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0
+   }
+  },
+  "PP3_gamma_ba": {
+   "name": "Granito Fazenda Bananal",
+   "survey_share_pct": 0.012,
+   "case1": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.042
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.082
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.132,
+    "enrichment": 11.131
+   }
+  },
+  "PP3_gamma_ci": {
+   "name": "Granito Cigano",
+   "survey_share_pct": 0.9,
+   "case1": {
+    "selected_share_pct": 1.543,
+    "enrichment": 1.715,
+    "random_share_p5_p95": [
+     0.093,
+     1.65
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 4.351,
+    "enrichment": 4.836,
+    "random_share_p5_p95": [
+     0.027,
+     1.777
+    ],
+    "above_random": true,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 6.106,
+    "enrichment": 6.787
+   }
+  },
+  "PP3_gamma_fo": {
+   "name": "Granito Formiga",
+   "survey_share_pct": 0.005,
+   "case1": {
+    "selected_share_pct": 0.033,
+    "enrichment": 7.118,
+    "random_share_p5_p95": [
+     0.0,
+     0.016
+    ],
+    "above_random": true,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.031
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0
+   }
+  },
+  "PP3_gamma_js": {
+   "name": "Granito Seringa",
+   "survey_share_pct": 3.19,
+   "case1": {
+    "selected_share_pct": 0.59,
+    "enrichment": 0.185,
+    "random_share_p5_p95": [
+     1.748,
+     4.925
+    ],
+    "above_random": false,
+    "below_random": true
+   },
+   "case2": {
+    "selected_share_pct": 1.487,
+    "enrichment": 0.466,
+    "random_share_p5_p95": [
+     1.507,
+     4.992
+    ],
+    "above_random": false,
+    "below_random": true
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 4.289,
+    "enrichment": 1.345
+   }
+  },
+  "PP3_gamma_po": {
+   "name": "Granito Pojuca",
+   "survey_share_pct": 0.041,
+   "case1": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.128
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.207
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.329,
+    "enrichment": 7.989
+   }
+  },
+  "PP3_gamma_rb": {
+   "name": "Granito Rio Branco",
+   "survey_share_pct": 0.305,
+   "case1": {
+    "selected_share_pct": 0.019,
+    "enrichment": 0.063,
+    "random_share_p5_p95": [
+     0.03,
+     0.581
+    ],
+    "above_random": false,
+    "below_random": true
+   },
+   "case2": {
+    "selected_share_pct": 0.149,
+    "enrichment": 0.487,
+    "random_share_p5_p95": [
+     0.0,
+     0.714
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.789,
+    "enrichment": 2.583
+   }
+  },
+  "PP3_gamma_sc": {
+   "name": "Granito Serra dos Caraj\u00e1s",
+   "survey_share_pct": 0.863,
+   "case1": {
+    "selected_share_pct": 0.142,
+    "enrichment": 0.164,
+    "random_share_p5_p95": [
+     0.199,
+     1.676
+    ],
+    "above_random": false,
+    "below_random": true
+   },
+   "case2": {
+    "selected_share_pct": 0.506,
+    "enrichment": 0.586,
+    "random_share_p5_p95": [
+     0.14,
+     1.79
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 5.485,
+    "enrichment": 6.355
+   }
+  },
+  "PP3_gamma_vg": {
+   "name": "Velho Guilherme",
+   "survey_share_pct": 0.408,
+   "case1": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.028,
+     0.915
+    ],
+    "above_random": false,
+    "below_random": true
+   },
+   "case2": {
+    "selected_share_pct": 0.882,
+    "enrichment": 2.162,
+    "random_share_p5_p95": [
+     0.0,
+     1.047
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 3.305,
+    "enrichment": 8.099
+   }
+  },
+  "PP3cn": {
+   "name": "Caninana",
+   "survey_share_pct": 1.511,
+   "case1": {
+    "selected_share_pct": 1.562,
+    "enrichment": 1.034,
+    "random_share_p5_p95": [
+     0.686,
+     2.593
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.469,
+    "enrichment": 0.311,
+    "random_share_p5_p95": [
+     0.577,
+     2.767
+    ],
+    "above_random": false,
+    "below_random": true
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.045,
+    "enrichment": 0.03
+   }
+  },
+  "PP3pd": {
+   "name": "Pared\u00e3o",
+   "survey_share_pct": 0.087,
+   "case1": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.227
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.299
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0
+   }
+  },
+  "PP3t": {
+   "name": "Triunfo",
+   "survey_share_pct": 0.003,
+   "case1": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.004
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0,
+    "random_share_p5_p95": [
+     0.0,
+     0.0
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.0,
+    "enrichment": 0.0
+   }
+  },
+  "Q2a": {
+   "name": "Dep\u00f3sitos aluvionares",
+   "survey_share_pct": 0.33,
+   "case1": {
+    "selected_share_pct": 0.299,
+    "enrichment": 0.908,
+    "random_share_p5_p95": [
+     0.119,
+     0.491
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2": {
+    "selected_share_pct": 0.438,
+    "enrichment": 1.329,
+    "random_share_p5_p95": [
+     0.092,
+     0.555
+    ],
+    "above_random": false,
+    "below_random": false
+   },
+   "case2_unscaled": {
+    "selected_share_pct": 0.484,
+    "enrichment": 1.47
+   }
+  }
+ }
+}
