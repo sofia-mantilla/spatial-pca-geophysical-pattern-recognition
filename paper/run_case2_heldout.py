@@ -206,6 +206,37 @@ def main() -> int:
               % (c28["a_uni"], c38["a_uni"], c28["U"]))
         print("  k_TMI=2, k_U 6..13: %.3f to %.3f" % (min(row2), max(row2)))
 
+    # --- which k_TMI each reference wants, at the retained k_U ---
+    KS = [2, 3, 4, 6, 8, 10, 12, 15]
+    prof = {}
+    for k1 in KS:
+        rr = protocol(k1, 8)
+        for h in REFS:
+            prof.setdefault(h, {})[k1] = round(
+                float(np.mean([r["a_uni"] for r in rr if r["h"] == h])), 4)
+    out["k_TMI_by_reference"] = {
+        "k_TMI_tested": KS, "k_U": 8,
+        "by_reference": {str(h): prof[h] for h in REFS},
+        "best_k_TMI": {str(h): max(prof[h], key=lambda k: prof[h][k]) for h in REFS},
+        "mean_all_six": {str(k): round(float(np.mean([prof[h][k] for h in REFS])), 4)
+                         for k in KS},
+        "mean_without_paulo_afonso": {
+            str(k): round(float(np.mean([prof[h][k] for h in REFS if h != 6])), 4)
+            for k in KS},
+    }
+    print("\nheld-out recovery by reference against k_TMI, at the retained k_U = 8")
+    print("  %-14s %s" % ("reference", "".join("%7d" % k for k in KS)))
+    for h in REFS:
+        print("  %-14s %s   best %d"
+              % (h, "".join("%7.3f" % prof[h][k] for k in KS),
+                 out["k_TMI_by_reference"]["best_k_TMI"][str(h)]))
+    for lab, key in (("mean, all six", "mean_all_six"),
+                     ("mean, no dep 6", "mean_without_paulo_afonso")):
+        d = out["k_TMI_by_reference"][key]
+        print("  %-14s %s   best %s"
+              % (lab, "".join("%7.3f" % d[str(k)] for k in KS),
+                 max(KS, key=lambda k: d[str(k)])))
+
     (OUT_DIR / "case2_heldout.json").write_text(json.dumps(out, indent=1))
     print("\nwrote %s" % (OUT_DIR / "case2_heldout.json"))
     return 0
