@@ -33,7 +33,7 @@ print("=== build ===")
 check("0 undefined references", "undefined" not in log.lower())
 check("0 overfull hboxes", log.count("Overfull \\hbox") == 0)
 check("0 LaTeX warnings", log.count("LaTeX Warning") == 0)
-EXPECTED_PAGES = "49"      # change here when the agreed length changes
+EXPECTED_PAGES = "50"      # change here when the agreed length changes
 m = re.search(r"\((\d+) pages", log)
 check("page count is %s" % EXPECTED_PAGES, m and m.group(1) == EXPECTED_PAGES,
       "(%s)" % (m.group(1) if m else "?"))

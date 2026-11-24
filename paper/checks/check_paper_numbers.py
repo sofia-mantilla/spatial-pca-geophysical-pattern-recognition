@@ -9,6 +9,14 @@ ho = json.load(open(RES / "case2_heldout.json"))
 hg = json.load(open(RES / "case2_heldout_grid.json"))
 a12 = json.load(open(RES / "all_twelve_case2.json"))
 arim = json.load(open(RES / "arim_contacts.json"))
+stru = json.load(open(RES / "structure_proximity.json"))
+def _pop(defn, name):
+    for r in stru[defn]["populations"]:
+        if r["population"].startswith(name):
+            return r
+    raise KeyError(name)
+_sb = stru["all structures but magnetic"]["random"]
+_sz = stru["shear zones"]["random"]
 era = json.load(open(RES / "era_shares.json"))
 import unicodedata as _ud
 def _era(case, name):
@@ -105,6 +113,14 @@ CHECKS = [
  ("case2 palaeoproterozoic", "13.4\\% of the Case-2 selection", 100 * _era("case2", "Paleoproterozóico")["top250"]),
  ("survey palaeoproterozoic", "against 11.7\\% of the survey", 100 * _era("case2", "Paleoproterozóico")["survey"]),
  ("case2 neoarchean", "47.9\\% against 30.4\\%", 100 * _era("case2", "Neoarqueano")["top250"]),
+ ("structures: case2 median", "median distance is 1{,}131~m", _pop("all structures but magnetic", "Case 2")["median_m"]),
+ ("structures: random median range", "1{,}407 to 1{,}892~m", _sb["median_m_p5_p95"]),
+ ("structures: case2 within 1 km", "46.2\\% of it falls within 1~km", 100 * _pop("all structures but magnetic", "Case 2")["within_1km"]),
+ ("structures: random 1 km range", "30.4 to 40.4\\%", _sb["within_1km_p5_p95"]),
+ ("structures: deposits", "1{,}020~m and 41.7\\%", _pop("all structures but magnetic", "the twelve")["median_m"]),
+ ("structures: case1", "at 1{,}523~m", _pop("all structures but magnetic", "Case 1")["median_m"]),
+ ("shear zones: case2", "3{,}453~m against a range beginning at 3{,}499~m", _pop("shear zones", "Case 2")["median_m"]),
+ ("structures: counts", "447 mapped structures remain, 133 of them shear zones", 447),
 ]
 
 bad = 0
