@@ -23,8 +23,8 @@ from pathlib import Path
 import numpy as np, geopandas as gpd
 from rasterio.features import rasterize
 from rasterio.transform import from_origin
-from scipy.ndimage import distance_transform_edt
-from shapely.geometry import box
+from shapely.geometry import Point, box
+from shapely.strtree import STRtree
 import case1_uni_repro as C1, numpy_repro_concat as R
 from run_era_shares import clear_of_deposits
 from run_geology_vs_baselines import deposit_boxes
@@ -35,17 +35,21 @@ tmi,_u,ox,oy=R.load_cropped(); H,W=tmi.shape
 tr=from_origin(ox,oy,R.PX,R.PX); area=box(ox,oy-H*R.PX,ox+W*R.PX,oy)
 g=gpd.clip(gpd.read_file(LITO).to_crs("EPSG:32722"),area); g=g[~g.geometry.is_empty]
 diss=g.dissolve("SIGLA_UNID").reset_index()
-contacts=rasterize([gm.boundary for gm in diss.geometry if not gm.is_empty],
-                   out_shape=(H,W),transform=tr,fill=0,default_value=1,all_touched=True).astype(bool)
-dist=distance_transform_edt(~contacts)*R.PX
+lines=[gm.boundary for gm in diss.geometry if not gm.is_empty]
+tree=STRtree(lines)
+def dist_at(x,y):
+    """Exact point-to-boundary distance. A rasterised transform at 200 m with
+    all_touched places every boundary up to one cell too close."""
+    p=Point(x,y); return p.distance(lines[tree.nearest(p)])
 foot=rasterize(list(g.geometry),out_shape=(H,W),transform=tr,fill=0,default_value=1).astype(bool)
 deposits=deposit_boxes()
 
 def stats(order,idx,wshape,origin,dep):
-    wh,ww=wshape; v=[]
+    oxx,oyy=origin; wh,ww=wshape; v=[]
     for r,c in clear_of_deposits(order,idx,wshape,origin,dep,deposits):
         rr=min(r+wh//2,H-1); cc=min(c+ww//2,W-1)
-        if foot[rr,cc]: v.append(dist[rr,cc])
+        if foot[rr,cc]:
+            v.append(dist_at(oxx+(c+ww/2)*R.PX, oyy-(r+wh/2)*R.PX))
     v=np.array(v,float)
     return len(v), np.median(v), (v<=500).mean()
 
@@ -64,4 +68,4 @@ for k in (2,8,17,25):
 for k in (2,17):
     o,i,ws,og,d=C1.rank_spca(k)
     n,m,p=stats(o,i,ws,og,d); print("%-42s %5d %7.0fm %7.1f%%" % ("Paulo Afonso TMI alone, k=%d"%k,n,m,100*p))
-print("\n(random mean 863m / 35.3%, 5-95%: 30.0-40.6%)")
+print("\n(random, exact geometry: mean 919m / 32.5%, 5-95%: 27.6-37.9%)")

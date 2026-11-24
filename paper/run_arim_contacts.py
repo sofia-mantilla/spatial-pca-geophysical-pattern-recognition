@@ -5,6 +5,10 @@ lithological contacts. If the ranking is finding that setting rather than any
 magnetic pattern, its windows should lie nearer mapped contacts than ordinary
 ground, and nearer than a template matcher that is only matching anomaly shape.
 
+Distances are computed from the polygon geometry. A rasterised distance
+transform at 200 m places boundaries up to one cell too close and shortens
+every distance by of order 100 m.
+
 run_contact_proximity.py asked this of the Para 1:1,000,000 sheet, which has
 230 polygons over the survey and puts its contacts in coarse places. This asks
 it of the ARIM Carajas 1:250,000 map, which has 728, using its own unit codes.
@@ -34,8 +38,8 @@ import geopandas as gpd
 import numpy as np
 from rasterio.features import rasterize
 from rasterio.transform import from_origin
-from scipy.ndimage import distance_transform_edt
-from shapely.geometry import box
+from shapely.geometry import Point, box
+from shapely.strtree import STRtree
 
 import case1_uni_repro as C1
 import numpy_repro_concat as R
@@ -61,14 +65,12 @@ def grids():
     # dissolve by unit first: a contact separates different units
     diss = g.dissolve("SIGLA_UNID").reset_index()
     lines = [geom.boundary for geom in diss.geometry if not geom.is_empty]
-    contacts = rasterize(lines, out_shape=shape, transform=transform, fill=0,
-                         default_value=1, all_touched=True).astype(bool)
+    tree = STRtree(lines)
     footprint = rasterize(list(g.geometry), out_shape=shape, transform=transform,
                           fill=0, default_value=1).astype(bool)
-    dist = distance_transform_edt(~contacts) * R.PX
-    print("%d polygons, %d units, contacts on %.1f%% of cells, footprint %.1f%%"
-          % (len(g), len(diss), 100 * contacts.mean(), 100 * footprint.mean()))
-    return dist, footprint, (ox, oy), shape
+    print("%d polygons, %d units, footprint %.1f%% of the grid"
+          % (len(g), len(diss), 100 * footprint.mean()))
+    return (tree, lines), footprint, (ox, oy), shape
 
 
 def summarise(values, buf):
@@ -86,7 +88,18 @@ def main() -> int:
     ap.add_argument("--seed", type=int, default=20261123)
     args = ap.parse_args()
 
-    dist, foot, (ox, oy), (H, W) = grids()
+    (tree, lines), foot, (ox, oy), (H, W) = grids()
+
+    def dist_at(x, y):
+        """Exact distance from a point to the nearest mapped unit boundary.
+
+        An earlier version read this off a rasterised distance transform. At
+        200 m with all_touched rasterisation that places every boundary up to
+        one cell too close, which shortened every distance here by of order
+        100 m. The geometry is used directly instead.
+        """
+        p = Point(x, y)
+        return p.distance(lines[tree.nearest(p)])
     deposits = deposit_boxes()
     rng = np.random.default_rng(args.seed)
     out = {"draws": args.draws, "buffer_m": args.buffer}
@@ -96,7 +109,7 @@ def main() -> int:
         r = int(round((oy - d.centroid.y) / R.PX)); c = int(round((d.centroid.x - ox) / R.PX))
         r = min(max(r, 0), H - 1); c = min(max(c, 0), W - 1)
         if foot[r, c]:
-            dep_d.append(dist[r, c])
+            dep_d.append(dist_at(d.centroid.x, d.centroid.y))
     out["the twelve known deposits"] = summarise(dep_d, args.buffer)
     print("deposits inside the ARIM footprint: %d of 12" % len(dep_d))
 
@@ -124,7 +137,8 @@ def main() -> int:
             for r, c in cells:
                 rr = min(r + wh // 2, H - 1); cc = min(c + ww // 2, W - 1)
                 if foot[rr, cc]:
-                    v.append(dist[rr, cc])
+                    v.append(dist_at(ox + (c + ww / 2) * R.PX,
+                                     oy - (r + wh / 2) * R.PX))
             return v
 
         rows = {"all candidate windows":
