@@ -684,8 +684,9 @@
  * Chain: crop/mask -> stride sliding windows (shared NaN mask across variables,
  * keep only all-finite windows) -> per-block standardized PCA scores (column
  * standardize ddof0, center, eigendecomposition of Zc^T Zc == full-SVD scores)
- * -> z_dep^2 block weights (alpha between variables) -> weighted distance to
- * the appended reference row -> top-N windows -> exact-geometry footprint
+ * -> z_dep^2 weights within each variable -> weighted distance of every row to
+ * the appended reference row, per variable -> with several variables, each
+ * divided by its own median and averaged with weights alpha -> top-N windows -> exact-geometry footprint
  * recovery (Sutherland-Hodgman rect clipping, union via cell decomposition),
  * hit = coverage >= MIN_COVER of a test-deposit footprint.
  */
@@ -1148,26 +1149,29 @@ function buildWindowMatrix(fields, H, W, tpl, strideY, strideX) {
 /* ---------------------------------------------------------------- ranking */
 // ks: per-variable k. alphas: per-variable weight (sum 1). Returns order
 // (indices into rows, ascending distance; includes dep row somewhere).
+// Each variable's deposit-weighted distance is computed on its own. With more
+// than one variable, each distance is divided by the median of its own
+// distances over all rows, and the scaled distances are averaged with the
+// weights alphas. This is block_distance, block_scale and rank_concat of
+// paper/numpy_repro_concat.py. With one variable the distance is used as is.
+// medianOf is nested so that rankWindows.toString() carries it into the
+// Web Worker that index.html builds from the function sources.
 function rankWindows(wm, ks, alphas) {
+  function medianOf(a) {
+    const s = Float64Array.from(a).sort();
+    const n = s.length, h = n >> 1;
+    return n % 2 ? s[h] : 0.5 * (s[h - 1] + s[h]);
+  }
   const { X, nRows, npix, totalCols } = wm;
   const nv = ks.length;
   const dep = nRows - 1;
-  const F = [];       // per-variable scores
-  const Wt = [];      // per-variable weights (scaled by alpha)
+  const d = new Float64Array(nRows);
+  const dv = new Float64Array(nRows);
   for (let v = 0; v < nv; v++) {
     const Z = blockScores(X, nRows, totalCols, v * npix, (v + 1) * npix, ks[v]);
     const k = Math.min(ks[v], npix, nRows);
-    const zdep = Z.subarray(dep * k, dep * k + k);
-    const w = blkW(zdep);
-    for (let i = 0; i < k; i++) w[i] *= (nv === 1 ? 1.0 : alphas[v]);
-    F.push({ Z, k });
-    Wt.push(w);
-  }
-  const d = new Float64Array(nRows);
-  for (let v = 0; v < nv; v++) {
-    const { Z, k } = F[v];
-    const w = Wt[v];
     const depBase = dep * k;
+    const w = blkW(Z.subarray(depBase, depBase + k));
     for (let r = 0; r < nRows; r++) {
       let s = 0.0;
       const base = r * k;
@@ -1175,10 +1179,13 @@ function rankWindows(wm, ks, alphas) {
         const t = Z[base + j] - Z[depBase + j];
         s += w[j] * t * t;
       }
-      d[r] += s;
+      dv[r] = Math.sqrt(s);
     }
+    if (nv === 1) { d.set(dv); break; }
+    let m = medianOf(dv);
+    if (!(m > 0)) m = 1.0;
+    for (let r = 0; r < nRows; r++) d[r] += alphas[v] * (dv[r] / m);
   }
-  for (let r = 0; r < nRows; r++) d[r] = Math.sqrt(d[r]);
   const order = Array.from({ length: nRows }, (_, i) => i);
   order.sort((a, b) => (d[a] - d[b]) || (a - b));
   return { order, d, dep };

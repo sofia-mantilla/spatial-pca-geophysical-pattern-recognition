@@ -1,15 +1,19 @@
 /* Validate the JS wPCA port against the paper's replication gates.
  * Case 1 (uni TMI, ref Paulo Afonso dep 6, k=17, stride 8, top 250):
  *   end 47.04, AUC 57.9, 5 hits, hit ranks {5:[10],103:[4],126:[7],166:[0],220:[1]}
- * Case 2 (concat, ref Alemão dep 3 of multi shp, k TMI=2, k U=8, alpha=0.503):
- *   end 63.75, AUC 106.1, 3 hits, hit ranks {10:[0],142:[1],246:[4]}
+ * Case 2 (TMI + U, ref Alemão dep 3, k TMI=2, k U=8, alpha TMI=0.541, each
+ * variable's distance divided by its own median before the weighted average;
+ * test set = deposits 1-6 of the twelve-deposit shapefile less Alemão):
+ *   end 58.81, AUC 122.9, 3 hits, hit ranks {11:[1],17:[0],74:[4]}
+ * Run from the repo root or from webapp/. DATA defaults to ../data relative to
+ * this file and can be overridden with the WPCA_DATA environment variable.
  */
 "use strict";
 const fs = require("fs");
 const path = require("path");
 const W = require("./wpca_core.js");
 
-const DATA = "/home/user/repro/data";
+const DATA = process.env.WPCA_DATA || path.join(__dirname, "..", "data");
 const NL = 3527, NC = 2485, PX = 200.0;
 const X0 = 279900.0, Y0 = 9656100.0, NODATA = -99999.0;
 const STRIDE = 8, N_TOP = 250, MIN_COVER = 0.5;
@@ -100,21 +104,24 @@ function runCase1(g) {
 
 function runCase2(g) {
   const t0 = Date.now();
-  const depsRaw = readShp(path.join(DATA, "Carajas_Brazil_Multivariate_TMI_U/Prospect_in Carajas_multi.shp"));
+  // Records 1-5 of the twelve-deposit shapefile are identical to the five of
+  // Prospect_in Carajas_multi.shp, so the Alemão window is the same from either.
+  const shp12 = path.join(DATA, "Carajas_Brazil_Univariate_TMI/Prospect_in Carajas_v2.shp");
+  const depsRaw = readShp(shp12);
   const tpl = templateRect(depsRaw[3 - 1], g.ox, g.oy, g.H, g.W);
   const wm = W.buildWindowMatrix([g.tmi, g.u], g.H, g.W, tpl, STRIDE);
   console.log(`case2: n windows = ${wm.nRows - 1}, window = (${wm.wh}, ${wm.ww})`);
-  const { order, dep } = W.rankWindows(wm, [2, 8], [0.503, 0.497]);
+  const { order, dep } = W.rankWindows(wm, [2, 8], [0.541, 0.459]);
   const rects = rectsFromOrder(order, dep, wm.idx, wm.wh, wm.ww, g.ox, g.oy, N_TOP);
-  const depsW = wgs84Deps(path.join(DATA, "Carajas_Brazil_Multivariate_TMI_U/Prospect_in Carajas_multi.shp"));
+  const depsW = wgs84Deps(shp12).slice(0, 6);
   const test = {};
   depsW.forEach((rings, i) => { if (i !== 3 - 1) test[i] = rings; });
   const m = W.metricsOf(W.footprintRecovery(rects, test, MIN_COVER), N_TOP);
   console.log(`case2: end ${m.end.toFixed(2)}  AUC ${m.auc.toFixed(1)}  hits ${m.hits}  ranks ${fmtRanks(m.hitRanks)}`);
-  console.log(`  gates: end 63.75  AUC 106.1  hits 3  ranks 10:[0] 142:[1] 246:[4]`);
+  console.log(`  gates: end 58.81  AUC 122.9  hits 3  ranks 11:[1] 17:[0] 74:[4]`);
   console.log(`  (${((Date.now() - t0) / 1000).toFixed(1)}s)`);
-  const pass = Math.abs(m.end - 63.747) < 0.02 && Math.abs(m.auc - 106.15) < 0.1 && m.hits === 3
-    && fmtRanks(m.hitRanks) === "10:[0] 142:[1] 246:[4]";
+  const pass = Math.abs(m.end - 58.809) < 0.02 && Math.abs(m.auc - 122.93) < 0.1 && m.hits === 3
+    && fmtRanks(m.hitRanks) === "11:[1] 17:[0] 74:[4]";
   console.log(pass ? "CASE 2 GATES: PASS" : "CASE 2 GATES: FAIL");
   return pass;
 }
