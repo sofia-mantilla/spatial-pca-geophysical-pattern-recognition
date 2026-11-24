@@ -159,6 +159,7 @@ def validate_run_config(config: dict[str, Any]) -> None:
         "two_stage_pca_fusion",
         "late_fusion_sum",
         "late_fusion_max",
+        "late_fusion_scaled_mean",
         "concat_scores",
     }
     if (

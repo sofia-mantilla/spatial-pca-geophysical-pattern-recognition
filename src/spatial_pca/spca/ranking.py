@@ -190,6 +190,19 @@ def run_spca_ranking_pipeline(
                 stage1_pca_svd_solver=stage1_pca_svd_solver,
             )
             return result.to_pipeline_dict()
+        if mode == "late_fusion_scaled_mean":
+            result = rank_multi_scaled_mean(
+                X_multi=X_multi,
+                deposit_index=deposit_index,
+                k_pcs_var1=int(k_pcs_rank_var1),
+                k_pcs_var2=int(k_pcs_rank_var2),
+                alpha_var1=float(fusion_weight_var1),
+                features_per_variable=features_per_variable,
+                weight_mode=weight_mode,
+                normalize_weights_over=normalize_weights_over,
+                stage1_pca_svd_solver=stage1_pca_svd_solver,
+            )
+            return result.to_pipeline_dict()
         if mode == "concat_scores":
             result = rank_multi_concat_scores(
                 X_multi=X_multi,
@@ -206,7 +219,7 @@ def run_spca_ranking_pipeline(
         if mode != "two_stage_pca_fusion":
             raise ValueError(
                 "Multi Spatial_PCA ranking modes: two_stage_pca_fusion, "
-                f"late_fusion_sum, late_fusion_max, concat_scores; got '{mode}'."
+                f"late_fusion_sum, late_fusion_max, late_fusion_scaled_mean, concat_scores; got '{mode}'."
             )
         result = rank_multi_two_stage_pca_fusion(
             X_multi=X_multi,
@@ -350,6 +363,14 @@ def rank_multi_late_fusion(
     combined either as a convex sum (``combine='sum'``, weight ``alpha_var1``)
     or as an intersection-style maximum (``combine='max'``: a target must match
     both geometries).
+
+    This is not the combination rule of the paper. Here the squared distance
+    of each variable is divided by its median and the result is combined in
+    quadrature, sqrt(a * u1 + (1 - a) * u2) with u = d**2 / median(d**2). The
+    paper divides the distance itself by its median and averages linearly,
+    a * d1 / median(d1) + (1 - a) * d2 / median(d2). The two give different
+    orderings. The paper's rule is ``rank_multi_scaled_mean``, ranking mode
+    ``late_fusion_scaled_mean``. This function is kept unchanged.
     """
 
     X = np.asarray(X_multi, dtype=float)
@@ -414,6 +435,100 @@ def rank_multi_late_fusion(
             "alpha_var1": a,
             "median_d_sq_var1": block_details[0]["median_d_sq"],
             "median_d_sq_var2": block_details[1]["median_d_sq"],
+            "standardize_fused_input": False,
+            "stage1_pca_svd_solver": stage1_pca_svd_solver,
+            "fused_pca_svd_solver": "none",
+            "features_per_variable": n_pix,
+        },
+    )
+
+
+def rank_multi_scaled_mean(
+    *,
+    X_multi: Any,
+    deposit_index: int,
+    k_pcs_var1: int,
+    k_pcs_var2: int,
+    alpha_var1: float = 0.5,
+    features_per_variable: int | None = None,
+    weight_mode: str = "square",
+    normalize_weights_over: str = "selected_pcs",
+    stage1_pca_svd_solver: str = "full",
+    eps: float = 1e-12,
+) -> RankingResult:
+    """The paper's multivariate ranking: a weighted average of median-scaled distances.
+
+    Each variable keeps its own PCA space, its own k and its own deposit
+    weights. Its deposit-weighted distance d_v is computed on its own and
+    divided by the median of d_v over all rows, the reference row included.
+    The scaled distances are averaged with weights ``alpha_var1`` and
+    ``1 - alpha_var1``:
+
+        d = a * d1 / median(d1) + (1 - a) * d2 / median(d2)
+
+    No square root is taken over the combination. The median division puts
+    the two variables on one scale first: in Case 2 of the paper the uranium
+    distances average 27.6 over the windows and the magnetic ones 5.4, and an
+    unscaled combination is decided by uranium.
+
+    This reproduces ``rank_concat`` of ``paper/numpy_repro_concat.py``. A
+    constant factor on a block's scores (for example the ddof of the column
+    standardization) cancels in the median division.
+    """
+
+    X = np.asarray(X_multi, dtype=float)
+    n_pix = int(features_per_variable) if features_per_variable else X.shape[1] // 2
+    X1 = X[:, :n_pix]
+    X2 = X[:, n_pix : 2 * n_pix]
+
+    scaled = []
+    block_details = []
+    weights_all = []
+    spaces = []
+    for X_block, k_req in ((X1, k_pcs_var1), (X2, k_pcs_var2)):
+        Zk, k_eff, _pca, _mu, _sd = _fit_block_scores(
+            X_block, int(k_req), svd_solver=stage1_pca_svd_solver
+        )
+        w = _compute_deposit_weights(
+            scores=Zk,
+            deposit_index=deposit_index,
+            k_used=k_eff,
+            weight_mode=weight_mode,
+            normalize_weights_over=normalize_weights_over,
+        )
+        diff = Zk[:, :k_eff] - Zk[int(deposit_index), :k_eff]
+        d = np.sqrt((diff**2) @ w)
+        med = float(np.median(d))
+        med_safe = med if med > eps else eps
+        scaled.append(d / med_safe)
+        block_details.append({"k_eff": int(k_eff), "median_d": med})
+        weights_all.append(w)
+        spaces.append(Zk[:, :k_eff])
+
+    a = float(alpha_var1)
+    dists = a * scaled[0] + (1.0 - a) * scaled[1]
+    order = np.argsort(dists)
+    k_total = block_details[0]["k_eff"] + block_details[1]["k_eff"]
+    return RankingResult(
+        ranked_idx=order,
+        ranked_dists=dists[order],
+        weights=np.concatenate(weights_all),
+        comparison_space=np.hstack(spaces),
+        k_used=int(k_total),
+        use_whitening=False,
+        use_weights=True,
+        return_squared=False,
+        weight_mode=weight_mode,
+        normalize_weights_over=normalize_weights_over,
+        ranking_mode="late_fusion_scaled_mean",
+        fusion_details={
+            "K_var1": block_details[0]["k_eff"],
+            "K_var2": block_details[1]["k_eff"],
+            "K_fused": int(k_total),
+            "combine": "scaled_mean",
+            "alpha_var1": a,
+            "median_d_var1": block_details[0]["median_d"],
+            "median_d_var2": block_details[1]["median_d"],
             "standardize_fused_input": False,
             "stage1_pca_svd_solver": stage1_pca_svd_solver,
             "fused_pca_svd_solver": "none",

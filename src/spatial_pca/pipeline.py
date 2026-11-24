@@ -1133,6 +1133,7 @@ def _build_diagnostic_paths(
         if getattr(ranking_result, "ranking_mode", "") in (
             "late_fusion_sum",
             "late_fusion_max",
+            "late_fusion_scaled_mean",
             "concat_scores",
         ):
             # These fusion modes have no single global PCA object; per-variable
