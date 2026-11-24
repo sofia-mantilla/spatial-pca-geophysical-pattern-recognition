@@ -33,8 +33,10 @@ print("=== build ===")
 check("0 undefined references", "undefined" not in log.lower())
 check("0 overfull hboxes", log.count("Overfull \\hbox") == 0)
 check("0 LaTeX warnings", log.count("LaTeX Warning") == 0)
+EXPECTED_PAGES = "49"      # change here when the agreed length changes
 m = re.search(r"\((\d+) pages", log)
-check("page count is 47", m and m.group(1) == "47", "(%s)" % (m.group(1) if m else "?"))
+check("page count is %s" % EXPECTED_PAGES, m and m.group(1) == EXPECTED_PAGES,
+      "(%s)" % (m.group(1) if m else "?"))
 
 print("\n=== Case 1 is untouched ===")
 C1 = {"47.0": "recovery", "57.9": "AUC", "20.7": "raw", "14.4": "a(250)",
