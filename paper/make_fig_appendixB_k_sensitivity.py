@@ -37,7 +37,6 @@ K_RETAINED_CASE1 = 17
 PLATEAU = (12, 60)
 K_TMI = 2
 K_U_RETAINED = 8
-TMI_ALONE_HELDOUT = 0.3226  # held-out mean recovered fraction, TMI alone at k_TMI = 2
 
 INK, MUTED, BLUE, RUST, GREEN = "#1a1a1a", "#8a8f98", "#2563eb", "#c2410c", "#16a34a"
 ANNOTATE_K = {2, 3, 5, 9, 12, 17, 30, 60}
@@ -83,23 +82,32 @@ def build(case1: pd.DataFrame, case2: pd.DataFrame):
     ax.set_ylim(0, 0.60)
 
     g = case2[case2.k1 == K_TMI].sort_values("k2")
+    # TMI alone does not depend on k_U, so the reference line is read from the
+    # grid's own TMI column rather than carried as a constant that can go stale.
+    tmi_alone = float(g.TMI.iloc[0])
+    assert g.TMI.nunique() == 1, "TMI alone varies along k_U: %s" % sorted(set(g.TMI))
+    lo = min(tmi_alone, float(g.a_uni.min()), float(g.U.min()))
+    hi = max(float(g.a_uni.max()), float(g.U.max()))
     bx.plot(g.k2, g.a_uni, lw=2.0, color=BLUE, marker="o", ms=4.0,
             label="Combined ranking", zorder=5)
     bx.plot(g.k2, g.U, lw=1.7, color=RUST, marker="s", ms=3.5,
             label="Radiometric U alone", zorder=4)
-    bx.axhline(TMI_ALONE_HELDOUT, lw=1.8, ls="--", color=MUTED,
+    bx.axhline(tmi_alone, lw=1.8, ls="--", color=MUTED,
                label=f"TMI alone ($k_{{\\mathrm{{TMI}}}}={K_TMI}$)", zorder=3)
     bx.axvline(K_U_RETAINED, lw=1.2, color=MUTED, zorder=2)
-    bx.annotate(f"retained\n$k_U={K_U_RETAINED}$", xy=(K_U_RETAINED, 0.26),
+    bx.annotate(f"retained\n$k_U={K_U_RETAINED}$", xy=(K_U_RETAINED, lo + 0.015),
                 fontsize=FS_NOTE, color=INK, ha="center",
                 bbox=dict(fc="white", ec="none", alpha=0.85, pad=1.5))
     bx.set_xlabel(f"Retained components $k_U$   (at $k_{{\\mathrm{{TMI}}}}={K_TMI}$)")
     bx.set_ylabel("Held-out mean recovered fraction")
     bx.set_title("(b) Case 2 — Alemão, leave-one-deposit-out", fontsize=FS_HEAD,
                  loc="left", color=INK)
-    bx.set_ylim(0.24, 0.56)
+    bx.set_ylim(lo - 0.03, hi + 0.06)
     bx.set_xticks([1, 3, 5, 7, 9, 11, 13, 15])
-    bx.legend(fontsize=FS_NOTE, frameon=False, loc="lower right", labelcolor=INK)
+    # opaque, so the TMI reference line does not run through the labels
+    bx.legend(fontsize=FS_NOTE, loc="lower right", labelcolor=INK,
+              frameon=True, framealpha=1.0, facecolor="white", edgecolor="none",
+              borderpad=0.5).set_zorder(10)
 
     for a in (ax, bx):
         a.xaxis.label.set_size(FS_LABEL)
