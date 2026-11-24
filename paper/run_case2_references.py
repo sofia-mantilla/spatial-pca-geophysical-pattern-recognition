@@ -93,7 +93,8 @@ def main() -> int:
     }
 
     out = {"alpha_TMI": R.ALPHA_TMI, "k_TMI": K_TMI, "k_U": K_U,
-           "n_windows": int(n),   # candidate windows; the deposit row is extra "n_test_deposits": len(deposits) - 1,
+           # candidate windows; the appended deposit row is not one of them
+           "n_windows": int(n), "n_test_deposits": len(deposits) - 1,
            "study_area_valid_px": valid, "draws": N_DRAW}
 
     # The two blocks' distance distributions, which the scaling of step 5.1
