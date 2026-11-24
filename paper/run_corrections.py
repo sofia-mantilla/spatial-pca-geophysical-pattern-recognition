@@ -1,5 +1,12 @@
 """All calculations needed to correct the Case-2 briefing/paper numbers.
 
+Exploration record. The combination here is the weighted sum of squared block
+distances, which is what was explored at the time; the paper's step 5.1 now
+averages each block's distance after dividing it by that block's median (see
+numpy_repro_concat.rank_concat and run_case2_scalings.py). Nothing in the
+current text reads off this script, and its CSVs are kept as the record of the
+alpha and k search.
+
 Uses numpy_repro_concat (validated against cached pipeline pickles: identical
 hit ranks/overlap events, AUC within +/-0.02 across 8 cached configs).
 

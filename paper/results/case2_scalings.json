@@ -1,0 +1,189 @@
+{
+ "alpha_TMI": 0.541,
+ "n_test_deposits": 5,
+ "block_distances": {
+  "TMI": {
+   "mean": 5.4,
+   "median": 2.79,
+   "iqr": 2.5,
+   "max": 132.4
+  },
+  "radiometric U": {
+   "mean": 27.6,
+   "median": 28.33,
+   "iqr": 9.03,
+   "max": 86.4
+  }
+ },
+ "scalings": {
+  "median": {
+   "c250": 58.8,
+   "auc": 122.9,
+   "hits": 3,
+   "hit_ranks": {
+    "11": [
+     2
+    ],
+    "17": [
+     1
+    ],
+    "74": [
+     5
+    ]
+   },
+   "shared_with_TMI_alone": 116,
+   "shared_with_U_alone": 36
+  },
+  "interquartile range": {
+   "c250": 58.5,
+   "auc": 116.7,
+   "hits": 3,
+   "hit_ranks": {
+    "9": [
+     2
+    ],
+    "25": [
+     1
+    ],
+    "89": [
+     5
+    ]
+   },
+   "shared_with_TMI_alone": 63,
+   "shared_with_U_alone": 78
+  },
+  "mean": {
+   "c250": 60.9,
+   "auc": 120.8,
+   "hits": 3,
+   "hit_ranks": {
+    "10": [
+     2
+    ],
+    "20": [
+     1
+    ],
+    "78": [
+     5
+    ]
+   },
+   "shared_with_TMI_alone": 71,
+   "shared_with_U_alone": 61
+  },
+  "standard deviation": {
+   "c250": 50.5,
+   "auc": 96.8,
+   "hits": 2,
+   "hit_ranks": {
+    "11": [
+     1
+    ],
+    "46": [
+     2
+    ]
+   },
+   "shared_with_TMI_alone": 27,
+   "shared_with_U_alone": 164
+  },
+  "maximum": {
+   "c250": 50.5,
+   "auc": 96.4,
+   "hits": 2,
+   "hit_ranks": {
+    "11": [
+     1
+    ],
+    "54": [
+     2
+    ]
+   },
+   "shared_with_TMI_alone": 25,
+   "shared_with_U_alone": 171
+  },
+  "percentile rank": {
+   "c250": 59.6,
+   "auc": 122.5,
+   "hits": 3,
+   "hit_ranks": {
+    "6": [
+     2
+    ],
+    "19": [
+     1
+    ],
+    "68": [
+     5
+    ]
+   },
+   "shared_with_TMI_alone": 66,
+   "shared_with_U_alone": 45
+  }
+ },
+ "unscaled": {
+  "weighted average of the raw distances": {
+   "c250": 59.6,
+   "auc": 99.5,
+   "hits": 3,
+   "hit_ranks": {
+    "12": [
+     1
+    ],
+    "35": [
+     2
+    ],
+    "209": [
+     5
+    ]
+   },
+   "shared_with_TMI_alone": 36,
+   "shared_with_U_alone": 148
+  },
+  "weighted sum of the squared distances": {
+   "c250": 48.1,
+   "auc": 85.8,
+   "hits": 2,
+   "hit_ranks": {
+    "10": [
+     1
+    ],
+    "139": [
+     2
+    ]
+   },
+   "shared_with_TMI_alone": 8,
+   "shared_with_U_alone": 212
+  }
+ },
+ "single_variables": {
+  "TMI alone": {
+   "c250": 52.5,
+   "auc": 78.8,
+   "hits": 2,
+   "hit_ranks": {
+    "14": [
+     1
+    ],
+    "95": [
+     2
+    ]
+   },
+   "shared_with_TMI_alone": 250,
+   "shared_with_U_alone": 6
+  },
+  "radiometric U alone": {
+   "c250": 44.6,
+   "auc": 84.2,
+   "hits": 2,
+   "hit_ranks": {
+    "17": [
+     1
+    ],
+    "198": [
+     2
+    ]
+   },
+   "shared_with_TMI_alone": 6,
+   "shared_with_U_alone": 250
+  }
+ }
+}
