@@ -73,7 +73,8 @@ check("letter audit", "ALL CHECKS PASS" in r.stdout,
       "" if "ALL CHECKS PASS" in r.stdout else r.stdout.strip().splitlines()[-1])
 
 print("\n=== values from earlier versions are gone ===")
-GONE = ["63.7", "106.1", "56.1", "55.4", "0.497", "0.491", "0.455", "0.396",
+GONE = ["four test deposits", "the four of the multivariate", "of the four test",
+        "63.7", "106.1", "56.1", "55.4", "0.497", "0.491", "0.455", "0.396",
         "23.3", "7.17", "68.4", "50.8", "51.2", "twenty-five", "twenty reference",
         "0.419", "7.2$\\times$", "+0.090", "0.610", "0.479", "+0.136", "+0.161"]
 for v in GONE:
