@@ -15,9 +15,20 @@ so a unit cannot be enriched merely because the ranking found a deposit in it.
 Geometry is taken on the 200 m raster grid, the grid the ranking itself runs
 on, so a window's composition is a count of its cells.
 
+How far the conclusions depend on the draw, checked at 2,000 draws under two
+seeds and at 600 draws under three:
+
+  * the eight units above the band are the same set every time;
+  * eight of the nine below it are stable;
+  * the Seringa granite is the exception. It holds 1.49 per cent of the
+    selection where the band's lower edge falls at 1.51 under one seed and
+    1.46 under another, so whether it counts as outside depends on the draw.
+    Appendix C reports it as sitting at the edge rather than outside, and the
+    table lists only the eight.
+
 Run from inside paper/:
 
-    python run_case2_unit_enrichment.py [--draws 2000]
+    python run_case2_unit_enrichment.py [--draws 2000] [--seed N]
 
 Writes results/case2_unit_enrichment.json.
 """

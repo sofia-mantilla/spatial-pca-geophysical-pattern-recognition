@@ -47,7 +47,7 @@ SHARED = [
  ("units: Plaque", "20.0", "20.0"),
  ("units: Seringa", "1.5", "1.5"),
  ("units: eight above", "eight units carry", "Eight units carry"),
- ("units: nine below", "Nine units carry less", "Nine units carry less"),
+ ("units: eight below", "Eight units carry less", "Eight units carry less"),
  ("structures: median", "1,131 m", "1{,}131~m"),
  ("structures: band", "1,407 to 1,892 m", "1{,}407 to 1{,}892~m"),
  ("structures: within 1 km", "46.2", "46.2"),
