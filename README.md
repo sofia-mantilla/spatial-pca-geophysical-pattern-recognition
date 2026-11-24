@@ -34,7 +34,8 @@ unchanged so existing links, imports, and the archived releases keep working.
 **[wPCA Explorer](https://sofia-mantilla.github.io/spatial-pca-geophysical-pattern-recognition/)**
 runs the full Carajás case study interactively — or your own GeoTIFF grids —
 using the exact implementation that reproduces this repository's replication
-gates (Case 1: 47.0% recovery · AUC 57.9 · 5 of 11 deposits). It is a single
+gates (Case 1: 47.0% recovery · AUC 57.9 · 5 of 11 deposits; Case 2: 58.8%
+recovery · AUC 122.9 · 3 of 5 deposits). It is a single
 self-contained page: all computation runs locally in your browser, nothing is
 ever uploaded, and it works offline. See [`webapp/`](webapp/) for details and
 the gate-validation harness.
@@ -94,28 +95,55 @@ and validates the top-ranked windows against independent deposit footprints.
 - Validate top-ranked windows with cumulative footprint-recovery metrics
   against an exact random-selection expectation of equal area.
 
-**Release scope (paper release)**
+**Results (paper release)**
 
-- **Case 1 — univariate TMI** (reference: Paulo Afonso deposit): validated.
-  The ranking recovers 47% of the test-deposit footprints in the top 250
-  windows, about three times the expectation of a random selection of equal
-  area.
-- **Case 2 — multivariate TMI + radiometric U** (reference: Alemão deposit):
-  validated on deposits that express both variables. The combination recovers
-  58.8% of the test-deposit footprints and hits three of five test deposits,
-  more than either variable alone (52.5% for TMI, 44.6% for radiometric U).
-  Scored instead against all twelve deposits of the study area, six of which
-  fall below the uranium threshold, the combination recovers 29.5% and TMI
-  alone 38.7%. The paper reports both and bounds the claim accordingly.
-- The scripts that reproduce the paper's numbers, tables, and figures live in
-  [`paper/`](paper/) — see the [Reproducing the paper](#reproducing-the-paper)
-  section. The checks added for the November 2026 major revision are there too:
-  rotation and scale sensitivity of the reference window, the multivariate
-  ranking rescored against all twelve deposits, and the high-ranking areas
-  compared with the published geological maps.
+Both cases are scored the same way. For each test deposit, the share of its
+mapped footprint that falls inside the top 250 windows is measured, and the
+shares are averaged over the test deposits. The result is compared with the
+exact expectation of a random selection covering the same area.
+
+- **Case 1, univariate TMI** (reference: Paulo Afonso deposit). The top 250
+  windows cover 14.4% of the study area and recover 47.0% of the test-deposit
+  footprints, against 15.2% for a random selection of the same area. They hit
+  five of the eleven test deposits.
+- **Case 2, multivariate TMI + radiometric U** (reference: Alemão deposit).
+  The top 250 windows cover 8.5% of the study area and recover 58.8% of the
+  test-deposit footprints, against 8.8% for a random selection of the same
+  area. The first test deposit is hit at rank 11, and three of the five are
+  hit by rank 74. The combination recovers more than either variable alone,
+  52.5% for TMI and 44.6% for radiometric U. The same holds out of sample:
+  with each of the six deposits that pass the uranium threshold taken in turn
+  as the reference, and the balance weight set without the held-out deposit,
+  the combination recovers on average 44.9% of the held-out deposit, against
+  38.2% for uranium alone and 25.0% for TMI alone.
+- The Case-2 advantage is measured on the deposits that express both
+  variables. Scored against all twelve deposits of the study area, six of
+  which fall below the uranium threshold, the combination recovers 29.5% and
+  TMI alone 38.7%. The paper reports both.
+
+To reach the same expected recovery, a random selection must examine 3.1
+times the area of the top 250 windows in Case 1 and 6.7 times in Case 2.
+
+<p align="center">
+  <img src="docs/figures/recovery_vs_area.png" alt="Mean recovered fraction against fraction of study area examined, Case 1 and Case 2, with the random-selection expectation" width="900">
+</p>
+
+<p align="center">
+  <strong>Mean recovered fraction against the fraction of the study area examined, for Case 1 (left) and Case 2 (right). The dashed line is the expected recovery of a random selection.</strong>
+</p>
+
+The scripts that reproduce the paper's numbers, tables, and figures live in
+[`paper/`](paper/) (see [Reproducing the paper](#reproducing-the-paper)). The
+checks added for the November 2026 major revision are there too, among them
+the rotation and scale sensitivity of the reference window and the Case-2
+ranking rescored against all twelve deposits.
 
 <p align="center">
   <img src="docs/figures/multi_top250_windows.png" alt="Case 2 multivariate TMI + U top-ranked windows" width="900">
+</p>
+
+<p align="center">
+  <strong>Case 2: the top 250 windows, ranked jointly on Alemão's TMI and radiometric-U geometry (TMI k=2, U k=8, α<sub>TMI</sub>=0.541).</strong>
 </p>
 
 ## Authors and Contact
