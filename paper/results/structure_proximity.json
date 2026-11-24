@@ -1,128 +1,179 @@
 {
- "shear zones": [
-  {
-   "population": "all candidate windows",
-   "n": 11972,
-   "dropped_outside_arim": 1059,
-   "median_m": 4104.0,
-   "mean_m": 6353.0,
-   "within_1km": 0.164,
-   "within_2km": 0.29,
-   "within_5km": 0.572
-  },
-  {
-   "population": "the twelve known deposits",
-   "n": 12,
-   "dropped_outside_arim": 0,
-   "median_m": 2733.0,
-   "mean_m": 4442.0,
-   "within_1km": 0.333,
-   "within_2km": 0.5,
-   "within_5km": 0.667
-  },
-  {
-   "population": "Case 1 top 250, no known deposit",
-   "n": 219,
-   "dropped_outside_arim": 5,
-   "median_m": 3805.0,
-   "mean_m": 5955.0,
-   "within_1km": 0.21,
-   "within_2km": 0.301,
-   "within_5km": 0.612
-  },
-  {
-   "population": "Case 2 top 250, no known deposit",
-   "n": 223,
-   "dropped_outside_arim": 2,
-   "median_m": 3453.0,
-   "mean_m": 5816.0,
-   "within_1km": 0.211,
-   "within_2km": 0.336,
-   "within_5km": 0.664
+ "shear zones": {
+  "populations": [
+   {
+    "population": "all candidate windows",
+    "n": 11972,
+    "dropped_outside_arim": 1059,
+    "median_m": 4104.0,
+    "mean_m": 6353.0,
+    "within_1km": 0.164,
+    "within_2km": 0.29,
+    "within_5km": 0.572
+   },
+   {
+    "population": "the twelve known deposits",
+    "n": 12,
+    "dropped_outside_arim": 0,
+    "median_m": 2733.0,
+    "mean_m": 4442.0,
+    "within_1km": 0.333,
+    "within_2km": 0.5,
+    "within_5km": 0.667
+   },
+   {
+    "population": "Case 1 top 250, no known deposit",
+    "n": 219,
+    "dropped_outside_arim": 5,
+    "median_m": 3805.0,
+    "mean_m": 5955.0,
+    "within_1km": 0.21,
+    "within_2km": 0.301,
+    "within_5km": 0.612
+   },
+   {
+    "population": "Case 2 top 250, no known deposit",
+    "n": 223,
+    "dropped_outside_arim": 2,
+    "median_m": 3453.0,
+    "mean_m": 5816.0,
+    "within_1km": 0.211,
+    "within_2km": 0.336,
+    "within_5km": 0.664
+   }
+  ],
+  "random": {
+   "draws": 2000,
+   "median_m_p5_p95": [
+    3498.5711,
+    4808.3261
+   ],
+   "within_1km_p5_p95": [
+    0.1227,
+    0.2029
+   ],
+   "within_2km_p5_p95": [
+    0.2379,
+    0.3394
+   ]
   }
- ],
- "all structures but magnetic": [
-  {
-   "population": "all candidate windows",
-   "n": 11972,
-   "dropped_outside_arim": 1059,
-   "median_m": 1612.0,
-   "mean_m": 2137.0,
-   "within_1km": 0.356,
-   "within_2km": 0.579,
-   "within_5km": 0.911
-  },
-  {
-   "population": "the twelve known deposits",
-   "n": 12,
-   "dropped_outside_arim": 0,
-   "median_m": 1020.0,
-   "mean_m": 1163.0,
-   "within_1km": 0.417,
-   "within_2km": 0.833,
-   "within_5km": 1.0
-  },
-  {
-   "population": "Case 1 top 250, no known deposit",
-   "n": 219,
-   "dropped_outside_arim": 5,
-   "median_m": 1523.0,
-   "mean_m": 2125.0,
-   "within_1km": 0.42,
-   "within_2km": 0.584,
-   "within_5km": 0.9
-  },
-  {
-   "population": "Case 2 top 250, no known deposit",
-   "n": 223,
-   "dropped_outside_arim": 2,
-   "median_m": 1131.0,
-   "mean_m": 1812.0,
-   "within_1km": 0.462,
-   "within_2km": 0.686,
-   "within_5km": 0.937
+ },
+ "all structures but magnetic": {
+  "populations": [
+   {
+    "population": "all candidate windows",
+    "n": 11972,
+    "dropped_outside_arim": 1059,
+    "median_m": 1612.0,
+    "mean_m": 2137.0,
+    "within_1km": 0.356,
+    "within_2km": 0.579,
+    "within_5km": 0.911
+   },
+   {
+    "population": "the twelve known deposits",
+    "n": 12,
+    "dropped_outside_arim": 0,
+    "median_m": 1020.0,
+    "mean_m": 1163.0,
+    "within_1km": 0.417,
+    "within_2km": 0.833,
+    "within_5km": 1.0
+   },
+   {
+    "population": "Case 1 top 250, no known deposit",
+    "n": 219,
+    "dropped_outside_arim": 5,
+    "median_m": 1523.0,
+    "mean_m": 2125.0,
+    "within_1km": 0.42,
+    "within_2km": 0.584,
+    "within_5km": 0.9
+   },
+   {
+    "population": "Case 2 top 250, no known deposit",
+    "n": 223,
+    "dropped_outside_arim": 2,
+    "median_m": 1131.0,
+    "mean_m": 1812.0,
+    "within_1km": 0.462,
+    "within_2km": 0.686,
+    "within_5km": 0.937
+   }
+  ],
+  "random": {
+   "draws": 2000,
+   "median_m_p5_p95": [
+    1407.1068,
+    1892.0814
+   ],
+   "within_1km_p5_p95": [
+    0.3045,
+    0.4039
+   ],
+   "within_2km_p5_p95": [
+    0.5234,
+    0.6293
+   ]
   }
- ],
- "named systems": [
-  {
-   "population": "all candidate windows",
-   "n": 11972,
-   "dropped_outside_arim": 1059,
-   "median_m": 53262.0,
-   "mean_m": 57272.0,
-   "within_1km": 0.014,
-   "within_2km": 0.025,
-   "within_5km": 0.07
-  },
-  {
-   "population": "the twelve known deposits",
-   "n": 12,
-   "dropped_outside_arim": 0,
-   "median_m": 27128.0,
-   "mean_m": 55617.0,
-   "within_1km": 0.0,
-   "within_2km": 0.083,
-   "within_5km": 0.083
-  },
-  {
-   "population": "Case 1 top 250, no known deposit",
-   "n": 219,
-   "dropped_outside_arim": 5,
-   "median_m": 56631.0,
-   "mean_m": 56215.0,
-   "within_1km": 0.023,
-   "within_2km": 0.027,
-   "within_5km": 0.068
-  },
-  {
-   "population": "Case 2 top 250, no known deposit",
-   "n": 223,
-   "dropped_outside_arim": 2,
-   "median_m": 39174.0,
-   "mean_m": 46939.0,
-   "within_1km": 0.027,
-   "within_2km": 0.031,
-   "within_5km": 0.081
+ },
+ "named systems": {
+  "populations": [
+   {
+    "population": "all candidate windows",
+    "n": 11972,
+    "dropped_outside_arim": 1059,
+    "median_m": 53262.0,
+    "mean_m": 57272.0,
+    "within_1km": 0.014,
+    "within_2km": 0.025,
+    "within_5km": 0.07
+   },
+   {
+    "population": "the twelve known deposits",
+    "n": 12,
+    "dropped_outside_arim": 0,
+    "median_m": 27128.0,
+    "mean_m": 55617.0,
+    "within_1km": 0.0,
+    "within_2km": 0.083,
+    "within_5km": 0.083
+   },
+   {
+    "population": "Case 1 top 250, no known deposit",
+    "n": 219,
+    "dropped_outside_arim": 5,
+    "median_m": 56631.0,
+    "mean_m": 56215.0,
+    "within_1km": 0.023,
+    "within_2km": 0.027,
+    "within_5km": 0.068
+   },
+   {
+    "population": "Case 2 top 250, no known deposit",
+    "n": 223,
+    "dropped_outside_arim": 2,
+    "median_m": 39174.0,
+    "mean_m": 46939.0,
+    "within_1km": 0.027,
+    "within_2km": 0.031,
+    "within_5km": 0.081
+   }
+  ],
+  "random": {
+   "draws": 2000,
+   "median_m_p5_p95": [
+    46840.4579,
+    61074.4299
+   ],
+   "within_1km_p5_p95": [
+    0.0,
+    0.0261
+   ],
+   "within_2km_p5_p95": [
+    0.0091,
+    0.0423
+   ]
   }
- ]
+ }
 }

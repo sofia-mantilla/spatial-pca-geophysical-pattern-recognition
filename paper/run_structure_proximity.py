@@ -39,6 +39,8 @@ Writes results/structure_proximity.json.
 """
 from __future__ import annotations
 
+import argparse
+
 import json
 from pathlib import Path
 
@@ -122,7 +124,48 @@ def summarise(name, values, dropped):
     }
 
 
+def random_band(grid, coverage, idx, wshape, dep, origin, deposits, clamp,
+                draws, seed):
+    """5-95% range of the same statistics over `draws` random selections.
+
+    A draw is 250 windows from the same pool, with those touching a known
+    deposit removed exactly as for the ranked selections, so the comparison
+    is like for like.
+    """
+    rng = np.random.default_rng(seed)
+    ox, oy = origin
+    wh, ww = wshape
+    pool = np.arange(len(idx))
+    pool = pool[pool != dep]
+    med, w1, w2 = [], [], []
+    for _ in range(draws):
+        rs, cs = [], []
+        for i in rng.choice(pool, size=N_TOP, replace=False):
+            r, c, _ = idx[i]
+            x1, y2 = ox + c * R.PX, oy - r * R.PX
+            if any(box(x1, y2 - wh * R.PX, x1 + ww * R.PX, y2).intersects(d)
+                   for d in deposits):
+                continue
+            rr_, cc_ = clamp(r + wh // 2, c + ww // 2)
+            if coverage[rr_, cc_]:
+                rs.append(rr_); cs.append(cc_)
+        v = grid[np.array(rs), np.array(cs)]
+        med.append(float(np.median(v)))
+        w1.append(float((v <= 1000).mean()))
+        w2.append(float((v <= 2000).mean()))
+    q = lambda a: [round(float(np.percentile(a, 5)), 4),
+                   round(float(np.percentile(a, 95)), 4)]
+    return {"draws": draws, "median_m_p5_p95": q(med),
+            "within_1km_p5_p95": q(w1), "within_2km_p5_p95": q(w2)}
+
+
 def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--draws", type=int, default=2000,
+                    help="random selections for the 5-95%% band")
+    ap.add_argument("--seed", type=int, default=20261124)
+    args = ap.parse_args()
+
     tmi, dists, coverage, (ox, oy) = grids()
     nrow, ncol = coverage.shape
     deposits = [box(min(p[0] for p in rings[0]), min(p[1] for p in rings[0]),
@@ -175,11 +218,16 @@ def main() -> int:
                 out += 1
         populations.append((label, np.array(rs), np.array(cs), out))
 
+    # the Case-2 geometry drives the draws: same pool, same window size
+    order2, idx2, ws2, org2, dep2 = R.rank_concat(3, 2, 8, R.ALPHA_TMI)
+
     out = {}
     for defname, grid in dists.items():
         rows = [summarise(name, grid[r, c], dropped)
                 for name, r, c, dropped in populations]
-        out[defname] = rows
+        band = random_band(grid, coverage, idx2, ws2, dep2, org2, deposits,
+                           clamp, args.draws, args.seed)
+        out[defname] = {"populations": rows, "random": band}
         print("\n=== distance to %s" % defname)
         w = max(len(r["population"]) for r in rows)
         print(f"{'population':{w}}  {'n':>6} {'out':>4}  {'median':>9}  "
@@ -189,6 +237,12 @@ def main() -> int:
                   f"{r['median_m']:7.0f} m  {r['mean_m']:7.0f} m  "
                   f"{100*r['within_1km']:5.1f}% {100*r['within_2km']:5.1f}% "
                   f"{100*r['within_5km']:5.1f}%")
+        b = band
+        lab = "random, 5-95 pct of %d draws" % args.draws
+        print(f"{lab:{w}}  {'':6} {'':4}  "
+              f"{b['median_m_p5_p95'][0]:7.0f}-{b['median_m_p5_p95'][1]:.0f} m  "
+              f"{'':9}  {100*b['within_1km_p5_p95'][0]:5.1f}-{100*b['within_1km_p5_p95'][1]:.1f}% "
+              f"{100*b['within_2km_p5_p95'][0]:5.1f}-{100*b['within_2km_p5_p95'][1]:.1f}%")
 
     OUT_DIR.mkdir(exist_ok=True)
     (OUT_DIR / "structure_proximity.json").write_text(
