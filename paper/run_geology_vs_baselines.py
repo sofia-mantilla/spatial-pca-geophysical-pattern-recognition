@@ -155,7 +155,7 @@ def main() -> int:
                 "correlation match": np.argsort(-ncc_scores(Xb, Xb.shape[0] - 1)),
             }
         else:
-            order, idx, wshape, origin, dep = R.rank_concat(3, 2, 8, 0.503)
+            order, idx, wshape, origin, dep = R.rank_concat(3, 2, 8, R.ALPHA_TMI)
             Xb, _i, _w, _o = R.window_matrix(3)
             d = Xb.shape[0] - 1
             npix = wshape[0] * wshape[1]
@@ -167,9 +167,9 @@ def main() -> int:
                                 - _demeaned(Xb[:, npix:2 * npix])[d], axis=1)
             rankings = {
                 "wPCA (published)": order,
-                "demeaned match": np.argsort(0.503 * dT / dT.std()
-                                             + 0.497 * dU / dU.std()),
-                "correlation match": np.argsort(-(0.503 * nT + 0.497 * nU)),
+                "demeaned match": np.argsort(R.ALPHA_TMI * dT / dT.std()
+                                             + (1 - R.ALPHA_TMI) * dU / dU.std()),
+                "correlation match": np.argsort(-(R.ALPHA_TMI * nT + (1 - R.ALPHA_TMI) * nU)),
             }
 
         all_cells = [(r, c) for r, c, _ in idx]

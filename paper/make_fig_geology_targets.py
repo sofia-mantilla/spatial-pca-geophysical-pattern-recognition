@@ -7,7 +7,7 @@ known deposits, and the reference deposit of that case.
 
     Fig26  Case 1, univariate TMI, reference Paulo Afonso, k=17
     Fig27  Case 2, multivariate TMI + radiometric U, reference Alemao,
-           k_TMI=2, k_U=8, alpha_TMI=0.503
+           k_TMI=2, k_U=8, alpha_TMI=0.541
 
 Windows that touch a known deposit are drawn in one colour and those that do
 not in another, since the second group is what the comment asks about.
@@ -73,7 +73,7 @@ def ranked_windows(case):
     if case == 1:
         order, idx, wshape, origin, dep = C1.rank_spca(17)
     else:
-        order, idx, wshape, origin, dep = R.rank_concat(3, 2, 8, 0.503)
+        order, idx, wshape, origin, dep = R.rank_concat(3, 2, 8, R.ALPHA_TMI)
     ox, oy = origin
     wh, ww = wshape
     deposits = deposit_frames().geometry

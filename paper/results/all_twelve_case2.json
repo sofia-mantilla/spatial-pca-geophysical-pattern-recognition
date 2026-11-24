@@ -1,44 +1,119 @@
 [
  {
-  "test_set": "the five of the multivariate shapefile (as published)",
-  "n_test_deposits": 4,
-  "end": 63.7,
-  "auc": 106.1,
+  "test_set": "the five Case-2 test deposits",
+  "n_test_deposits": 5,
+  "end": 58.8,
+  "auc": 122.9,
   "hits": 3,
   "hit_ranks": {
-   "10": [
-    0
-   ],
-   "142": [
+   "11": [
     1
    ],
-   "246": [
+   "17": [
+    0
+   ],
+   "74": [
     4
    ]
   },
-  "a250": 0.0868,
-  "random_matched": 8.9,
-  "ratio": 7.17
+  "a250": 0.0851,
+  "random_matched": 8.8,
+  "ratio": 6.7
  },
  {
   "test_set": "all twelve known deposits",
   "n_test_deposits": 11,
-  "end": 23.3,
-  "auc": 38.8,
+  "end": 29.5,
+  "auc": 59.4,
   "hits": 3,
   "hit_ranks": {
-   "10": [
-    0
-   ],
-   "142": [
+   "11": [
     1
    ],
-   "246": [
+   "17": [
+    0
+   ],
+   "74": [
     4
    ]
   },
-  "a250": 0.0868,
-  "random_matched": 9.1,
-  "ratio": 2.55
+  "a250": 0.0851,
+  "random_matched": 9.0,
+  "ratio": 3.29
+ },
+ {
+  "test_set": "TMI alone, scored on the five",
+  "n_test_deposits": 5,
+  "end": 52.5,
+  "auc": 78.8,
+  "hits": 2,
+  "hit_ranks": {
+   "14": [
+    0
+   ],
+   "95": [
+    1
+   ]
+  },
+  "a250": 0.1041,
+  "random_matched": 10.7,
+  "ratio": 4.89
+ },
+ {
+  "test_set": "TMI alone, scored on all twelve",
+  "n_test_deposits": 11,
+  "end": 38.7,
+  "auc": 62.0,
+  "hits": 3,
+  "hit_ranks": {
+   "14": [
+    0
+   ],
+   "22": [
+    6
+   ],
+   "95": [
+    1
+   ]
+  },
+  "a250": 0.1041,
+  "random_matched": 11.0,
+  "ratio": 3.53
+ },
+ {
+  "test_set": "radiometric U alone, scored on the five",
+  "n_test_deposits": 5,
+  "end": 44.6,
+  "auc": 84.2,
+  "hits": 2,
+  "hit_ranks": {
+   "17": [
+    0
+   ],
+   "198": [
+    1
+   ]
+  },
+  "a250": 0.087,
+  "random_matched": 9.0,
+  "ratio": 4.96
+ },
+ {
+  "test_set": "radiometric U alone, scored on all twelve",
+  "n_test_deposits": 11,
+  "end": 20.3,
+  "auc": 38.3,
+  "hits": 2,
+  "hit_ranks": {
+   "17": [
+    0
+   ],
+   "198": [
+    1
+   ]
+  },
+  "a250": 0.087,
+  "random_matched": 9.2,
+  "ratio": 2.21
  }
 ]

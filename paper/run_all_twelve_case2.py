@@ -6,7 +6,7 @@ against all twelve. Reviewer 2 asks whether that smaller set flatters the
 multivariate ranking.
 
 The ranking is not touched. The same published model -- reference Alemao,
-k_TMI=2, k_U=8, alpha_TMI=0.503 -- is scored a second time against every
+k_TMI=2, k_U=8, alpha_TMI=0.541 -- is scored a second time against every
 deposit of the twelve-deposit shapefile, so the only thing that changes is
 which footprints count as a success. Alemao is deposit 3 in both shapefiles,
 with identical outlines, so it is the reference and excluded either way.
@@ -31,9 +31,9 @@ import numpy_repro_concat as R
 HERE = Path(__file__).resolve().parent
 OUT_DIR = HERE / "results"
 REF = 3                       # Alemao, in both shapefiles
-K_TMI, K_U, ALPHA = 2, 8, 0.503
+K_TMI, K_U, ALPHA = 2, 8, R.ALPHA_TMI
 T_MAX = 6000
-PUBLISHED = {"end": 63.7, "hits": 3}
+EXPECTED = {"end": 58.8, "hits": 3}
 
 
 def score(order, idx, wshape, origin, dep, deposits_fn, label):
@@ -73,8 +73,8 @@ def main() -> int:
     order, idx, wshape, origin, dep = R.rank_concat(REF, K_TMI, K_U, ALPHA)
 
     rows = [
-        score(order, idx, wshape, origin, dep, R.deposits_wgs84,
-              "the five of the multivariate shapefile (as published)"),
+        score(order, idx, wshape, origin, dep, C1.deposits_case2_wgs84,
+              "the five Case-2 test deposits"),
         score(order, idx, wshape, origin, dep, C1.deposits_case1_wgs84,
               "all twelve known deposits"),
     ]
@@ -83,17 +83,16 @@ def main() -> int:
     # the test-set size cancels: alpha=1 is TMI alone, alpha=0 uranium alone.
     for label, alpha in (("TMI alone", 1.0), ("radiometric U alone", 0.0)):
         o, i, ws, org, d = R.rank_concat(REF, K_TMI, K_U, alpha)
-        rows.append(score(o, i, ws, org, d, R.deposits_wgs84,
+        rows.append(score(o, i, ws, org, d, C1.deposits_case2_wgs84,
                           "%s, scored on the five" % label))
         rows.append(score(o, i, ws, org, d, C1.deposits_case1_wgs84,
                           "%s, scored on all twelve" % label))
 
-    published = rows[0]
-    if (abs(published["end"] - PUBLISHED["end"]) > 0.15
-            or published["hits"] != PUBLISHED["hits"]):
-        raise SystemExit("the published Case-2 result did not reproduce: %r" % published)
-    print("published Case 2 reproduced: %.1f%%, %d hits\n" % (
-        published["end"], published["hits"]))
+    case2 = rows[0]
+    if (abs(case2["end"] - EXPECTED["end"]) > 0.15
+            or case2["hits"] != EXPECTED["hits"]):
+        raise SystemExit("the Case-2 result did not reproduce: %r" % case2)
+    print("Case 2 reproduced: %.1f%%, %d hits\n" % (case2["end"], case2["hits"]))
 
     width = max(len(r["test_set"]) for r in rows)
     print("%-*s %5s %8s %6s %8s %8s" % (width, "scored against", "n", "c(250)",

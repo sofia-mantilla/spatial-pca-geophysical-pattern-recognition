@@ -32,9 +32,13 @@ Regenerate this table (needs the Carajás TMI data, about 20 min):
 
 The 15 × 15 nested leave-one-deposit-out grid at each (k_TMI, k_U). The panel shows the
 section at k_TMI = 2, using columns `a_uni` (combined ranking under the α_v rule) and `U`
-(radiometric U alone); the TMI-alone reference line is 0.3226 (the `TMI` column at
-k_TMI = 2). This grid was produced by the analysis worktree's `lodo_k_grid.py`, which is
-not part of the distributed repository, so its summary CSV is committed here directly.
+(radiometric U alone); the TMI-alone reference line is 0.2730 (the `TMI` column at
+k_TMI = 2). Regenerate this table with
+
+    python paper/run_case2_heldout.py --grid
+
+which writes it here and the full per-cell record, intervals included, to
+`paper/results/case2_heldout_grid.json` (about 12 min).
 
 ## Result
 
@@ -44,3 +48,7 @@ the plateau the ranking is worse (38.3 % / four hits at k = 8; 24.2 % / two at k
 retained k = 17 sits inside the plateau. Locating the plateau's lower edge used all eleven
 test deposits; from a single known deposit its position could not have been identified —
 this is stated in the appendix.
+
+For Case 2 the combined ranking exceeds both single variables at every k_U from 1 to 15.
+Held-out recovery is highest at (2, 9) with 0.528 and reaches 0.527 at the retained (2, 8);
+raising k_TMI to 3 costs 0.078 at k_U = 8.

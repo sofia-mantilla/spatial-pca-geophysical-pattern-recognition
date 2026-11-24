@@ -25,10 +25,10 @@
  },
  {
   "population": "Case 2 top 250, no known deposit",
-  "n": 234,
-  "median_m": 1265.0,
-  "mean_m": 1589.0,
-  "within_1km": 0.427,
-  "within_2km": 0.709
+  "n": 225,
+  "median_m": 894.0,
+  "mean_m": 1295.0,
+  "within_1km": 0.551,
+  "within_2km": 0.791
  }
 ]

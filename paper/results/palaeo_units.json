@@ -87,7 +87,7 @@
   }
  },
  "case2": {
-  "n_clear": 234,
+  "n_clear": 225,
   "by_unit": {
    "PP23ac": {
     "name": "Formação Águas Claras",
@@ -96,8 +96,8 @@
      2300.0
     ],
     "survey": 6.64,
-    "top250": 2.67,
-    "ratio": 0.4
+    "top250": 7.59,
+    "ratio": 1.14
    },
    "PP3_gamma_ci": {
     "name": "Corpo Granito Cigano",
@@ -106,8 +106,8 @@
      2050.0
     ],
     "survey": 0.66,
-    "top250": 4.44,
-    "ratio": 6.76
+    "top250": 3.82,
+    "ratio": 5.83
    },
    "PP3_gamma_po": {
     "name": "Corpo Granito Pojuca",
@@ -116,8 +116,8 @@
      2050.0
     ],
     "survey": 0.08,
-    "top250": 0.07,
-    "ratio": 0.95
+    "top250": 0.0,
+    "ratio": 0.0
    },
    "PP3_gamma_rb": {
     "name": "Corpo Granito Rio Branco",
@@ -136,8 +136,8 @@
      2050.0
     ],
     "survey": 3.17,
-    "top250": 6.38,
-    "ratio": 2.01
+    "top250": 0.98,
+    "ratio": 0.31
    },
    "PP3_gamma_sc": {
     "name": "Suíte Serra dos Carajás",
@@ -146,8 +146,8 @@
      2050.0
     ],
     "survey": 0.75,
-    "top250": 8.36,
-    "ratio": 11.1
+    "top250": 0.28,
+    "ratio": 0.37
    },
    "PP3_gamma_vgvg": {
     "name": "Corpo Granito Velho Guilherme",
@@ -156,21 +156,21 @@
      2050.0
     ],
     "survey": 0.17,
-    "top250": 0.76,
-    "ratio": 4.47
+    "top250": 0.71,
+    "ratio": 4.15
    }
   },
   "era_total": {
    "name": "Paleoproterozóico",
    "age_ma": null,
    "survey": 11.67,
-   "top250": 22.67,
-   "ratio": 1.94
+   "top250": 13.37,
+   "ratio": 1.15
   },
   "granite_1p88ga": {
-   "top250": 20.01,
+   "top250": 5.79,
    "survey": 5.03,
-   "fraction_of_era_selected": 0.883
+   "fraction_of_era_selected": 0.433
   }
  }
 }

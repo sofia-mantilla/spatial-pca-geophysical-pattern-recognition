@@ -20,7 +20,7 @@ PAPER_CMAP = LinearSegmentedColormap.from_list("spatial_pca_paper", (
     (0.00, "#0101ff"), (0.167, "#2dc4ff"), (0.334, "#26ff00"), (0.501, "#ffe101"),
     (0.668, "#ff0109"), (0.835, "#ef00ff"), (1.00, "#de9eff")))
 
-DEP, K1, K2, ALPHA = 3, 2, 8, 0.5033
+DEP, K1, K2, ALPHA = 3, 2, 8, R.ALPHA_TMI
 order, idx, wshape, origin, dep_index = R.rank_concat(DEP, K1, K2, ALPHA)
 X, _, _, _ = R.window_matrix(DEP)
 tmi, u, ox, oy = R.load_cropped()

@@ -75,7 +75,7 @@ def main() -> int:
         if case == 1:
             order, idx, wshape, origin, dep = C1.rank_spca(17)
         else:
-            order, idx, wshape, origin, dep = R.rank_concat(3, 2, 8, 0.503)
+            order, idx, wshape, origin, dep = R.rank_concat(3, 2, 8, R.ALPHA_TMI)
         allb = [(r, c) for r, c, _ in idx]
         clear = clear_of_deposits(order, idx, wshape, origin, dep, deposits)
         rows = {}

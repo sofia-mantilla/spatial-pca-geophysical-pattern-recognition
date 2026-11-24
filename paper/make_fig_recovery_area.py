@@ -90,7 +90,8 @@ ax.set_title("(a) Case 1 — Reference Deposit 6")
 ax.legend(fontsize=14, loc="lower right")
 
 # ---------------------------------------------------------------- panel (b)
-DEP, K1, K2, ALPHA = 3, 2, 8, 0.503
+DEP, K1, K2, ALPHA = 3, 2, 8, R.ALPHA_TMI
+R.deposits_wgs84 = C1.deposits_case2_wgs84
 X2, idx2, w2, o2 = R.window_matrix(DEP); n2 = X2.shape[0] - 1
 deps2 = R.deposits_wgs84()
 rects2 = NE.rects_from_idx(idx2, w2, o2)
@@ -123,7 +124,8 @@ ax.annotate("", xy=(a_eq2, end_cb), xytext=(end_ab, end_cb),
             arrowprops=dict(arrowstyle="->", color=GRAY, lw=1.4, ls=":"))
 # the random diagonal passes just under the right end of the guide arrow, so the
 # label sits below the arrow where the panel is empty
-ax.annotate("same recovery,\n7.2$\\times$ the area", xy=(end_ab + 0.34 * (a_eq2 - end_ab), end_cb),
+ax.annotate("same recovery,\n%.1f$\\times$ the area" % (a_eq2 / end_ab),
+            xy=(end_ab + 0.34 * (a_eq2 - end_ab), end_cb),
             textcoords="offset points", xytext=(0, -46), ha="center", fontsize=14,
             color=GRAY)
 ax.set_xlim(0, xmax2); ax.set_ylim(0, 0.7)

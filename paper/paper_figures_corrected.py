@@ -30,6 +30,7 @@ from matplotlib.patches import Patch, Rectangle
 from matplotlib.ticker import FuncFormatter
 from matplotlib.legend_handler import HandlerBase
 
+import case1_uni_repro as C1
 import numpy_repro_concat as R
 
 import argparse
@@ -59,7 +60,8 @@ U_LIMS = (0.0, 15.0)           # config analysis_defaults vmin_var2/vmax_var2
 def coverage(alpha):
     return R.run(DEP, K1, K2, alpha)["coverage_by_deposit"]
 
-others = [t for t in (1, 2, 3, 4, 5) if t != DEP]
+R.deposits_wgs84 = C1.deposits_case2_wgs84
+others = [t for t in (1, 2, 3, 4, 5, 6) if t != DEP]
 covT, covU = coverage(1.0), coverage(0.0)
 pT = float(np.mean([covT.get(t - 1, 0.0) for t in others]))
 pU = float(np.mean([covU.get(t - 1, 0.0) for t in others]))

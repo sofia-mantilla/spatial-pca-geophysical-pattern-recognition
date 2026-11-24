@@ -36,10 +36,10 @@
   },
   {
    "population": "Case 2 top 250, no known deposit",
-   "n": 234,
-   "touching": 0.098,
-   "mean_fraction": 0.0068,
-   "enrichment": 0.54
+   "n": 225,
+   "touching": 0.076,
+   "mean_fraction": 0.0062,
+   "enrichment": 0.49
   }
  ],
  "broad": [
@@ -79,10 +79,10 @@
   },
   {
    "population": "Case 2 top 250, no known deposit",
-   "n": 234,
-   "touching": 0.299,
-   "mean_fraction": 0.0846,
-   "enrichment": 0.85
+   "n": 225,
+   "touching": 0.231,
+   "mean_fraction": 0.0656,
+   "enrichment": 0.66
   }
  ]
 }

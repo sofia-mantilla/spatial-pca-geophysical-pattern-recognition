@@ -39,6 +39,11 @@ STRIDE = 8
 N_TOP = 250
 MIN_COVER = 0.5
 
+# Case-2 balance weight, from the univariate recoveries of the five test
+# deposits: 52.5 / (52.5 + 44.6).
+ALPHA_TMI = 0.541
+BLOCK_SCALE = "median"
+
 # GRS67 (SAD69) / WGS84 ellipsoids, UTM zone 22S
 GRS67 = (6378160.0, 1 / 298.247167427)
 WGS84 = (6378137.0, 1 / 298.257223563)
@@ -312,15 +317,64 @@ def blk_w(z):
     return w / w.sum() if w.sum() > 0 else np.ones_like(w) / max(len(w), 1)
 
 
-def rank_concat(dep_1based, k1, k2, alpha):
+def block_distance(Z, dep):
+    """Deposit-weighted distance of every window to the deposit, one block."""
+    return np.sqrt(((Z - Z[dep]) ** 2) @ blk_w(Z[dep]))
+
+
+def block_scale(d, kind=BLOCK_SCALE):
+    """Scale of one block's distance distribution.
+
+    The two blocks' distances are not commensurable: the uranium distances of
+    Case 2 run an order of magnitude above the magnetic ones and the magnetic
+    ones are heavily skewed. A weighted average of the raw distances is set by
+    whichever block happens to be numerically larger. Dividing each block by a
+    robust scale of its own distribution puts them on one footing first.
+    """
+    if kind is None:
+        return 1.0
+    if kind == "median":
+        return float(np.median(d))
+    if kind == "iqr":
+        return float(np.subtract(*np.percentile(d, [75, 25])))
+    if kind == "prank":
+        # rank-transform in place of a scale factor; returns the transform
+        raise ValueError("prank is applied by block_prank, not block_scale")
+    raise ValueError("unknown block scale %r" % (kind,))
+
+
+def block_prank(d):
+    """Percentile rank of each window within its own block, in [0, 1]."""
+    r = np.empty(len(d))
+    r[np.argsort(d)] = np.arange(len(d))
+    return r / (len(d) - 1)
+
+
+def rank_concat(dep_1based, k1, k2, alpha, scale=BLOCK_SCALE):
+    """Combined multivariate ranking (step 5.1).
+
+    With ``scale`` set, each block's distance is divided by a robust scale of
+    its own distribution and the scaled distances are averaged with weights
+    alpha and 1-alpha. ``scale=None`` gives the unscaled form, the weighted sum
+    of squared block distances, kept so the two can be compared.
+    """
     X, idx, wshape, origin = window_matrix(dep_1based)
     npix = wshape[0] * wshape[1]
     dep = X.shape[0] - 1
     Z1 = block_scores(X[:, :npix], k1)
     Z2 = block_scores(X[:, npix:2 * npix], k2)
-    F = np.hstack([Z1, Z2])
-    w = np.concatenate([blk_w(Z1[dep]) * alpha, blk_w(Z2[dep]) * (1 - alpha)])
-    d = np.sqrt(((F - F[dep]) ** 2) @ w)
+    if scale is None:
+        F = np.hstack([Z1, Z2])
+        w = np.concatenate([blk_w(Z1[dep]) * alpha, blk_w(Z2[dep]) * (1 - alpha)])
+        d = np.sqrt(((F - F[dep]) ** 2) @ w)
+    else:
+        d1 = block_distance(Z1, dep)
+        d2 = block_distance(Z2, dep)
+        if scale == "prank":
+            u1, u2 = block_prank(d1), block_prank(d2)
+        else:
+            u1, u2 = d1 / block_scale(d1, scale), d2 / block_scale(d2, scale)
+        d = alpha * u1 + (1 - alpha) * u2
     order = np.argsort(d)
     return order, idx, wshape, origin, dep
 
@@ -434,11 +488,11 @@ def footprint_recovery(order, idx, wshape, origin, dep_index, ref_dep_1based, n_
     }
 
 
-def run(dep_1based, k1, k2, alpha, mode="fusion"):
+def run(dep_1based, k1, k2, alpha, mode="fusion", scale=BLOCK_SCALE):
     if mode == "raw":
         order, idx, wshape, origin, dep = rank_raw(dep_1based)
     else:
-        order, idx, wshape, origin, dep = rank_concat(dep_1based, k1, k2, alpha)
+        order, idx, wshape, origin, dep = rank_concat(dep_1based, k1, k2, alpha, scale)
     return footprint_recovery(order, idx, wshape, origin, dep, dep_1based)
 
 
@@ -457,4 +511,7 @@ if __name__ == "__main__":
     import json, sys
     dep = int(sys.argv[1]); k1 = int(sys.argv[2]); k2 = int(sys.argv[3])
     alpha = float(sys.argv[4]); mode = sys.argv[5] if len(sys.argv) > 5 else "fusion"
-    print(json.dumps(metrics(run(dep, k1, k2, alpha, mode)), indent=1))
+    scale = sys.argv[6] if len(sys.argv) > 6 else BLOCK_SCALE
+    if scale in ("none", "None", ""):
+        scale = None
+    print(json.dumps(metrics(run(dep, k1, k2, alpha, mode, scale)), indent=1))

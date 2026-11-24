@@ -1,0 +1,133 @@
+{
+ "alpha_TMI": 0.541,
+ "k_TMI": 2,
+ "k_U": 8,
+ "n_windows": 13196,
+ "n_test_deposits": 5,
+ "study_area_valid_px": 895873,
+ "draws": 2000,
+ "block_distances": {
+  "TMI": {
+   "mean": 5.4,
+   "median": 2.79,
+   "max": 132.4
+  },
+  "radiometric U": {
+   "mean": 27.6,
+   "median": 28.33,
+   "max": 86.4
+  }
+ },
+ "rankings": {
+  "combined": {
+   "c250": 58.8,
+   "auc": 122.9,
+   "hits": 3,
+   "hit_ranks": {
+    "11": [
+     2
+    ],
+    "17": [
+     1
+    ],
+    "74": [
+     5
+    ]
+   },
+   "a250": 8.5,
+   "coverage_pct": {
+    "1": 100.0,
+    "2": 100.0,
+    "4": 0.6,
+    "5": 88.2,
+    "6": 5.3
+   }
+  },
+  "TMI alone": {
+   "c250": 52.5,
+   "auc": 78.8,
+   "hits": 2,
+   "hit_ranks": {
+    "14": [
+     1
+    ],
+    "95": [
+     2
+    ]
+   },
+   "a250": 10.4,
+   "coverage_pct": {
+    "1": 100.0,
+    "2": 83.3,
+    "5": 41.3,
+    "6": 38.0
+   }
+  },
+  "radiometric U alone": {
+   "c250": 44.6,
+   "auc": 84.2,
+   "hits": 2,
+   "hit_ranks": {
+    "17": [
+     1
+    ],
+    "198": [
+     2
+    ]
+   },
+   "a250": 8.7,
+   "coverage_pct": {
+    "1": 92.2,
+    "2": 71.1,
+    "4": 40.9,
+    "5": 17.4,
+    "6": 1.3
+   }
+  },
+  "raw multi": {
+   "c250": 0.7,
+   "auc": 0.5,
+   "hits": 0,
+   "hit_ranks": {},
+   "a250": 8.6,
+   "coverage_pct": {
+    "1": 3.6
+   }
+  }
+ },
+ "random_at_rank250": {
+  "expected_recovery_pct": 15.1,
+  "expected_a250_pct": 14.7
+ },
+ "random_monte_carlo": {
+  "mean_hits": 0.5,
+  "share_reaching_c250_pct": 0.0,
+  "share_reaching_hits_pct": 0.7
+ },
+ "budget_windows_overlapping_reference": {
+  "n": 6,
+  "ranks": [
+   1,
+   26,
+   47,
+   67,
+   79,
+   186
+  ]
+ },
+ "distinct_groups": {
+  "n": 61,
+  "largest": 34,
+  "touching_no_known_deposit": 55,
+  "sizes": [
+   34,
+   24,
+   19,
+   9,
+   9,
+   9,
+   8,
+   8
+  ]
+ }
+}

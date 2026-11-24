@@ -32,13 +32,13 @@
   },
   {
    "population": "Case 2 top 250, no known deposit",
-   "n": 234,
-   "dropped_outside_arim": 0,
-   "median_m": 3977.0,
-   "mean_m": 6972.0,
-   "within_1km": 0.145,
-   "within_2km": 0.274,
-   "within_5km": 0.568
+   "n": 223,
+   "dropped_outside_arim": 2,
+   "median_m": 3453.0,
+   "mean_m": 5816.0,
+   "within_1km": 0.211,
+   "within_2km": 0.336,
+   "within_5km": 0.664
   }
  ],
  "all structures but magnetic": [
@@ -74,13 +74,13 @@
   },
   {
    "population": "Case 2 top 250, no known deposit",
-   "n": 234,
-   "dropped_outside_arim": 0,
-   "median_m": 1400.0,
-   "mean_m": 1786.0,
-   "within_1km": 0.389,
-   "within_2km": 0.645,
-   "within_5km": 0.953
+   "n": 223,
+   "dropped_outside_arim": 2,
+   "median_m": 1131.0,
+   "mean_m": 1812.0,
+   "within_1km": 0.462,
+   "within_2km": 0.686,
+   "within_5km": 0.937
   }
  ],
  "named systems": [
@@ -116,13 +116,13 @@
   },
   {
    "population": "Case 2 top 250, no known deposit",
-   "n": 234,
-   "dropped_outside_arim": 0,
-   "median_m": 29092.0,
-   "mean_m": 38490.0,
-   "within_1km": 0.009,
-   "within_2km": 0.026,
-   "within_5km": 0.103
+   "n": 223,
+   "dropped_outside_arim": 2,
+   "median_m": 39174.0,
+   "mean_m": 46939.0,
+   "within_1km": 0.027,
+   "within_2km": 0.031,
+   "within_5km": 0.081
   }
  ]
 }

@@ -55,7 +55,7 @@ def stats(order,idx,wshape,origin,dep):
 
 print("%-42s %5s %8s %8s" % ("ranking","n","median","<=500m"))
 # Case 2 and its halves, all reference Alemao, k_TMI=2, k_U=8
-for lab,a in (("Case 2 combined, alpha=0.503",0.503),
+for lab,a in (("Case 2 combined, alpha=%.3f" % R.ALPHA_TMI, R.ALPHA_TMI),
               ("Case 2, TMI alone (k=2)",1.0),
               ("Case 2, U alone (k=8)",0.0)):
     o,i,ws,og,d=R.rank_concat(3,2,8,a)

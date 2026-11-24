@@ -11,7 +11,7 @@ cent of the survey, and because at the printed width the survey plots at about
 
     (a) Case 1, univariate TMI, reference Paulo Afonso, k=17
     (b) Case 2, multivariate TMI + radiometric U, reference Alemao,
-        k_TMI=2, k_U=8, alpha_TMI=0.503
+        k_TMI=2, k_U=8, alpha_TMI=0.541
 
 With --structures the mapped structures of the ARIM Carajas preliminary
 integration map (SGB, 2019, 1:250,000) are drawn over both panels and the

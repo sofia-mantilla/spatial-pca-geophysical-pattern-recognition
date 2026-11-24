@@ -12,6 +12,15 @@ shapefile outlines, window extraction, PCA, ranking, footprint recovery) that
 was validated against the main pipeline's cached outputs (identical hit ranks
 and overlap events; AUC within ±0.02 across 8 cached configs).
 
+With several variables, `rank_concat` divides each block's distance by the
+median of that block's own distances before taking the weighted average
+(`BLOCK_SCALE = "median"`, `ALPHA_TMI = 0.541`). The two blocks' distances are
+not commensurable: in Case 2 the uranium distances average 27.6 against 5.4
+for the magnetic ones. `scale=None` gives the unscaled weighted sum of squared
+block distances, and `scale="iqr"` and `scale="prank"` the two other robust
+treatments, so the four can be compared. The Case-2 test set is the five
+deposits of `case1_uni_repro.deposits_case2_wgs84()`.
+
 ## How to run
 
 Download both Carajás data folders (see the repository README) into `data/`,
@@ -20,7 +29,7 @@ then run from inside this folder so sibling imports resolve:
 ```bash
 cd paper
 python case1_uni_repro.py       # Case-1 gates (end 47.0, AUC 57.9, 5 hits)
-python run_ablation_checks.py   # Case-2 headline (end 63.7, AUC 106.1, 3 hits)
+python run_ablation_checks.py   # Case-2 headline (end 58.8, AUC 122.9, 3 hits)
                                 # + ablations and classical baselines, both cases
 ```
 
@@ -42,7 +51,10 @@ to the repository's `data/` folder automatically.
 
 | Script | Reproduces |
 |---|---|
-| `run_ablation_checks.py` | **Case-2 headline numbers** (concat, TMI k=2 / U k=8, α=0.503: end 63.7, AUC 106.1, 3 hits) + weight-variant ablation (both cases), joint concat-PCA disclosure, Paulo Afonso check, classical baselines (demeaned match, correlation match, raw) |
+| `run_ablation_checks.py` | **Case-2 headline numbers** (concat, TMI k=2 / U k=8, α=0.541, median block scaling: end 58.8, AUC 122.9, 3 hits) + weight-variant ablation (both cases), joint concat-PCA disclosure, classical baselines (demeaned match, correlation match, raw) |
+| `run_case2_references.py` | Every area, random and grouping reference quoted for Case 2 in Section 5.2, plus the two blocks' distance distributions; writes `results/case2_references.json` |
+| `run_case2_appendixC.py` | Every Case-2 row of the Appendix C weight-ablation and classical-baseline tables and of the joint-decomposition paragraph, each with c(250), AUC, hits, a(250) and the ratio to a random selection of equal area; writes `results/case2_appendixC.json` |
+| `run_case2_heldout.py` | Appendix A: the held-out protocol for the Case-2 choices (25 reference and test pairs), and with `--grid` the 15 × 15 component-count grid behind Appendix B's panel (b); writes `results/case2_heldout.json`, `results/case2_heldout_grid.json` and `appendix_b/lodo_grid_by_k.csv` |
 | `run_weight_ablation_area.py` | Appendix C weight-ablation table with the area budget: four weightings (deposit-based, standardized scores, uniform, whitened 1/λ) × both cases, each with c̄(250), AUC, hits, a(250) and the ratio to a random selection of equal area; also the variance-ledness of the published weights and the distinct-group counts of the top 250 (44 and 49) |
 | `run_refswap_case1.py` | Reference-swap: every deposit as reference (Case 1, k=17) |
 | `alpha_from_univariate.py` | Balance weight α set from univariate performance |
@@ -65,7 +77,7 @@ to the repository's `data/` folder automatically.
 |---|---|
 | `run_rotation_scale_case1.py` | **R2.3**: Case-1 ranking with the reference window rotated (-55° to +90°) and the reference body rescaled (0.35-1.25), each scored with c̄(250), hits, a(250) and the ratio to a random selection of equal area (Table 6) |
 | `reference_geometry_ranges.py` | **R2.3**: the rotations and scales the Carajás deposits themselves justify, which set the ranges tested above |
-| `run_all_twelve_case2.py` | **R2.4**: the published Case-2 ranking rescored, unchanged and not re-tuned, against all twelve deposits instead of the five of the multivariate set |
+| `run_all_twelve_case2.py` | The Case-2 ranking scored against all twelve deposits instead of the five that pass the uranium threshold, with the single-variable rankings scored the same way |
 | `run_weight_ablation_area.py` | Appendix C weight ablation with the area budget (see above) |
 | `run_magnetite_units.py` | **R2.6**: whether the ranking finds mapped magnetitite and iron formation rather than mineralisation (Table 8) |
 | `run_era_shares.py` | **R2.6**: the age of the ground the ranking selects, against the survey as a whole (Table 8) |

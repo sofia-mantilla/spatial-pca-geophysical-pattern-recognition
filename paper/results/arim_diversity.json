@@ -1,5 +1,5 @@
 {
- "draws": 400,
+ "draws": 2000,
  "seed": 20261123,
  "n_host_units": 29,
  "host_units": [
@@ -74,56 +74,56 @@
   },
   "random": {
    "units": {
-    "mean": 82.062,
-    "p5": 78.0,
+    "mean": 81.965,
+    "p5": 77.0,
     "p95": 86.0,
     "pct_of_draws_below": 0.0
    },
    "effective": {
-    "mean": 34.625,
-    "p5": 31.316,
-    "p95": 38.071,
-    "pct_of_draws_below": 0.018
+    "mean": 34.555,
+    "p5": 31.08,
+    "p95": 38.001,
+    "pct_of_draws_below": 0.029
    },
    "largest": {
-    "mean": 0.135,
-    "p5": 0.107,
+    "mean": 0.136,
+    "p5": 0.108,
     "p95": 0.165,
-    "pct_of_draws_below": 0.92
+    "pct_of_draws_below": 0.913
    },
    "on_hosts": {
     "mean": 0.537,
-    "p5": 0.499,
+    "p5": 0.493,
     "p95": 0.58,
-    "pct_of_draws_below": 0.975
+    "pct_of_draws_below": 0.971
    }
   }
  },
  "case2": {
   "selection": {
-   "units": 62,
-   "effective": 20.62,
-   "largest": 0.221,
-   "on_hosts": 0.436
+   "units": 56,
+   "effective": 19.06,
+   "largest": 0.24,
+   "on_hosts": 0.578
   },
   "rankings": {
    "wPCA": {
-    "units": 62,
-    "effective": 20.62,
-    "largest": 0.221,
-    "on_hosts": 0.436
+    "units": 56,
+    "effective": 19.06,
+    "largest": 0.24,
+    "on_hosts": 0.578
    },
    "demeaned match": {
     "units": 67,
-    "effective": 28.39,
-    "largest": 0.214,
-    "on_hosts": 0.495
+    "effective": 27.38,
+    "largest": 0.223,
+    "on_hosts": 0.501
    },
    "correlation match": {
-    "units": 76,
-    "effective": 33.26,
-    "largest": 0.131,
-    "on_hosts": 0.579
+    "units": 77,
+    "effective": 34.15,
+    "largest": 0.117,
+    "on_hosts": 0.582
    }
   },
   "all windows": {
@@ -134,28 +134,28 @@
   },
   "random": {
    "units": {
-    "mean": 77.188,
+    "mean": 77.308,
     "p5": 72.0,
     "p95": 82.0,
     "pct_of_draws_below": 0.0
    },
    "effective": {
-    "mean": 34.063,
-    "p5": 30.032,
-    "p95": 37.41,
+    "mean": 34.106,
+    "p5": 30.489,
+    "p95": 37.771,
     "pct_of_draws_below": 0.0
    },
    "largest": {
-    "mean": 0.139,
+    "mean": 0.138,
     "p5": 0.11,
-    "p95": 0.171,
+    "p95": 0.17,
     "pct_of_draws_below": 1.0
    },
    "on_hosts": {
     "mean": 0.547,
-    "p5": 0.498,
-    "p95": 0.591,
-    "pct_of_draws_below": 0.0
+    "p5": 0.5,
+    "p95": 0.593,
+    "pct_of_draws_below": 0.871
    }
   }
  }

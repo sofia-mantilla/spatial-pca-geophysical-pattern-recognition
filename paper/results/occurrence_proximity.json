@@ -20,12 +20,12 @@
   },
   {
    "population": "Case 2 top 250, no known deposit",
-   "n": 234,
-   "dropped_outside_arim": 0,
-   "median_m": 24407.0,
-   "mean_m": 28342.0,
-   "within_5km": 0.038,
-   "within_10km": 0.184
+   "n": 223,
+   "dropped_outside_arim": 2,
+   "median_m": 27716.0,
+   "mean_m": 30648.0,
+   "within_5km": 0.009,
+   "within_10km": 0.067
   }
  ],
  "Fe and Mn occurrences (control)": [
@@ -49,12 +49,12 @@
   },
   {
    "population": "Case 2 top 250, no known deposit",
-   "n": 234,
-   "dropped_outside_arim": 0,
-   "median_m": 29223.0,
-   "mean_m": 29651.0,
-   "within_5km": 0.017,
-   "within_10km": 0.145
+   "n": 223,
+   "dropped_outside_arim": 2,
+   "median_m": 28792.0,
+   "mean_m": 28922.0,
+   "within_5km": 0.0,
+   "within_10km": 0.072
   }
  ]
 }

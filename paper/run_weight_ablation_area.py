@@ -38,7 +38,8 @@ def scores_full(Xb, k):
     return (U_ * S)[:, :k], (S ** 2)[:k]
 
 
-def table(case, variants, idx, wshape, origin, dep, ref, deps_wgs, case1):
+def table(case, variants, idx, wshape, origin, dep, ref, deps_wgs, case1,
+          case2=False):
     rects = NE.rects_from_idx(idx, wshape, origin)
     cells, areas = NE.build_cells(deps_wgs, ref - 1, rects)
     rc = NE.exact_random_curve(cells, areas, dep, t_max=T)
@@ -50,6 +51,8 @@ def table(case, variants, idx, wshape, origin, dep, ref, deps_wgs, case1):
         old = R.deposits_wgs84
         if case1:
             R.deposits_wgs84 = C1.deposits_case1_wgs84
+        elif case2:
+            R.deposits_wgs84 = C1.deposits_case2_wgs84
         try:
             res = R.footprint_recovery(order, idx, wshape, origin, dep, ref)
         finally:
@@ -122,10 +125,11 @@ Zu, lamu = scores_full(X[:, npix:2 * npix], 8)
 St, Su = Zt / np.sqrt(lamt), Zu / np.sqrt(lamu)
 
 
-def order2(A, B, wt, wu, alpha=0.503):
-    F = np.hstack([A, B])
-    w = np.concatenate([wt * alpha, wu * (1 - alpha)])
-    return np.argsort(np.sqrt(((F - F[dep]) ** 2) @ w))
+def order2(A, B, wt, wu, alpha=R.ALPHA_TMI):
+    """Combined Case-2 ranking, each block scaled by its own median first."""
+    dt = np.sqrt(((A - A[dep]) ** 2) @ wt)
+    du = np.sqrt(((B - B[dep]) ** 2) @ wu)
+    return np.argsort(alpha * dt / np.median(dt) + (1 - alpha) * du / np.median(du))
 
 
 v2 = [("Deposit-based z_dm^2", order2(Zt, Zu, R.blk_w(Zt[dep]), R.blk_w(Zu[dep]))),
@@ -133,8 +137,8 @@ v2 = [("Deposit-based z_dm^2", order2(Zt, Zu, R.blk_w(Zt[dep]), R.blk_w(Zu[dep])
       ("Standardized scores", order2(St, Su, R.blk_w(St[dep]), R.blk_w(Su[dep]))),
       ("Whitened 1/lambda", order2(Zt, Zu, (1 / lamt) / (1 / lamt).sum(),
                                    (1 / lamu) / (1 / lamu).sum()))]
-table("Case 2: Alemao, TMI + radiometric U, k=(2,8), alpha=0.503", v2,
-      idx, wshape, origin, dep, 3, R.deposits_wgs84(), False)
+table("Case 2: Alemao, TMI + radiometric U, k=(2,8), alpha=%.3f" % R.ALPHA_TMI, v2,
+      idx, wshape, origin, dep, 3, C1.deposits_case2_wgs84(), False, case2=True)
 
 # ----------------------------------------- how variance-led the raw rule is
 wr, ws = R.blk_w(Z1[dep1]), R.blk_w(Zs1[dep1])

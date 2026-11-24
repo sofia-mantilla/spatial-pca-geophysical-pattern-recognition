@@ -92,39 +92,39 @@
     }
    },
    "wPCA": {
-    "n": 234,
-    "median_m": 1201,
-    "mean_m": 1524,
-    "within_buf": 0.282,
-    "within_1km": 0.406,
+    "n": 223,
+    "median_m": 947,
+    "mean_m": 1364,
+    "within_buf": 0.323,
+    "within_1km": 0.525,
     "percentile": {
-     "median_m": 0.997,
-     "within_buf": 0.049,
-     "within_1km": 0.0
+     "median_m": 0.639,
+     "within_buf": 0.366,
+     "within_1km": 0.444
     }
    },
    "demeaned match": {
-    "n": 225,
-    "median_m": 1010,
-    "mean_m": 1556,
-    "within_buf": 0.307,
-    "within_1km": 0.498,
+    "n": 224,
+    "median_m": 1016,
+    "mean_m": 1553,
+    "within_buf": 0.317,
+    "within_1km": 0.496,
     "percentile": {
-     "median_m": 0.837,
-     "within_buf": 0.196,
-     "within_1km": 0.166
+     "median_m": 0.849,
+     "within_buf": 0.303,
+     "within_1km": 0.162
     }
    },
    "correlation match": {
     "n": 207,
-    "median_m": 589,
-    "mean_m": 1264,
+    "median_m": 585,
+    "mean_m": 1255,
     "within_buf": 0.473,
-    "within_1km": 0.618,
+    "within_1km": 0.623,
     "percentile": {
      "median_m": 0.0,
      "within_buf": 1.0,
-     "within_1km": 0.995
+     "within_1km": 0.997
     }
    }
   },

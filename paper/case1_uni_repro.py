@@ -87,6 +87,16 @@ def deposits_case1_wgs84():
     return out
 
 
+def deposits_case2_wgs84():
+    """The Case-2 test set, from the twelve-deposit shapefile.
+
+    Deposits 1 to 6 are the ones whose deposit window passes the radiometric-U
+    threshold of Section 5.2. Deposit 3 (Alemao) is the Case-2 reference and is
+    excluded by footprint_recovery, leaving five test deposits.
+    """
+    return deposits_case1_wgs84()[:6]
+
+
 def recovery(order, idx, wshape, origin, dep_index, n_top=R.N_TOP):
     """footprint_recovery against the 12-deposit Case-1 shapefile."""
     old = R.deposits_wgs84

@@ -122,7 +122,9 @@ print("CASE1: E[cbar(250)]=%.4f AUC=%.1f | union250/valid: wPCA %.3f raw %.3f ra
 print("CASE1 budget ranks overlapping reference:", ov1)
 
 # ================================ CASE 2 ================================
-DEP, K1, K2, ALPHA = 3, 2, 8, 0.503
+DEP, K1, K2, ALPHA = 3, 2, 8, R.ALPHA_TMI
+# Case 2 is scored against its five test deposits; Case 1 above swaps its own.
+R.deposits_wgs84 = C1.deposits_case2_wgs84
 X2, idx2, wshape2, origin2 = R.window_matrix(DEP)
 n2 = X2.shape[0] - 1
 deps2 = R.deposits_wgs84()

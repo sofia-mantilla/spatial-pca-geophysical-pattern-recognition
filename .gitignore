@@ -106,6 +106,9 @@ data/Carajas_Brazil_Geology/
 
 # Scratch output of the paper figure scripts
 paper/figures_out/
+paper/figures/
+paper/appendix_b/appendixB_k_sensitivity.pdf
+paper/appendix_b/appendixB_k_sensitivity.png
 
 # ARIM Carajas structures (SGB 2019, 1:250,000, preliminary integration map).
 # Unlike the geology above there is no fetch script for this archive, and the

@@ -158,7 +158,7 @@ def main() -> int:
         if case == 1:
             order, idx, wshape, origin, dep = C1.rank_spca(17)
         else:
-            order, idx, wshape, origin, dep = R.rank_concat(3, 2, 8, 0.503)
+            order, idx, wshape, origin, dep = R.rank_concat(3, 2, 8, R.ALPHA_TMI)
         oxx, oyy = origin
         wh, ww = wshape
         rs, cs, out = [], [], 0
