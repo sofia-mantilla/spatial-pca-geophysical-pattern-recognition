@@ -610,7 +610,7 @@
       <div class="tile"><div class="lab">Test deposits hit<span class="info info-end"><button type="button" aria-label="About test deposits hit" aria-describedby="tip-hits"><svg class="ico"><use href="#i-info"/></svg></button><span class="tip" role="tooltip" id="tip-hits">A test deposit counts as <b>hit</b> once the selected windows cover at least 50% of its footprint.</span></span></div><div class="val" id="t-hits">–</div></div>
       <div class="tile"><div class="lab">Recovery AUC<span class="info info-end"><button type="button" aria-label="About recovery AUC" aria-describedby="tip-auc"><svg class="ico"><use href="#i-info"/></svg></button><span class="tip" role="tooltip" id="tip-auc">Area under the cumulative recovery curve. It rewards recovering footprint <b>early</b> in the ranking, not only by the final window.</span></span></div><div class="val" id="t-auc">–</div></div>
       <div class="tile"><div class="lab">Area selected<span class="info info-end"><button type="button" aria-label="About area selected" aria-describedby="tip-area"><svg class="ico"><use href="#i-info"/></svg></button><span class="tip" role="tooltip" id="tip-area">Total ground area of the selected windows, with overlaps merged so shared ground is counted once.</span></span></div><div class="val" id="t-area">–</div></div>
-      <div class="tile"><div class="lab">vs random of matched area<span class="info info-end"><button type="button" aria-label="About the random comparison" aria-describedby="tip-lift"><svg class="ico"><use href="#i-info"/></svg></button><span class="tip" role="tooltip" id="tip-lift">Footprint recovered divided by the share of the study area selected. 1× is chance; 2× means twice what a random selection of the same area would recover.</span></span></div><div class="val" id="t-lift">–</div></div>
+      <div class="tile"><div class="lab">vs random of matched area<span class="info info-end"><button type="button" aria-label="About the random comparison" aria-describedby="tip-lift"><svg class="ico"><use href="#i-info"/></svg></button><span class="tip" role="tooltip" id="tip-lift">Footprint recovered divided by what a random selection of windows covering the same area is expected to recover (exact expectation, as in the paper). 1× is chance; 2× means twice what that random selection would recover.</span></span></div><div class="val" id="t-lift">–</div></div>
     </div>
 
     <div class="resgrid">
@@ -1275,12 +1275,97 @@ function metricsOf(res, nTop) {
   };
 }
 
+/* ------------------------------------------ random selection at matched area */
+// The recovery a random selection is expected to reach when it covers the same
+// area as the ranking's top windows. Mirrors paper/null_expectation.py and the
+// ratio of paper/run_all_twelve_case2.py: find t*, the number of windows drawn
+// uniformly without replacement whose expected union area equals unionTarget,
+// then take the exact expected mean recovered fraction of t* random windows,
+// both by linear interpolation between whole t. A cell covered by m of the n
+// windows stays uncovered after t draws with probability
+// q_m(t) = prod_{j<t} (n-m-j)/(n-j).
+//   allRects:   [xmin,xmax,ymin,ymax] of every candidate window, map metres
+//   testDeps:   { key: rings } as for footprintRecovery
+//   n:          number of candidate windows
+//   coverFreq:  Map m -> number of grid cells covered by exactly m windows
+//   unionTarget: grid cells covered by the ranking's top windows
+function randomAtMatchedArea(allRects, testDeps, n, coverFreq, unionTarget) {
+  const qAt = (m, t) => {
+    let q = 1.0;
+    for (let j = 0; j < t; j++) { q *= Math.max(0, n - m - j) / (n - j); if (q === 0) break; }
+    return q;
+  };
+  // t*: expected random union area reaches the ranking's union area
+  const ms = [...coverFreq.keys()], fr = ms.map(m => coverFreq.get(m));
+  const q = ms.map(() => 1.0);
+  let tStar = n, prevU = 0, prevT = 0;
+  for (let t = 1; t <= n; t++) {
+    let U = 0;
+    for (let k = 0; k < ms.length; k++) {
+      q[k] *= Math.max(0, n - ms[k] - (t - 1)) / (n - (t - 1));
+      U += fr[k] * (1 - q[k]);
+    }
+    if (U >= unionTarget) {
+      tStar = (t === 1 || U === prevU) ? t : prevT + (unionTarget - prevU) / (U - prevU);
+      break;
+    }
+    prevU = U; prevT = t;
+  }
+  // cells of each test deposit induced by every candidate window over it,
+  // with the number of windows that contain each cell
+  const keys = Object.keys(testDeps);
+  const perDep = keys.map(i => {
+    const rings = testDeps[i];
+    const ring = openRing(rings[0]);
+    const bx = ring.map(p => p[0]), by = ring.map(p => p[1]);
+    const minbx = Math.min(...bx), maxbx = Math.max(...bx);
+    const minby = Math.min(...by), maxby = Math.max(...by);
+    const cand = [];
+    for (const r of allRects) {
+      if (!(r[1] <= minbx || r[0] >= maxbx || r[3] <= minby || r[2] >= maxby)) cand.push(r);
+    }
+    const xs = [...new Set([minbx, maxbx, ...cand.flatMap(r => [r[0], r[1]])])].sort((a, b) => a - b);
+    const ys = [...new Set([minby, maxby, ...cand.flatMap(r => [r[2], r[3]])])].sort((a, b) => a - b);
+    const cells = [];
+    for (let xi = 0; xi < xs.length - 1; xi++) {
+      for (let yi = 0; yi < ys.length - 1; yi++) {
+        const xa = xs[xi], xb = xs[xi + 1], ya = ys[yi], yb = ys[yi + 1];
+        const ar = ringsClipArea(rings, xa, xb, ya, yb);
+        if (ar <= 1e-9) continue;
+        let m = 0;
+        for (const r of cand) {
+          if (r[0] <= xa + 1e-9 && r[1] >= xb - 1e-9 && r[2] <= ya + 1e-9 && r[3] >= yb - 1e-9) m++;
+        }
+        if (m) cells.push([ar, m]);
+      }
+    }
+    return { cells, area: Math.abs(polyArea(ring)) };
+  });
+  const recoveryAt = t => {
+    const cache = new Map();
+    let s = 0.0;
+    for (const { cells, area } of perDep) {
+      let cov = 0.0;
+      for (const [ar, m] of cells) {
+        if (!cache.has(m)) cache.set(m, qAt(m, t));
+        cov += ar * (1 - cache.get(m));
+      }
+      s += cov / area;
+    }
+    return s / Math.max(1, perDep.length);
+  };
+  const tf = Math.max(1, Math.floor(tStar)), tc = Math.max(1, Math.ceil(tStar));
+  const cf = recoveryAt(tf);
+  const expected = tc === tf ? cf : cf + (tStar - tf) * (recoveryAt(tc) - cf);
+  return { tStar, expected };
+}
+
 /* exports (Node + browser global) */
 const WPCA = {
   readShpPolygons, sad69ToWgs84Utm,
   polyArea, clipRect, ringsClipArea, pointInRings, openRing,
   symEigen, blockScores, blkW,
-  buildWindowMatrix, rankWindows, footprintRecovery, metricsOf,
+  buildWindowMatrix, rankWindows, footprintRecovery, metricsOf, randomAtMatchedArea,
 };
 if (typeof module !== "undefined" && module.exports) module.exports = WPCA;
 if (typeof window !== "undefined") window.WPCA = WPCA;
@@ -2119,6 +2204,23 @@ async function computeRanking(setStatus){
       for(let i=0;i<wm.ww;i++){ if(!cover[base+i]){ cover[base+i]=1; covered++; } } }
     areaFrac[t]=covered/studyCells;
   }
+  /* Ratio to a random selection covering the same area as the top T windows, as
+     in the paper: the exact expected recovery of t* random windows, where t*
+     random windows cover on average the same area. */
+  let lift=null;
+  if(nTest){
+    await say("Computing the random-selection reference at matched area…");
+    const cnt=new Int32Array(W*H), allRects=new Array(nWin);
+    for(let w=0;w<nWin;w++){
+      const gy=wm.idx[3*w]+ay0, gx=wm.idx[3*w+1]+ax0;
+      for(let j=0;j<wm.wh;j++){ const base=(gy+j)*W+gx; for(let i=0;i<wm.ww;i++) cnt[base+i]++; }
+      allRects[w]=gridRectToMap(gx,gy,wm.ww,wm.wh);
+    }
+    const freq=new Map();
+    for(const v of cnt) if(v>0) freq.set(v,(freq.get(v)||0)+1);
+    const {expected}=WPCA.randomAtMatchedArea(allRects,testDeps,nWin,freq,covered);
+    lift=expected>0?(m.end/100)/expected:null;
+  }
   let randMean=null, randLo=null, randHi=null;
   if(nTest){
   await say("Simulating the random-selection reference…");
@@ -2166,7 +2268,7 @@ async function computeRanking(setStatus){
           overlapRanks:res?Object.keys(res.overlapByRank).map(Number).sort((x,y)=>x-y):[],
           hitRankList:res?Object.keys(res.hitByRank).map(Number).sort((x,y)=>x-y):[],
           overlapBy:res?res.overlapByRank:{}, hitBy:res?res.hitByRank:{},
-          lift:m?(m.end/100)/Math.max(1e-9,areaFrac[T-1]||1e-9):null};
+          lift};
 }
 
 /* ============ run + results ============ */
@@ -2206,7 +2308,7 @@ function renderResults(res){
     document.getElementById("t-rec").innerHTML=((res.rec.at(-1)||0)*100).toFixed(1)+"<small>%</small>";
     document.getElementById("t-hits").innerHTML=res.hits+"<small> of "+res.nTest+"</small>";
     document.getElementById("t-auc").textContent=res.auc.toFixed(1);
-    document.getElementById("t-lift").innerHTML=res.lift.toFixed(2)+"<small>×</small>";
+    document.getElementById("t-lift").innerHTML=res.lift==null?"—":res.lift.toFixed(2)+"<small>×</small>";
   }
   document.getElementById("t-area").innerHTML=Math.round(res.areaKm2).toLocaleString()+"<small> km²</small>";
   const tb=document.querySelector("#topwins tbody"); tb.textContent="";
@@ -2502,7 +2604,7 @@ document.getElementById("reportbtn").addEventListener("click",()=>{
     ? [["Footprint recovered",(res.rec[res.rec.length-1]*100).toFixed(1)+"%"],
        ["Test deposits hit",`${res.hits} of ${res.nTest}`],["Recovery AUC",res.auc.toFixed(1)],
        ["Area selected",Math.round(res.areaKm2).toLocaleString()+" km²"],
-       ["vs random of matched area",res.lift.toFixed(2)+"×"]]
+       ["vs random of matched area",res.lift==null?"—":res.lift.toFixed(2)+"×"]]
     : [["Windows ranked",res.nWindows.toLocaleString()],
        ["Top windows kept",String(res.top.length)],
        ["Area selected",Math.round(res.areaKm2).toLocaleString()+" km²"]];

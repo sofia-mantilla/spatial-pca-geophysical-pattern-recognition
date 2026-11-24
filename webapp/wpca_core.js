@@ -596,12 +596,97 @@ function metricsOf(res, nTop) {
   };
 }
 
+/* ------------------------------------------ random selection at matched area */
+// The recovery a random selection is expected to reach when it covers the same
+// area as the ranking's top windows. Mirrors paper/null_expectation.py and the
+// ratio of paper/run_all_twelve_case2.py: find t*, the number of windows drawn
+// uniformly without replacement whose expected union area equals unionTarget,
+// then take the exact expected mean recovered fraction of t* random windows,
+// both by linear interpolation between whole t. A cell covered by m of the n
+// windows stays uncovered after t draws with probability
+// q_m(t) = prod_{j<t} (n-m-j)/(n-j).
+//   allRects:   [xmin,xmax,ymin,ymax] of every candidate window, map metres
+//   testDeps:   { key: rings } as for footprintRecovery
+//   n:          number of candidate windows
+//   coverFreq:  Map m -> number of grid cells covered by exactly m windows
+//   unionTarget: grid cells covered by the ranking's top windows
+function randomAtMatchedArea(allRects, testDeps, n, coverFreq, unionTarget) {
+  const qAt = (m, t) => {
+    let q = 1.0;
+    for (let j = 0; j < t; j++) { q *= Math.max(0, n - m - j) / (n - j); if (q === 0) break; }
+    return q;
+  };
+  // t*: expected random union area reaches the ranking's union area
+  const ms = [...coverFreq.keys()], fr = ms.map(m => coverFreq.get(m));
+  const q = ms.map(() => 1.0);
+  let tStar = n, prevU = 0, prevT = 0;
+  for (let t = 1; t <= n; t++) {
+    let U = 0;
+    for (let k = 0; k < ms.length; k++) {
+      q[k] *= Math.max(0, n - ms[k] - (t - 1)) / (n - (t - 1));
+      U += fr[k] * (1 - q[k]);
+    }
+    if (U >= unionTarget) {
+      tStar = (t === 1 || U === prevU) ? t : prevT + (unionTarget - prevU) / (U - prevU);
+      break;
+    }
+    prevU = U; prevT = t;
+  }
+  // cells of each test deposit induced by every candidate window over it,
+  // with the number of windows that contain each cell
+  const keys = Object.keys(testDeps);
+  const perDep = keys.map(i => {
+    const rings = testDeps[i];
+    const ring = openRing(rings[0]);
+    const bx = ring.map(p => p[0]), by = ring.map(p => p[1]);
+    const minbx = Math.min(...bx), maxbx = Math.max(...bx);
+    const minby = Math.min(...by), maxby = Math.max(...by);
+    const cand = [];
+    for (const r of allRects) {
+      if (!(r[1] <= minbx || r[0] >= maxbx || r[3] <= minby || r[2] >= maxby)) cand.push(r);
+    }
+    const xs = [...new Set([minbx, maxbx, ...cand.flatMap(r => [r[0], r[1]])])].sort((a, b) => a - b);
+    const ys = [...new Set([minby, maxby, ...cand.flatMap(r => [r[2], r[3]])])].sort((a, b) => a - b);
+    const cells = [];
+    for (let xi = 0; xi < xs.length - 1; xi++) {
+      for (let yi = 0; yi < ys.length - 1; yi++) {
+        const xa = xs[xi], xb = xs[xi + 1], ya = ys[yi], yb = ys[yi + 1];
+        const ar = ringsClipArea(rings, xa, xb, ya, yb);
+        if (ar <= 1e-9) continue;
+        let m = 0;
+        for (const r of cand) {
+          if (r[0] <= xa + 1e-9 && r[1] >= xb - 1e-9 && r[2] <= ya + 1e-9 && r[3] >= yb - 1e-9) m++;
+        }
+        if (m) cells.push([ar, m]);
+      }
+    }
+    return { cells, area: Math.abs(polyArea(ring)) };
+  });
+  const recoveryAt = t => {
+    const cache = new Map();
+    let s = 0.0;
+    for (const { cells, area } of perDep) {
+      let cov = 0.0;
+      for (const [ar, m] of cells) {
+        if (!cache.has(m)) cache.set(m, qAt(m, t));
+        cov += ar * (1 - cache.get(m));
+      }
+      s += cov / area;
+    }
+    return s / Math.max(1, perDep.length);
+  };
+  const tf = Math.max(1, Math.floor(tStar)), tc = Math.max(1, Math.ceil(tStar));
+  const cf = recoveryAt(tf);
+  const expected = tc === tf ? cf : cf + (tStar - tf) * (recoveryAt(tc) - cf);
+  return { tStar, expected };
+}
+
 /* exports (Node + browser global) */
 const WPCA = {
   readShpPolygons, sad69ToWgs84Utm,
   polyArea, clipRect, ringsClipArea, pointInRings, openRing,
   symEigen, blockScores, blkW,
-  buildWindowMatrix, rankWindows, footprintRecovery, metricsOf,
+  buildWindowMatrix, rankWindows, footprintRecovery, metricsOf, randomAtMatchedArea,
 };
 if (typeof module !== "undefined" && module.exports) module.exports = WPCA;
 if (typeof window !== "undefined") window.WPCA = WPCA;

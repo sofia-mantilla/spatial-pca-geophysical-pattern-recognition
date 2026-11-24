@@ -29,11 +29,17 @@ The JavaScript implementation reproduces the paper's replication gates
 `paper/run_ablation_checks.py`):
 
 - **Case 1** (univariate TMI, ref. Paulo Afonso, k=17): recovery 47.04%,
-  AUC 57.9, 5 hits at ranks 5/103/126/166/220, n = 13,031 windows.
+  AUC 57.9, 5 hits at ranks 5/103/126/166/220, n = 13,031 windows, 3.09
+  times a random selection of matched area.
 - **Case 2** (TMI + radiometric U, ref. Alemão, k=2/8, α<sub>TMI</sub>=0.541,
   each variable's distance divided by its own median before the weighted
   average): recovery 58.81%, AUC 122.9, 3 of the 5 test deposits hit at ranks
-  11/17/74, n = 13,197 windows.
+  11/17/74, n = 13,197 windows, 6.70 times a random selection of matched
+  area.
+
+"Random selection of matched area" is the exact expected recovery of the
+number of random windows that cover, on average, the same area as the top
+250 (`randomAtMatchedArea`, after `paper/null_expectation.py`).
 
 To verify (requires the Carajás data folders from the repo README under
 `../data/`):
