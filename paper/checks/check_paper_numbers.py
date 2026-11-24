@@ -120,7 +120,7 @@ CHECKS = [
  ("structures: deposits", "1{,}020~m and 41.7\\%", _pop("all structures but magnetic", "the twelve")["median_m"]),
  ("structures: case1", "at 1{,}523~m", _pop("all structures but magnetic", "Case 1")["median_m"]),
  ("shear zones: case2", "3{,}453~m against a range beginning at 3{,}499~m", _pop("shear zones", "Case 2")["median_m"]),
- ("structures: counts", "447 mapped structures remain, 133 of them shear zones", 447),
+ ("structures: counts", "That leaves 447 structures, 133 of them shear zones", 447),
 ]
 
 bad = 0
