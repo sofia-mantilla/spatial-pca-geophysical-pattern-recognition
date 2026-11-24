@@ -64,7 +64,7 @@ text is held only in prose:
   Section 5.2, and the two blocks' distance distributions.
 - `run_case2_appendixC.py` — every Case-2 row of the Appendix C weight-ablation
   and classical-baseline tables, and the joint-decomposition paragraph.
-- `run_case2_heldout.py` — the Appendix A held-out protocol over 25 reference
+- `run_case2_heldout.py` — the Appendix A held-out protocol over 30 reference
   and test pairs, and with `--grid` the 15 × 15 component-count grid behind
   Appendix B's panel (b), which also regenerates
   `paper/appendix_b/lodo_grid_by_k.csv`.
@@ -79,3 +79,19 @@ univariate ranking in the repository is identical to v2.3.5.
 **Compatibility.** `rank_concat(dep, k1, k2, alpha)` returns a different
 ordering than in v2.3.5 for any `0 < alpha < 1`. Pass `scale=None` for the old
 behaviour.
+
+**The webapp follows the same rule.** `rankWindows` in `webapp/wpca_core.js`
+and its inline copy in `webapp/index.html` now divide each variable's distance
+by its own median before the weighted average. Before this release they
+pooled the variables into one distance, so a multivariate run in the app did
+not give the paper's Case-2 ranking. `webapp/validate_gates.cjs` now asserts
+the Case-2 result above (58.81%, AUC 122.9, hits at ranks 11, 17 and 74, with
+α_TMI = 0.541) alongside the unchanged Case-1 gate. A single-variable run in
+the app is unchanged.
+
+**The library offers the published rule.** `spatial_pca.spca.ranking` gains
+`rank_multi_scaled_mean`, ranking mode `late_fusion_scaled_mean`, which gives
+the same ordering as `rank_concat` on the Case-2 windows. The existing
+`late_fusion_sum` mode is unchanged. It divides the squared distances by their
+medians and combines them in quadrature, which orders windows differently from
+the paper's rule.

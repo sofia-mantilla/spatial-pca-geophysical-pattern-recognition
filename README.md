@@ -84,8 +84,11 @@ and validates the top-ranked windows against independent deposit footprints.
 - Crop rasters, rotate deposit templates, and build sliding windows.
 - Flatten windows into a wPCA feature matrix.
 - Rank candidate windows by PCA-space similarity to a selected reference
-  deposit, univariate or multivariate (score concatenation with a balance
-  weight between variables).
+  deposit, univariate or multivariate. The paper's multivariate rule divides
+  each variable's distance by the median of its own distances and averages
+  the scaled distances with a balance weight (ranking mode
+  `late_fusion_scaled_mean`). Score concatenation and two other fusion modes
+  are also available.
 - Export top-window maps, diagnostic figures, GeoPackage outputs, run configs,
   and provenance files.
 - Validate top-ranked windows with cumulative footprint-recovery metrics
@@ -99,10 +102,11 @@ and validates the top-ranked windows against independent deposit footprints.
   area.
 - **Case 2 — multivariate TMI + radiometric U** (reference: Alemão deposit):
   validated on deposits that express both variables. The combination recovers
-  64% of the test-deposit footprints and hits three of four test deposits, more
-  than either variable alone. Scored instead against all twelve deposits of the
-  study area, seven of which have no usable uranium expression, TMI alone ends
-  higher; the paper reports both and bounds the claim accordingly.
+  58.8% of the test-deposit footprints and hits three of five test deposits,
+  more than either variable alone (52.5% for TMI, 44.6% for radiometric U).
+  Scored instead against all twelve deposits of the study area, six of which
+  fall below the uranium threshold, the combination recovers 29.5% and TMI
+  alone 38.7%. The paper reports both and bounds the claim accordingly.
 - The scripts that reproduce the paper's numbers, tables, and figures live in
   [`paper/`](paper/) — see the [Reproducing the paper](#reproducing-the-paper)
   section. The checks added for the November 2026 major revision are there too:
@@ -194,8 +198,9 @@ synthetic dataset tracked in Git. After that, you can run:
   Carajás univariate TMI workflow (paper Case 1); requires the Carajás raster
   and polygon data from the public Drive folders below.
 - `python scripts/run_project_from_config.py --config configs/carajas_multi_tmi_u_concat_scores_tmi17_u25.yaml --deposit 3`:
-  Carajás multivariate TMI + radiometric-U workflow (score concatenation, the
-  paper's Case-2 method family); requires both Carajás data folders.
+  Carajás multivariate TMI + radiometric-U workflow (score concatenation);
+  requires both Carajás data folders. This demonstrates the pipeline and does
+  not reproduce the paper's Case-2 numbers.
 - The scripts in [`paper/`](paper/): reproduce the paper's headline numbers,
   ablations, and figures (see below).
 
@@ -256,18 +261,27 @@ python scripts/run_project_from_config.py \
   --deposit 3
 ```
 
-This takes about a minute and demonstrates the multivariate workflow: each
-variable's standardized PC scores are concatenated and windows are ranked in
-the combined score space against the reference deposit (Alemão, Deposit 3).
-**Expected result:** ~63% cumulative footprint recovery in the top 250 windows
-with 3 test deposits hit.
+This takes about a minute and demonstrates the multivariate workflow against
+the reference deposit (Alemão, Deposit 3). Each variable's standardized PC
+scores are concatenated and windows are ranked in the combined score space,
+with 17 TMI and 25 radiometric-U components.
 
-The paper's exact Case-2 headline numbers (TMI k=2, U k=8, balance weight set
-from the other deposits' univariate performance: **63.7% recovery, AUC 106.1,
-3 of 4 test deposits**) are reproduced by `paper/run_ablation_checks.py` — see
-the next section. `configs/carajas_multi_tmi_u.yaml` is the full 5-deposit ×
-20-k selection sweep behind Appendix B; it takes much longer and expects the
-univariate sweeps' best-k tables, so it is not the place to start.
+This run is not the paper's Case 2, and its recovery is not a number the
+paper reports. Its combination rule is `concat_scores`, one pooled distance
+with no balance weight. It keeps 17 and 25 components where the paper keeps 2
+and 8. It is scored on the four other deposits of
+`Prospect_in Carajas_multi.shp`, where the paper scores five.
+
+The paper's Case 2 uses TMI k=2, U k=8 and a balance weight
+α<sub>TMI</sub>=0.541 set from the univariate recoveries of the five test
+deposits. Each variable's distance is divided by its own median before the
+weighted average. It gives **58.8% recovery, AUC 122.9, three of five test
+deposits hit at ranks 11, 17 and 74**, and is reproduced by
+`paper/run_ablation_checks.py` (see the next section). The library offers the
+same rule as `multi_ranking_mode: "late_fusion_scaled_mean"`.
+`configs/carajas_multi_tmi_u.yaml` is the full 5-deposit × 20-k selection
+sweep behind Appendix B. It takes much longer and expects the univariate
+sweeps' best-k tables, so it is not the place to start.
 
 ### Output Data
 
@@ -298,7 +312,7 @@ environment caveats. To verify the paper's headline numbers yourself
 ```bash
 cd paper
 python case1_uni_repro.py      # Case 1: end 47.0, AUC 57.9, 5 hits (k=17)
-python run_ablation_checks.py  # Case 2: end 63.7, AUC 106.1, 3 hits (TMI k=2, U k=8)
+python run_ablation_checks.py  # Case 2: end 58.8, AUC 122.9, 3 hits (TMI k=2, U k=8)
                                # + weight ablations, joint-PCA check, classical baselines
 ```
 
@@ -374,11 +388,11 @@ The univariate path is the same with a single variable and no concatenation.
 4. Slide a template-sized window across the raster grid.
 5. Flatten each valid window into a wPCA feature vector (per variable).
 6. Append the reference deposit template as the reference row.
-7. Fit PCA per variable, keep each variable's leading components, and — in the
-   multivariate case — concatenate the standardized scores with a balance
-   weight between variables.
+7. Fit PCA per variable and keep each variable's leading components.
 8. Rank all windows by weighted PCA-space distance to the reference deposit
-   and export the top windows.
+   and export the top windows. With several variables, the paper divides each
+   variable's distance by its own median and averages the scaled distances
+   with a balance weight.
 9. Validate the ranked windows by measuring cumulative recovery of known
    deposit footprints outside the reference deposit, against the exact
    expectation of a random selection of equal area.
