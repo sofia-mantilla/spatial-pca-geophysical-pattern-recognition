@@ -8,10 +8,12 @@ Checks the build log, that Case 1 is untouched, that the Case-2 deposit set is
 stated the same way everywhere, that every Case-2 number in the text traces to
 a regenerated JSON (check_paper_numbers.py), that the response letter agrees
 with the paper (check_letter_agrees.py), that no value or phrasing from an
-earlier version survives, that the marked copy regenerates, and that both
-repositories are committed. Exits non-zero on any failure.
+earlier version survives, that the marked copy regenerates, that the
+response letter is a .docx Word can open, and that both repositories are
+committed. Exits non-zero on any failure.
 """
 import io, json, re, subprocess, sys, unicodedata as ud, zipfile
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 ROOT = Path(".").resolve()
@@ -85,6 +87,33 @@ for v in GONE:
 print("\n=== the marked copy regenerates ===")
 r = subprocess.run([sys.executable, "make_marked.py"], capture_output=True, text=True, cwd=D)
 check("make_marked.py runs", r.returncode == 0, r.stdout.strip().splitlines()[-1] if r.stdout else r.stderr[-120:])
+
+print("\n=== the response letter is a readable .docx ===")
+# Word rejects the whole file on one malformed part, and the failure is silent
+# until someone tries to open it. Editing word/document.xml by hand produced
+# exactly that once: a <w:t> left open around an inserted <w:p>.
+DOCX = D / "NRR_response_to_reviewers.docx"
+try:
+    zl = zipfile.ZipFile(DOCX)
+    check("zip is intact", zl.testzip() is None)
+    names = set(zl.namelist())
+    for req in ("[Content_Types].xml", "_rels/.rels", "word/document.xml"):
+        check("%s present" % req, req in names)
+    bad = []
+    for n in sorted(names):
+        if n.endswith((".xml", ".rels")):
+            try:
+                ET.fromstring(zl.read(n))
+            except ET.ParseError as e:
+                bad.append("%s: %s" % (n, e))
+    check("every XML part parses", not bad, bad[0] if bad else "")
+    doc = zl.read("word/document.xml").decode("utf-8")
+    check("no block element inside a <w:t>",
+          not re.search(r"<w:t[^>]*><w:(p|tbl|r)[ >]", doc))
+    check("<w:t> tags balanced", doc.count("<w:t") == doc.count("</w:t>"),
+          "%d open, %d close" % (doc.count("<w:t"), doc.count("</w:t>")))
+except zipfile.BadZipFile as e:
+    check("zip is intact", False, str(e))
 
 print("\n=== reviewer-facing register ===")
 BAD = ["this check", "now measured", "rescores the published", "reported for that reason",
