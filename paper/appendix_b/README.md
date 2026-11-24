@@ -32,7 +32,7 @@ Regenerate this table (needs the Carajás TMI data, about 20 min):
 
 The 15 × 15 nested leave-one-deposit-out grid at each (k_TMI, k_U). The panel shows the
 section at k_TMI = 2, using columns `a_uni` (combined ranking under the α_v rule) and `U`
-(radiometric U alone); the TMI-alone reference line is 0.2730 (the `TMI` column at
+(radiometric U alone); the TMI-alone reference line is 0.2498 (the `TMI` column at
 k_TMI = 2). Regenerate this table with
 
     python paper/run_case2_heldout.py --grid
@@ -50,5 +50,7 @@ test deposits; from a single known deposit its position could not have been iden
 this is stated in the appendix.
 
 For Case 2 the combined ranking exceeds both single variables at every k_U from 1 to 15.
-Held-out recovery is highest at (2, 9) with 0.528 and reaches 0.527 at the retained (2, 8);
-raising k_TMI to 3 costs 0.078 at k_U = 8.
+Held-out recovery over the thirty reference and test pairs is highest at 0.483, at k_TMI of
+12 to 15 with k_U = 9, and reaches 0.449 at the retained (2, 8); raising k_TMI to 3 costs
+0.008 at k_U = 8. The grid does not single out the retained counts, which are read from the
+reference deposit's reconstructions.

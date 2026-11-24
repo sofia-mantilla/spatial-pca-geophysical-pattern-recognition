@@ -1,9 +1,10 @@
 """Appendix A: the held-out protocol for the Case-2 choices.
 
-Each deposit whose outline is carried by the multivariate deposit set serves in
-turn as the reference. Every other deposit of the Case-2 set is a held-out test
-deposit, and for each reference and test pair the balance weight is computed
-from the remaining deposits only, so no deposit influences its own result.
+Each of the deposits that pass the uranium threshold serves in turn as the
+reference, with the window its own outline sets. Every other deposit of that
+set is a held-out test deposit, and for each reference and test pair the
+balance weight is computed from the remaining deposits only, so no deposit
+influences its own result.
 
 Also runs the 15 x 15 grid of component counts that Appendix B's panel (b) and
 the k statements of Section 5.2 read from.
@@ -32,8 +33,8 @@ import numpy_repro_concat as R
 
 HERE = Path(__file__).resolve().parent
 OUT_DIR = HERE / "results"
-REFS = [1, 2, 3, 4, 5]            # outlines carried by the multivariate set
-TESTS = [1, 2, 3, 4, 5, 6]        # the deposits passing the uranium threshold
+REFS = [1, 2, 3, 4, 5, 6]         # the deposits passing the uranium threshold
+TESTS = [1, 2, 3, 4, 5, 6]
 KMAX = 40
 N_BOOT = 20000
 SEED = 20260715

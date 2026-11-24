@@ -4,7 +4,8 @@
   2,
   3,
   4,
-  5
+  5,
+  6
  ],
  "test_deposits": [
   1,
@@ -18,21 +19,21 @@
  "k_U": 8,
  "block_scale": "median",
  "heldout": {
-  "n_pairs": 25,
+  "n_pairs": 30,
   "n_clusters": 6,
   "means": {
-   "a_uni": 0.5266,
-   "fixed": 0.4328,
-   "U": 0.4361,
-   "TMI": 0.2733
+   "a_uni": 0.4493,
+   "fixed": 0.4274,
+   "U": 0.3819,
+   "TMI": 0.2498
   },
   "best_single": "U",
-  "advantage": 0.0905,
+  "advantage": 0.0673,
   "ci95": [
-   -0.0649,
-   0.2416
+   -0.0616,
+   0.184
   ],
-  "p_signflip": 0.3438,
+  "p_signflip": 0.375,
   "p_min_attainable": 0.0312
  },
  "pairs": [
@@ -260,23 +261,80 @@
    "fixed": 0.98571,
    "U": 0.61813,
    "TMI": 0.0
+  },
+  {
+   "h": 6,
+   "t": 1,
+   "alpha": 0.5442,
+   "a_uni": 0.0,
+   "fixed": 0.0,
+   "U": 0.0,
+   "TMI": 0.0
+  },
+  {
+   "h": 6,
+   "t": 2,
+   "alpha": 0.3601,
+   "a_uni": 0.0,
+   "fixed": 1.0,
+   "U": 0.0,
+   "TMI": 0.3508
+  },
+  {
+   "h": 6,
+   "t": 3,
+   "alpha": 0.5442,
+   "a_uni": 0.0,
+   "fixed": 0.0,
+   "U": 0.0,
+   "TMI": 0.0
+  },
+  {
+   "h": 6,
+   "t": 4,
+   "alpha": 0.5442,
+   "a_uni": 0.0,
+   "fixed": 0.0,
+   "U": 0.0,
+   "TMI": 0.0
+  },
+  {
+   "h": 6,
+   "t": 5,
+   "alpha": 1.0,
+   "a_uni": 0.3126,
+   "fixed": 1.0,
+   "U": 0.5556,
+   "TMI": 0.3126
   }
  ],
  "grid": {
   "n_cells": 225,
-  "highest_a_uni": 0.5283,
+  "highest_a_uni": 0.483,
   "highest_at": [
-   2,
+   12,
    9
   ],
   "cells_reaching_highest": [
    [
-    2,
+    12,
+    9
+   ],
+   [
+    13,
+    9
+   ],
+   [
+    14,
+    9
+   ],
+   [
+    15,
     9
    ]
   ],
-  "all_highest_have_kTMI_2": true,
-  "largest_advantage": 0.1357,
+  "all_highest_have_kTMI_2": false,
+  "largest_advantage": 0.1612,
   "largest_advantage_at": [
    3,
    1
@@ -285,28 +343,28 @@
   "k28": {
    "k1": 2,
    "k2": 8,
-   "a_uni": 0.5266,
-   "fixed": 0.4328,
-   "U": 0.4361,
-   "TMI": 0.2733,
-   "adv": 0.0905,
-   "ci_lo": -0.0649,
-   "ci_hi": 0.2416
+   "a_uni": 0.4493,
+   "fixed": 0.4274,
+   "U": 0.3819,
+   "TMI": 0.2498,
+   "adv": 0.0673,
+   "ci_lo": -0.0616,
+   "ci_hi": 0.184
   },
   "k38": {
    "k1": 3,
    "k2": 8,
-   "a_uni": 0.4487,
-   "fixed": 0.4083,
-   "U": 0.4361,
-   "TMI": 0.1775,
-   "adv": 0.0127,
-   "ci_lo": -0.1328,
-   "ci_hi": 0.1508
+   "a_uni": 0.4406,
+   "fixed": 0.4002,
+   "U": 0.3819,
+   "TMI": 0.1799,
+   "adv": 0.0587,
+   "ci_lo": -0.0786,
+   "ci_hi": 0.1949
   },
   "kTMI2_kU_6_to_13_range": [
-   0.5098,
-   0.5283
+   0.4352,
+   0.4506
   ]
  }
 }

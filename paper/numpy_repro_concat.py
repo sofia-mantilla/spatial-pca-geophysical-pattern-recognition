@@ -30,6 +30,11 @@ TMI_BIN = DATA / "Carajas_Brazil_Univariate_TMI/1097_1125_1129_TMI_merged"
 U_BIN = DATA / "Carajas_Brazil_Multivariate_TMI_U/1097_1125_1129_RAD_eU_merged"
 DEMO_SHP = DATA / "Carajas_Brazil_Univariate_TMI/Demo_area_polygon.shp"
 DEP_SHP = DATA / "Carajas_Brazil_Multivariate_TMI_U/Prospect_in Carajas_multi.shp"
+# Reference outlines are read from the twelve-deposit shapefile, which carries
+# every deposit of the province. Its records for deposits 1 to 5 are identical
+# to DEP_SHP's, point for point, so this changes no existing reference window;
+# it adds the ones DEP_SHP does not hold, Paulo Afonso among them.
+REF_SHP = DATA / "Carajas_Brazil_Univariate_TMI/Prospect_in Carajas_v2.shp"
 
 NL, NC = 3527, 2485          # full raster lines/cells
 PX = 200.0                    # cell size (m)
@@ -262,9 +267,14 @@ def load_cropped():
 
 @lru_cache(maxsize=8)
 def window_matrix(dep_1based: int):
-    """Replicate build_multivariate_window_matrix for reference deposit."""
+    """Replicate build_multivariate_window_matrix for reference deposit.
+
+    The reference outline comes from REF_SHP and sets the window, so the window
+    dimensions follow each reference as they do in the univariate case. A
+    deposit whose window is not fully covered in both variables raises.
+    """
     tmi, u, ox, oy = load_cropped()
-    deps = read_shp_polygons(DEP_SHP)          # SAD69 coords used AS raster CRS (assume_raster)
+    deps = read_shp_polygons(REF_SHP)          # SAD69 coords used AS raster CRS (assume_raster)
     rings = deps[dep_1based - 1]
     xs = [p[0] for r in rings for p in r]; ys = [p[1] for r in rings for p in r]
     cs = math.floor((min(xs) - ox) / PX); ce = math.ceil((max(xs) - ox) / PX)
