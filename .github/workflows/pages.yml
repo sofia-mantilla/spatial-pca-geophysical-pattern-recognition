@@ -3,7 +3,7 @@ name: Deploy wPCA Explorer to GitHub Pages
 on:
   push:
     branches: [main]
-    paths: ["webapp/**"]
+    paths: ["webapp/**", ".github/workflows/pages.yml"]
   workflow_dispatch:
 
 permissions:
@@ -15,11 +15,11 @@ concurrency:
   group: pages
   cancel-in-progress: true
 
+# Upload and deploy run as separate jobs. In one job, deploy-pages can look
+# the artifact up before the upload is visible and fail with "No artifacts
+# named github-pages were found" (actions/deploy-pages#451).
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,5 +27,13 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: webapp
+
+  deploy:
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
       - id: deployment
         uses: actions/deploy-pages@v4
