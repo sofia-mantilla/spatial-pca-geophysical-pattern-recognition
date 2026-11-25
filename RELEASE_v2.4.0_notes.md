@@ -46,7 +46,7 @@ the top 250 shares 116 windows with magnetics alone and 36 with uranium alone.
 distances, and `scale="iqr"` and `scale="prank"` two other robust treatments,
 so the four can be compared. The median is adopted as the standard robust scale
 for a skewed distribution, not as the highest scorer; `run_case2_scalings.py`
-reports six estimators and the median is fourth of the six.
+reports six estimators and the median is third of the six.
 
 **Case 2 of the paper.** `ALPHA_TMI` is re-derived from the univariate
 recoveries of the five test deposits, 52.5 / (52.5 + 44.6) = 0.541, and Paulo

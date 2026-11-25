@@ -96,7 +96,7 @@ CHECKS = [
  ("grid retained", "0.449 at the retained $(2,8)$", cells[(2, 8)]["a_uni"]),
  
  ("PA at k2", "0.062 at $k_{\\mathrm{TMI}}=2$ and 0.579 at 12", ho["k_TMI_by_reference"]["by_reference"]["6"]["2"]),
- ("Alemao at k2", "0.588, against 0.503 at three and 0.410 at eight", ho["k_TMI_by_reference"]["by_reference"]["3"]["2"]),
+ ("Alemao at k2", "0.588, against 0.503 at three and 0.405 at eight", ho["k_TMI_by_reference"]["by_reference"]["3"]["2"]),
  ("mean no PA", "0.527 against 0.454 at twelve", ho["k_TMI_by_reference"]["mean_without_paulo_afonso"]["2"]),
  ("grid kU 6-13", "between 0.435 and 0.451", [min(row2), max(row2)]),
  ("grid adv range", r"between $+0.034$ and $+0.101$", [min(adv2), max(adv2)]),

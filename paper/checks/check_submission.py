@@ -56,7 +56,7 @@ for lab, s in [
     ("Fig19 caption says 1--6", "for Deposits 1--6"),
     ("results: three of the five", "hits three of the five test deposits"),
     ("abstract: three of five", "hits three of five test deposits"),
-    ("highlight: three of the five", "reached three of the five deposits held back"),
+    ("highlight: three of the five", "and reached three of them"),
     ("per-deposit table carries Paulo Afonso", "6 Paulo Afonso &"),
     ("per-deposit mean of the five", "Mean of the five &"),
     ("held-out: thirty pairs", "thirty reference and test pairs"),
