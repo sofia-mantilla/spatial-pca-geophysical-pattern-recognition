@@ -95,3 +95,9 @@ the same ordering as `rank_concat` on the Case-2 windows. The existing
 `late_fusion_sum` mode is unchanged. It divides the squared distances by their
 medians and combines them in quadrature, which orders windows differently from
 the paper's rule.
+
+**The geology figure of Appendix C.** `paper/make_fig_geology_selected.py`
+cuts the panels at the eastern edge of the ARIM sheet, which ends 24 km short
+of the study area and printed blank paper there, and it halves every line
+weight so the unit colours read through. `--no-lineaments` drops the magnetic
+lineaments, which the published figure no longer shows.
