@@ -151,12 +151,12 @@ def draw_structures(ax, struct, extent):
     shear, named, lineaments = struct
     xmin, ymin, xmax, ymax = extent
     if lineaments is not None and len(lineaments):
-        lineaments.plot(ax=ax, color="white", linewidth=1.6, alpha=0.85, zorder=4.4)
-        lineaments.plot(ax=ax, color=LINEAMENT_COLOUR, linewidth=0.7,
+        lineaments.plot(ax=ax, color="white", linewidth=0.8, alpha=0.85, zorder=4.4)
+        lineaments.plot(ax=ax, color=LINEAMENT_COLOUR, linewidth=0.35,
                         linestyle=(0, (3.5, 2.0)), alpha=0.9, zorder=4.5)
     if shear is not None and len(shear):
-        shear.plot(ax=ax, color="white", linewidth=2.2, alpha=0.9, zorder=4.6)
-        shear.plot(ax=ax, color=SHEAR_COLOUR, linewidth=1.1, zorder=4.7)
+        shear.plot(ax=ax, color="white", linewidth=1.1, alpha=0.9, zorder=4.6)
+        shear.plot(ax=ax, color=SHEAR_COLOUR, linewidth=0.55, zorder=4.7)
         for name, grp in named.groupby("NOME_ESTRU"):
             c = grp.geometry.union_all().centroid
             if not (xmin < c.x < xmax and ymin < c.y < ymax):
@@ -165,7 +165,7 @@ def draw_structures(ax, struct, extent):
                         .replace("Lineamento ", "Lin. ").replace("Falha ", "F. "),
                         (c.x, c.y), fontsize=6.5, color=SHEAR_COLOUR, ha="center",
                         va="center", fontweight="bold", zorder=5,
-                        path_effects=[pe.withStroke(linewidth=2.0, foreground="white")])
+                        path_effects=[pe.withStroke(linewidth=1.5, foreground="white")])
 
 
 def draw(ax, g, rects, present, colour, extent, title, struct=None):
@@ -174,7 +174,7 @@ def draw(ax, g, rects, present, colour, extent, title, struct=None):
     # 1. the whole map, desaturated
     for c in present:
         sub = g[g["cls"] == c]
-        sub.plot(ax=ax, color=colour.get(c, L.UNMAPPED[1]), lw=0.1,
+        sub.plot(ax=ax, color=colour.get(c, L.UNMAPPED[1]), lw=0.05,
                  edgecolor="white", alpha=DIM, zorder=1)
     # 2. the geology the ranking selected, at full colour
     union = unary_union(rects)
@@ -188,18 +188,20 @@ def draw(ax, g, rects, present, colour, extent, title, struct=None):
     for r in rects:
         x0, y0, x1, y1 = r.bounds
         ax.add_patch(Rectangle((x0, y0), x1 - x0, y1 - y0, fill=False,
-                               ec="#2a2a2a", lw=0.35, zorder=4))
+                               ec="#2a2a2a", lw=0.22, zorder=4))
     if struct is not None:
         draw_structures(ax, struct, extent)
-    deposit_frames().boundary.plot(ax=ax, color="white", lw=2.0, zorder=5.8)
-    deposit_frames().boundary.plot(ax=ax, color="black", lw=1.0, zorder=6)
+    deposit_frames().boundary.plot(ax=ax, color="white", lw=1.0, zorder=5.8)
+    deposit_frames().boundary.plot(ax=ax, color="black", lw=0.55, zorder=6)
+    # Ticks first: a fixed tick outside the view widens it again, which is what
+    # used to put blank paper east of the map sheet.
+    ax.set_xticks([t for t in np.arange(450000, 700001, 50000) if xmin <= t <= xmax])
+    ax.set_yticks([t for t in np.arange(9240000, 9360001, 40000) if ymin <= t <= ymax])
+    ax.set_xticklabels(["%d" % (t / 1000) for t in ax.get_xticks()])
+    ax.set_yticklabels(["%d" % (t / 1000) for t in ax.get_yticks()])
     ax.set_xlim(xmin, xmax)
     ax.set_ylim(ymin, ymax)
     ax.set_aspect("equal", adjustable="box")
-    ax.set_xticks(np.arange(450000, 700001, 50000))
-    ax.set_yticks(np.arange(9240000, 9360001, 40000))
-    ax.set_xticklabels(["%d" % (t / 1000) for t in ax.get_xticks()])
-    ax.set_yticklabels(["%d" % (t / 1000) for t in ax.get_yticks()])
     ax.set_ylabel("Northing (km)")
     ax.set_title(title, loc="left")
     return bright
@@ -219,6 +221,11 @@ def main() -> int:
                     help="overlay the ARIM shear zones and magnetic lineaments")
     ap.add_argument("--no-lineaments", dest="lineaments", action="store_false",
                     help="with --structures, omit the magnetic lineaments")
+    ap.add_argument("--no-crop", dest="crop", action="store_false",
+                    help="keep the full study-area extent even where the map "
+                         "sheet does not reach it; the default cuts the panels "
+                         "at the edge of the mapped ground, so no blank margin "
+                         "is drawn")
     ap.add_argument("--paper", action="store_true",
                     help="size at \\textwidth with 6.5 pt type, for the manuscript")
     ap.add_argument("--name", default=None)
@@ -229,6 +236,14 @@ def main() -> int:
         g, colour, label, order, extent = load_arim()
     else:
         g, colour, label, order, extent = load_geology(a.colour)
+    if a.crop:
+        # The ARIM sheet ends short of the eastern edge of the study area, and
+        # the unmapped strip prints as blank paper. Cut the panels at the edge
+        # of the mapped ground instead.
+        bx0, by0, bx1, by1 = g.total_bounds
+        x0, y0, x1, y1 = extent
+        extent = (max(x0, bx0), max(y0, by0), min(x1, bx1), min(y1, by1))
+        print("cropped to mapped ground: %s" % (tuple(round(v) for v in extent),))
     present = [c for c in order if (g["cls"] == c).any()]
     legend_units = present
     if a.colour == "arim":
@@ -287,14 +302,14 @@ def main() -> int:
     if len(legend_units) < len(present):
         handles.append(Rectangle((0, 0), 1, 1, fc="#d9d9d9"))
         labels.append("other mapped units (%d)" % (len(present) - len(legend_units)))
-    handles += [Line2D([0], [0], color="#2a2a2a", lw=0.6),
-                Line2D([0], [0], color="black", lw=1.2)]
+    handles += [Line2D([0], [0], color="#2a2a2a", lw=0.4),
+                Line2D([0], [0], color="black", lw=0.7)]
     labels += ["top 250 window", "known deposit"]
     if struct is not None:
-        handles.append(Line2D([0], [0], color=SHEAR_COLOUR, lw=1.3))
+        handles.append(Line2D([0], [0], color=SHEAR_COLOUR, lw=0.7))
         labels.append("mapped shear zone (ARIM, 1:250,000)")
         if struct[2] is not None and len(struct[2]):
-            handles.append(Line2D([0], [0], color=LINEAMENT_COLOUR, lw=0.9,
+            handles.append(Line2D([0], [0], color=LINEAMENT_COLOUR, lw=0.5,
                                   linestyle=(0, (3.5, 2.0))))
             labels.append("magnetic lineament (drawn, not measured against)")
     fig.legend(handles, labels, loc="lower center",
